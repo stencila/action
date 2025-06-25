@@ -1,0 +1,128 @@
+# Stencila Action
+
+A GitHub Action to setup and use Stencila CLI in your workflows. This action installs the Stencila CLI tool and optionally runs Stencila commands like `lint` and `render` on your executable documents.
+
+## Usage
+
+### Basic Setup
+
+Just install Stencila CLI without running any commands:
+
+```yaml
+- uses: stencila/action@v1
+```
+
+### Install and Run Commands
+
+Install Stencila CLI and run a command:
+
+```yaml
+- uses: stencila/action@v1
+  with:
+    command: lint
+    args: report.smd
+```
+
+### Complete Workflow Examples
+
+#### Lint Documents
+
+```yaml
+name: Lint Documents
+on: [push, pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: stencila/action@v1
+        with:
+          command: lint
+          args: "**/*.smd"
+```
+
+#### Multi-Platform Testing
+
+```yaml
+name: Test Documents
+on: [push, pull_request]
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: stencila/action@v1
+        with:
+          version: latest
+          command: execute
+          args: "tests/**/*.smd"
+```
+
+## Inputs
+
+| Input               | Description                                                  | Required | Default  |
+| ------------------- | ------------------------------------------------------------ | -------- | -------- |
+| `version`           | Version of Stencila CLI to install (e.g., "latest", "2.0.0") | No       | `latest` |
+| `command`           | Stencila command to run (e.g., "lint", "release", "push")    | No       | -        |
+| `args`              | Arguments to pass to the Stencila command                    | No       | -        |
+| `working-directory` | Working directory to run Stencila commands                   | No       | `.`      |
+
+## Outputs
+
+| Output      | Description                                    |
+| ----------- | ---------------------------------------------- |
+| `version`   | The version of Stencila CLI that was installed |
+| `exit-code` | Exit code from the Stencila command            |
+
+## Advanced Usage
+
+### Custom Working Directory
+
+Run commands in a specific directory:
+
+```yaml
+- uses: stencila/action@v1
+  with:
+    command: lint
+    args: "report.smd"
+    working-directory: ./docs
+```
+
+### Specific Version
+
+Install a specific version of Stencila CLI:
+
+```yaml
+- uses: stencila/action@v1
+  with:
+    version: 2.0.0
+    command: lint
+    args: report.smd
+```
+
+## License
+
+This action is licensed under the Apache-2.0. See [LICENSE.md](LICENSE.md) for details.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Support
+
+For issues and feature requests, please use the [GitHub Issues](https://github.com/stencila/action/issues) page.
+
+## Releasing
+
+To create a new release, run:
+
+```bash
+./scripts/release.sh <version>
+```

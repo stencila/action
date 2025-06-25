@@ -1,0 +1,32 @@
+name: 'Stencila Action'
+description: 'Setup Stencila CLI in GitHub Actions workflows to lint, release, and push executable documents'
+author: 'Stencila'
+branding:
+  icon: 'check-circle'
+  color: 'blue'
+
+inputs:
+  version:
+    description: 'Version of Stencila CLI to install (e.g., "latest", "2.0.0")'
+    required: false
+    default: 'latest'
+  command:
+    description: 'Stencila command to run (e.g., "lint", "release", "push")'
+    required: false
+  args:
+    description: 'Arguments to pass to the Stencila command'
+    required: false
+  working-directory:
+    description: 'Working directory to run Stencila commands'
+    required: false
+    default: '.'
+
+outputs:
+  version:
+    description: 'The version of Stencila CLI that was installed'
+  exit-code:
+    description: 'Exit code from the Stencila command'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'

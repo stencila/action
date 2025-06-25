@@ -1,0 +1,30 @@
+name: Test Action
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-setup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Test installation
+        uses: ./
+
+      - name: Verify installation
+        run: stencila --version
+
+      - name: Test installation with specific version
+        uses: ./
+        with:
+          version: latest
+          command: --version
+
+      - name: Test lint command
+        uses: ./
+        with:
+          command: lint
+          args: test.smd
