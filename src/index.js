@@ -1,6 +1,7 @@
 const core = require('@actions/core');
 const exec = require('@actions/exec');
 const tc = require('@actions/tool-cache');
+const fs = require('fs');
 const https = require('https');
 const os = require('os');
 const path = require('path');
@@ -85,8 +86,33 @@ async function run() {
       extractPath = await tc.extractTar(downloadPath);
     }
     
-    // Find the stencila binary
-    const stencilaPath = path.join(extractPath, 'stencila');
+    // Find the stencila binary - it's nested in a folder
+    // First, find the extracted folder (it should be named like cli-v2.3.0-x86_64-unknown-linux-gnu)
+    const extractedItems = fs.readdirSync(extractPath);
+    let stencilaPath;
+    
+    // Look for the stencila binary in the extracted folder
+    for (const item of extractedItems) {
+      const itemPath = path.join(extractPath, item);
+      const stats = fs.statSync(itemPath);
+      
+      if (stats.isDirectory()) {
+        // Check if stencila binary exists in this directory
+        const binaryPath = path.join(itemPath, platform === 'win32' ? 'stencila.exe' : 'stencila');
+        if (fs.existsSync(binaryPath)) {
+          stencilaPath = binaryPath;
+          break;
+        }
+      }
+    }
+    
+    if (!stencilaPath) {
+      // If not found in subdirectory, check root
+      stencilaPath = path.join(extractPath, platform === 'win32' ? 'stencila.exe' : 'stencila');
+      if (!fs.existsSync(stencilaPath)) {
+        throw new Error('Could not find stencila binary in extracted archive');
+      }
+    }
     
     // Make it executable on Unix-like systems
     if (platform !== 'win32') {
