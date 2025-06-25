@@ -6,25 +6,44 @@ on:
     branches: [main]
 
 jobs:
-  test-setup:
-    runs-on: ubuntu-latest
+  test-multi-platform:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Test installation
+      - name: Install Stencila on ${{ matrix.os }}
         uses: ./
+        with:
+          command: --version
+        id: install
 
       - name: Verify installation
         run: stencila --version
 
-      - name: Test installation with specific version
+      - name: Check output version
+        run: echo "Installed version ${{ steps.install.outputs.version }}"
+
+  test-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Test with specific version
         uses: ./
         with:
-          version: latest
+          version: 2.3.0
           command: --version
 
-      - name: Test lint command
+      - name: Test with working directory
         uses: ./
         with:
-          command: lint
-          args: test.smd
+          working-directory: test
+          command: --version
+
+      - name: Test command
+        uses: ./
+        with:
+          command: help

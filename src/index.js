@@ -1,9 +1,9 @@
 const core = require('@actions/core');
 const exec = require('@actions/exec');
 const tc = require('@actions/tool-cache');
-const io = require('@actions/io');
-const path = require('path');
+const https = require('https');
 const os = require('os');
+const path = require('path');
 
 async function run() {
   try {
@@ -17,47 +17,73 @@ async function run() {
     const platform = os.platform();
     const arch = os.arch();
     
-    let platformSuffix;
-    let archSuffix;
+    let platformString;
+    let extension = 'tar.gz';
     
     switch (platform) {
       case 'linux':
-        platformSuffix = 'linux';
+        if (arch === 'x64') {
+          platformString = 'x86_64-unknown-linux-gnu';
+        } else {
+          throw new Error(`Unsupported Linux architecture: ${arch}`);
+        }
         break;
       case 'darwin':
-        platformSuffix = 'macos';
+        if (arch === 'x64') {
+          platformString = 'x86_64-apple-darwin';
+        } else if (arch === 'arm64') {
+          platformString = 'aarch64-apple-darwin';
+        } else {
+          throw new Error(`Unsupported macOS architecture: ${arch}`);
+        }
         break;
       case 'win32':
-        platformSuffix = 'windows';
+        if (arch === 'x64') {
+          platformString = 'x86_64-pc-windows-msvc';
+          extension = 'zip';
+        } else {
+          throw new Error(`Unsupported Windows architecture: ${arch}`);
+        }
         break;
       default:
         throw new Error(`Unsupported platform: ${platform}`);
-    }
-    
-    switch (arch) {
-      case 'x64':
-        archSuffix = 'x86_64';
-        break;
-      case 'arm64':
-        archSuffix = 'aarch64';
-        break;
-      default:
-        throw new Error(`Unsupported architecture: ${arch}`);
     }
 
     // Construct download URL
     let downloadUrl;
     if (version === 'latest') {
-      downloadUrl = `https://github.com/stencila/stencila/releases/latest/download/stencila-${platformSuffix}-${archSuffix}.tar.gz`;
+      // For latest, follow the redirect to get the actual version
+      const latestVersion = await new Promise((resolve, reject) => {
+        https.get('https://github.com/stencila/stencila/releases/latest', (res) => {
+          if (res.statusCode === 302 && res.headers.location) {
+            // Extract version from redirect URL like /stencila/stencila/releases/tag/v2.3.0
+            const match = res.headers.location.match(/\/tag\/(v[\d.]+)$/);
+            if (match) {
+              resolve(match[1]);
+            } else {
+              reject(new Error('Could not parse version from redirect'));
+            }
+          } else {
+            reject(new Error('Expected redirect from latest release URL'));
+          }
+        }).on('error', reject);
+      });
+      
+      downloadUrl = `https://github.com/stencila/stencila/releases/download/${latestVersion}/cli-${latestVersion}-${platformString}.${extension}`;
     } else {
-      downloadUrl = `https://github.com/stencila/stencila/releases/download/v${version}/stencila-${platformSuffix}-${archSuffix}.tar.gz`;
+      downloadUrl = `https://github.com/stencila/stencila/releases/download/v${version}/cli-v${version}-${platformString}.${extension}`;
     }
 
     core.info(`Downloading Stencila CLI from ${downloadUrl}`);
 
     // Download and extract
     const downloadPath = await tc.downloadTool(downloadUrl);
-    const extractPath = await tc.extractTar(downloadPath);
+    let extractPath;
+    if (extension === 'zip') {
+      extractPath = await tc.extractZip(downloadPath);
+    } else {
+      extractPath = await tc.extractTar(downloadPath);
+    }
     
     // Find the stencila binary
     const stencilaPath = path.join(extractPath, 'stencila');
