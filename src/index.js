@@ -75,48 +75,65 @@ async function run() {
       downloadUrl = `https://github.com/stencila/stencila/releases/download/v${version}/cli-v${version}-${platformString}.${extension}`;
     }
 
-    core.info(`Downloading Stencila CLI from ${downloadUrl}`);
-
-    // Download and extract
-    const downloadPath = await tc.downloadTool(downloadUrl);
-    let extractPath;
-    if (extension === 'zip') {
-      extractPath = await tc.extractZip(downloadPath);
-    } else {
-      extractPath = await tc.extractTar(downloadPath);
-    }
-    
-    // Find the stencila binary - it's nested in a folder
-    // First, find the extracted folder (it should be named like cli-v2.3.0-x86_64-unknown-linux-gnu)
-    const extractedItems = fs.readdirSync(extractPath);
+    // Check if Stencila is already cached/installed
+    let cachedPath = tc.find('stencila', version);
     let stencilaPath;
-    
-    // Look for the stencila binary in the extracted folder
-    for (const item of extractedItems) {
-      const itemPath = path.join(extractPath, item);
-      const stats = fs.statSync(itemPath);
+
+    if (cachedPath) {
+      // Use cached version
+      core.info(`Using cached Stencila CLI from ${cachedPath}`);
+      stencilaPath = path.join(cachedPath, platform === 'win32' ? 'stencila.exe' : 'stencila');
+    } else {
+      // Download and install
+      core.info(`Downloading Stencila CLI from ${downloadUrl}`);
+
+      const downloadPath = await tc.downloadTool(downloadUrl);
+      let extractPath;
+      if (extension === 'zip') {
+        extractPath = await tc.extractZip(downloadPath);
+      } else {
+        extractPath = await tc.extractTar(downloadPath);
+      }
       
-      if (stats.isDirectory()) {
-        // Check if stencila binary exists in this directory
-        const binaryPath = path.join(itemPath, platform === 'win32' ? 'stencila.exe' : 'stencila');
-        if (fs.existsSync(binaryPath)) {
-          stencilaPath = binaryPath;
-          break;
+      // Find the stencila binary - it's nested in a folder
+      // First, find the extracted folder (it should be named like cli-v2.3.0-x86_64-unknown-linux-gnu)
+      const extractedItems = fs.readdirSync(extractPath);
+      
+      // Look for the stencila binary in the extracted folder
+      for (const item of extractedItems) {
+        const itemPath = path.join(extractPath, item);
+        const stats = fs.statSync(itemPath);
+        
+        if (stats.isDirectory()) {
+          // Check if stencila binary exists in this directory
+          const binaryPath = path.join(itemPath, platform === 'win32' ? 'stencila.exe' : 'stencila');
+          if (fs.existsSync(binaryPath)) {
+            stencilaPath = binaryPath;
+            break;
+          }
         }
       }
-    }
-    
-    if (!stencilaPath) {
-      // If not found in subdirectory, check root
-      stencilaPath = path.join(extractPath, platform === 'win32' ? 'stencila.exe' : 'stencila');
-      if (!fs.existsSync(stencilaPath)) {
-        throw new Error('Could not find stencila binary in extracted archive');
+      
+      if (!stencilaPath) {
+        // If not found in subdirectory, check root
+        stencilaPath = path.join(extractPath, platform === 'win32' ? 'stencila.exe' : 'stencila');
+        if (!fs.existsSync(stencilaPath)) {
+          throw new Error('Could not find stencila binary in extracted archive');
+        }
       }
-    }
-    
-    // Make it executable on Unix-like systems
-    if (platform !== 'win32') {
-      await exec.exec('chmod', ['+x', stencilaPath]);
+      
+      // Make it executable on Unix-like systems
+      if (platform !== 'win32') {
+        await exec.exec('chmod', ['+x', stencilaPath]);
+      }
+
+      // Cache the extracted binary directory for future use
+      const binaryDir = path.dirname(stencilaPath);
+      cachedPath = await tc.cacheDir(binaryDir, 'stencila', version);
+      core.info(`Cached Stencila CLI to ${cachedPath}`);
+      
+      // Update path to cached location
+      stencilaPath = path.join(cachedPath, platform === 'win32' ? 'stencila.exe' : 'stencila');
     }
 
     // Add to PATH
