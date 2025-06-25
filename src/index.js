@@ -50,8 +50,10 @@ async function run() {
         throw new Error(`Unsupported platform: ${platform}`);
     }
 
-    // Construct download URL
+    // Resolve actual version for caching
+    let actualVersion = version;
     let downloadUrl;
+    
     if (version === 'latest') {
       // For latest, follow the redirect to get the actual version
       const latestVersion = await new Promise((resolve, reject) => {
@@ -70,13 +72,14 @@ async function run() {
         }).on('error', reject);
       });
       
+      actualVersion = latestVersion;
       downloadUrl = `https://github.com/stencila/stencila/releases/download/${latestVersion}/cli-${latestVersion}-${platformString}.${extension}`;
     } else {
       downloadUrl = `https://github.com/stencila/stencila/releases/download/v${version}/cli-v${version}-${platformString}.${extension}`;
     }
 
-    // Check if Stencila is already cached/installed
-    let cachedPath = tc.find('stencila', version);
+    // Check if Stencila is already cached/installed using actual version
+    let cachedPath = tc.find('stencila', actualVersion);
     let stencilaPath;
 
     if (cachedPath) {
@@ -129,7 +132,7 @@ async function run() {
 
       // Cache the extracted binary directory for future use
       const binaryDir = path.dirname(stencilaPath);
-      cachedPath = await tc.cacheDir(binaryDir, 'stencila', version);
+      cachedPath = await tc.cacheDir(binaryDir, 'stencila', actualVersion);
       core.info(`Cached Stencila CLI to ${cachedPath}`);
       
       // Update path to cached location
