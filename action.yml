@@ -31,10 +31,6 @@ inputs:
   assets:
     description: 'Path pattern for assets files to store after each run (e.g., "*.pdf", "output/**/*")'
     required: false
-  assets-name:
-    description: 'Name for the uploaded assets artifact (if assets is specified)'
-    required: false
-    default: 'assets'
   releases:
     description: 'Enable releases on tags. Set to true to use assets pattern, or provide a custom pattern (e.g., "*.pdf")'
     required: false
@@ -45,10 +41,17 @@ inputs:
   release-notes:
     description: 'Jinja template string or path to document to be rendered by Stencila into release notes'
     required: false
+  release-filenames:
+    description: 'Jinja template string or path to document for renaming uploaded files (defaults to no renaming)'
+    required: false
   working-directory:
     description: 'Working directory to run Stencila commands'
     required: false
     default: '.'
+  artifact-name:
+    description: 'Name for the uploaded assets artifact (if assets is specified)'
+    required: false
+    default: 'assets'
   cache:
     description: 'Whether to cache the .stencila folder between runs'
     required: false

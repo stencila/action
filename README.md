@@ -80,10 +80,11 @@ jobs:
 | `execute`           | Shortcut for `command: execute` with these arguments         | No       | -         |
 | `render`            | Shortcut for `command: render` with these arguments          | No       | -         |
 | `assets`           | Path pattern for files to upload as artifacts                | No       | -         |
-| `assets-name`      | Name for the uploaded artifact                               | No       | `assets` |
+| `artifact-name`      | Name for the uploaded artifact                               | No       | `assets` |
 | `releases`           | Enable releases on tags. When set to `true` (the default) uses the `assets` path pattern, but can also be set as a custom path pattern for releases | No       | `true`   |
 | `release-name`      | Template string or file for release name (auto-detects `release-name.*`)           | No       | -         |
 | `release-notes`     | Template string or file for release notes (auto-detects `release-notes.*`)      | No       | -         |
+| `release-filenames`     | Template string or file for renaming release assets | No       | -         |
 | `cache`             | Whether to cache the .stencila folder between runs           | No       | `true`    |
 | `working-directory` | Working directory to run Stencila commands                   | No       | `.`       |
 
@@ -209,6 +210,52 @@ jobs:
           assets: "docs/*.pdf"
           releases: true  # Will auto-detect release-notes.* files
 ```
+
+### Template-Based Asset Renaming
+
+Rename uploaded files using Stencila templates with access to file-specific variables:
+
+```yaml
+- uses: stencila/action@v1
+  with:
+    render: "docs/*.smd"
+    releases: "docs/*.pdf"
+    release-filenames: "{{ repo }}-{{ tag }}-{{ filestem }}.{{ fileext }}"
+```
+
+This feature allows you to:
+- **Rename release assets**: Give files meaningful names during upload
+- **Use template variables**: Access both standard variables (tag, date, etc.) and file-specific ones
+- **Support both string templates and files**: Use inline templates or separate template files
+
+**Available file-specific variables:**
+- `{{ filepath }}` - Full file path (e.g., "docs/report.pdf")
+- `{{ dirname }}` - Directory name (e.g., "docs")
+- `{{ filename }}` - Full filename (e.g., "report.pdf")
+- `{{ filestem }}` - Filename without extension (e.g., "report")
+- `{{ fileext }}` - File extension (e.g., ".pdf")
+- `{{ filesize }}` - File size in bytes
+
+**Example with template file:**
+
+Create `asset-rename.smd`:
+
+```markdown
+{{ repo }}_{{ tag }}_{{ filestem }}{{ fileext }}
+```
+
+Use in workflow:
+```yaml
+- uses: stencila/action@v1
+  with:
+    render: "**/*.smd"
+    releases: "**/*.pdf"
+    release-filenames: "asset-rename.smd"
+```
+
+This would rename files like:
+- `report.pdf` → `myrepo_v1.2.0_report.pdf`
+- `summary.pdf` → `myrepo_v1.2.0_summary.pdf`
 
 ### Custom Working Directory
 

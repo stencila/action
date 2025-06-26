@@ -16,14 +16,15 @@ async function run() {
     const version = core.getInput('version') || 'latest';
     let command = core.getInput('command');
     let args = core.getInput('args');
-    const workingDirectory = core.getInput('working-directory') || '.';
-    const useCache = core.getBooleanInput('cache');
     const assetsPath = core.getInput('assets');
-    const assetsName = core.getInput('assets-name') || 'assets';
+    const artifactName = core.getInput('artifact-name') || 'assets';
     const releasesInput = core.getInput('releases');
     const releaseName = core.getInput('release-name');
     const releaseNotes = core.getInput('release-notes');
-    
+    const releaseFilenames = core.getInput('release-filenames');
+    const workingDirectory = core.getInput('working-directory') || '.';
+    const useCache = core.getBooleanInput('cache');
+
     // Parse release input - can be boolean or string pattern
     let enableReleases = false;
     let releasesPath = '';
@@ -269,7 +270,7 @@ async function run() {
             
             // Upload the artifact with proper root directory
             const {id, size} = await artifactClient.uploadArtifact(
-              assetsName,
+              artifactName,
               files,
               path.resolve(workingDirectory),
               {
@@ -277,7 +278,7 @@ async function run() {
               }
             );
             
-            core.info(`Successfully uploaded artifact '${assetsName}' (ID: ${id}, Size: ${size} bytes) with ${files.length} file(s)`);
+            core.info(`Successfully uploaded artifact '${artifactName}' (ID: ${id}, Size: ${size} bytes) with ${files.length} file(s)`);
           }
         } catch (error) {
           core.warning(`Failed to upload artifacts: ${error.message}`);
@@ -336,7 +337,7 @@ async function run() {
         const now = new Date();
         const templateVars = [
           `--tag=${tagName}`,
-          `--datetime=${now.toISOString().replace('T', ' ').substring(0, 19)}`,
+          `--datetime=${now.toISOString().replace('T', '-').substring(0, 19)}`,
           `--date=${now.toISOString().substring(0, 10)}`,
           `--year=${now.getFullYear()}`,
           `--month=${(now.getMonth() + 1).toString().padStart(2, '0')}`,
@@ -350,12 +351,13 @@ async function run() {
         ];
         
         // Helper function to render template using Stencila
-        const renderTemplate = async (template, defaultValue) => {
+        const renderTemplate = async (template, defaultValue, extraVars = []) => {
           if (!template) return defaultValue;
           
           try {
             const isFile = fs.existsSync(path.resolve(workingDirectory, template));
             let result = '';
+            const allVars = [...templateVars, ...extraVars];
             
             if (isFile) {
               // Render file
@@ -364,7 +366,7 @@ async function run() {
                 path.resolve(workingDirectory, template), 
                 '--to=md',
                 '--',
-                ...templateVars
+                ...allVars
               ], {
                 cwd: workingDirectory,
                 listeners: {
@@ -383,9 +385,10 @@ async function run() {
               // Render string via stdin
               const exitCode = await exec.exec('stencila', [
                 'render',
+                '-',
                 '--to=md',
                 '--',
-                ...templateVars
+                ...allVars
               ], {
                 cwd: workingDirectory,
                 input: Buffer.from(template),
@@ -407,6 +410,29 @@ async function run() {
           } catch (error) {
             core.warning(`Error rendering template: ${error.message}`);
             return defaultValue;
+          }
+        };
+        
+        // Helper function to render filename using Stencila with file-specific variables
+        const renderFilename = async (filePath) => {
+          if (!releaseFilenames) return path.basename(filePath);
+          
+          try {
+            const parsedPath = path.parse(filePath);
+            
+            const fileVars = [
+              `--filepath=${filePath}`,
+              `--dirname=${parsedPath.dir}`,
+              `--filename=${parsedPath.base}`,
+              `--filestem=${parsedPath.name}`,
+              `--fileext=${parsedPath.ext}`,
+            ];
+            
+            const newName = await renderTemplate(releaseFilenames, parsedPath.base, fileVars);
+            return newName || parsedPath.base;
+          } catch (error) {
+            core.warning(`Error rendering filename for ${filePath}: ${error.message}`);
+            return path.basename(filePath);
           }
         };
         
@@ -439,8 +465,10 @@ async function run() {
           } else {
             core.info(`Found ${files.length} file(s) to upload as release assets`);
             
-            for (const file of files) {
-              const fileName = path.basename(file);
+            for (let i = 0; i < files.length; i++) {
+              const file = files[i];
+              const originalFileName = path.basename(file);
+              const finalFileName = await renderFilename(file);
               const fileContent = fs.readFileSync(file);
               
               try {
@@ -448,13 +476,17 @@ async function run() {
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   release_id: releaseResponse.data.id,
-                  name: fileName,
+                  name: finalFileName,
                   data: fileContent
                 });
                 
-                core.info(`Uploaded release asset: ${fileName}`);
+                if (finalFileName !== originalFileName) {
+                  core.info(`Uploaded release asset: ${originalFileName} → ${finalFileName}`);
+                } else {
+                  core.info(`Uploaded release asset: ${finalFileName}`);
+                }
               } catch (uploadError) {
-                core.warning(`Failed to upload ${fileName}: ${uploadError.message}`);
+                core.warning(`Failed to upload ${originalFileName}: ${uploadError.message}`);
               }
             }
           }
