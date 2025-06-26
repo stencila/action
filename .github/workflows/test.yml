@@ -44,7 +44,7 @@ jobs:
           working-directory: test
           command: --version
 
-      - name: Test command
+      - name: Test caching of .stencila directory
         uses: ./
         with:
-          command: help
+          command: init
