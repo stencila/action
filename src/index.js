@@ -247,32 +247,18 @@ async function run() {
             core.info(`Found ${files.length} file(s) to upload`);
             
             // Create artifact client
-            const artifactClient = artifact.create();
-            
-            // Calculate relative paths for proper structure in artifact
-            const rootDirectory = workingDirectory;
-            const filesToUpload = files.map(file => {
-              return {
-                absolutePath: file,
-                relativePath: path.relative(rootDirectory, file)
-              };
-            });
+            const artifactClient = new artifact.DefaultArtifactClient();
             
             // Upload the artifact
-            const uploadResponse = await artifactClient.uploadArtifact(
+            const {id, size} = await artifactClient.uploadArtifact(
               outputsName,
-              filesToUpload.map(f => f.absolutePath),
-              rootDirectory,
+              files,
               {
-                continueOnError: false
+                retentionDays: 90
               }
             );
             
-            if (uploadResponse.failedItems.length > 0) {
-              core.warning(`Failed to upload ${uploadResponse.failedItems.length} file(s)`);
-            } else {
-              core.info(`Successfully uploaded artifact '${outputsName}' with ${files.length} file(s)`);
-            }
+            core.info(`Successfully uploaded artifact '${outputsName}' (ID: ${id}, Size: ${size} bytes) with ${files.length} file(s)`);
           }
         } catch (error) {
           core.warning(`Failed to upload artifacts: ${error.message}`);
