@@ -28,6 +28,13 @@ inputs:
   render:
     description: 'Run "stencila render" with these arguments'
     required: false
+  outputs:
+    description: 'Path pattern for outputs files to upload as artifacts (e.g., "*.pdf", "output/**/*")'
+    required: false
+  outputs-name:
+    description: 'Name for the uploaded outputs artifact (if outputs is specified)'
+    required: false
+    default: 'outputs'
   working-directory:
     description: 'Working directory to run Stencila commands'
     required: false

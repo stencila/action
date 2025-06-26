@@ -50,39 +50,39 @@ jobs:
           lint: "**/*.smd"
 ```
 
-#### Multi-Platform Testing
+#### Render Documents and Store Outputs
 
 ```yaml
-name: Test Documents
+name: Render Documents
 on: [push, pull_request]
 
 jobs:
-  test:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+  render:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - uses: stencila/action@v1
         with:
-          execute: "tests/**/*.smd"
+          render: report.smd 
+          outputs: "*.pdf"
 ```
 
 ## Inputs
 
-| Input               | Description                                                  | Required | Default  |
-| ------------------- | ------------------------------------------------------------ | -------- | -------- |
-| `version`           | Version of Stencila CLI to install (e.g., "latest", "2.0.0") | No       | `latest` |
-| `command`           | Stencila command to run (e.g., "lint", "release", "push")    | No       | -        |
-| `args`              | Arguments to pass to the Stencila command                    | No       | -        |
-| `convert`           | Shortcut for `command: convert` with these arguments         | No       | -        |
-| `lint`              | Shortcut for `command: lint` with these arguments            | No       | -        |
-| `execute`           | Shortcut for `command: execute` with these arguments         | No       | -        |
-| `render`            | Shortcut for `command: render` with these arguments          | No       | -        |
-| `working-directory` | Working directory to run Stencila commands                   | No       | `.`      |
-| `cache`             | Whether to cache the .stencila folder between runs           | No       | `true`   |
+| Input               | Description                                                  | Required | Default   |
+| ------------------- | ------------------------------------------------------------ | -------- | --------- |
+| `version`           | Version of Stencila CLI to install (e.g., "latest", "2.0.0") | No       | `latest`  |
+| `command`           | Stencila command to run (e.g., "lint", "release", "push")    | No       | -         |
+| `args`              | Arguments to pass to the Stencila command                    | No       | -         |
+| `convert`           | Shortcut for `command: convert` with these arguments         | No       | -         |
+| `lint`              | Shortcut for `command: lint` with these arguments            | No       | -         |
+| `execute`           | Shortcut for `command: execute` with these arguments         | No       | -         |
+| `render`            | Shortcut for `command: render` with these arguments          | No       | -         |
+| `outputs`           | Path pattern for files to upload as artifacts                | No       | -         |
+| `outputs-name`      | Name for the uploaded artifact                               | No       | `outputs` |
+| `cache`             | Whether to cache the .stencila folder between runs           | No       | `true`    |
+| `working-directory` | Working directory to run Stencila commands                   | No       | `.`       |
 
 ## Outputs
 
@@ -92,6 +92,36 @@ jobs:
 | `exit-code` | Exit code from the Stencila command            |
 
 ## Advanced Usage
+
+### Storing outputs
+
+After successfully rendering documents, you can automatically upload the output files as GitHub Actions artifacts:
+
+```yaml
+- uses: stencila/action@v1
+  with:
+    render: "report.smd report.docx"
+    outputs: "*.docx"
+```
+
+This is useful for:
+
+- Preserving rendered documents (PDFs, HTML, etc.) from CI runs
+- Sharing outputs with team members
+- Creating downloadable assets for releases
+
+You can use glob patterns to match multiple files:
+
+```yaml
+- uses: stencila/action@v1
+  with:
+    render: "**/*.smd"
+    outputs: |
+      **/*.pdf
+      **/*.html
+      !**/temp.*
+```
+
 
 ### Custom Working Directory
 
@@ -118,11 +148,7 @@ Install a specific version of Stencila CLI:
 
 ### Caching
 
-By default, this action caches the `.stencila` folder between runs to speed up subsequent executions. The cache is keyed by:
-- Operating system
-- Architecture
-- Stencila version
-- Git commit SHA
+By default, this action caches the `.stencila` folder between runs to speed up subsequent executions. The cache is keyed by operating system, `stencila` version & Git commit SHA.
 
 To disable caching:
 

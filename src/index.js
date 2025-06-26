@@ -1,7 +1,9 @@
+const artifact = require('@actions/artifact');
+const cache = require('@actions/cache');
 const core = require('@actions/core');
 const exec = require('@actions/exec');
+const glob = require('@actions/glob');
 const tc = require('@actions/tool-cache');
-const cache = require('@actions/cache');
 const fs = require('fs');
 const https = require('https');
 const os = require('os');
@@ -15,6 +17,8 @@ async function run() {
     let args = core.getInput('args');
     const workingDirectory = core.getInput('working-directory') || '.';
     const useCache = core.getBooleanInput('cache');
+    const outputsPath = core.getInput('outputs');
+    const outputsName = core.getInput('outputs-name') || 'outputs';
     
     // Check for simplified command syntax
     const commands = ['convert', 'lint', 'execute', 'render'];
@@ -225,6 +229,53 @@ async function run() {
           } else {
             core.warning(`Failed to save cache: ${error.message}`);
           }
+        }
+      }
+      
+      // Upload artifacts if specified
+      if (outputsPath && exitCode === 0) {
+        try {
+          core.info(`Looking for files matching: ${outputsPath}`);
+          
+          // Create globber with the artifact path pattern
+          const globber = await glob.create(path.join(workingDirectory, outputsPath));
+          const files = await globber.glob();
+          
+          if (files.length === 0) {
+            core.warning(`No files found matching pattern: ${outputsPath}`);
+          } else {
+            core.info(`Found ${files.length} file(s) to upload`);
+            
+            // Create artifact client
+            const artifactClient = artifact.create();
+            
+            // Calculate relative paths for proper structure in artifact
+            const rootDirectory = workingDirectory;
+            const filesToUpload = files.map(file => {
+              return {
+                absolutePath: file,
+                relativePath: path.relative(rootDirectory, file)
+              };
+            });
+            
+            // Upload the artifact
+            const uploadResponse = await artifactClient.uploadArtifact(
+              outputsName,
+              filesToUpload.map(f => f.absolutePath),
+              rootDirectory,
+              {
+                continueOnError: false
+              }
+            );
+            
+            if (uploadResponse.failedItems.length > 0) {
+              core.warning(`Failed to upload ${uploadResponse.failedItems.length} file(s)`);
+            } else {
+              core.info(`Successfully uploaded artifact '${outputsName}' with ${files.length} file(s)`);
+            }
+          }
+        } catch (error) {
+          core.warning(`Failed to upload artifacts: ${error.message}`);
         }
       }
     }

@@ -38,18 +38,14 @@ jobs:
           version: 2.3.0
           command: --version
 
-      - name: Test with working directory
-        uses: ./
-        with:
-          working-directory: test
-          command: --version
-
       - name: Test caching of .stencila directory
         uses: ./
         with:
           command: init
 
-      - name: Test execution
+      - name: Test storing of outputs
         uses: ./
         with:
-          execute: test/test.smd
+          working-directory: test
+          render: test.smd test.json
+          outputs: test.json
