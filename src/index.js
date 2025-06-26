@@ -1,4 +1,4 @@
-const artifact = require('@actions/artifact');
+const { DefaultArtifactClient } = require('@actions/artifact');
 const cache = require('@actions/cache');
 const core = require('@actions/core');
 const exec = require('@actions/exec');
@@ -247,12 +247,13 @@ async function run() {
             core.info(`Found ${files.length} file(s) to upload`);
             
             // Create artifact client
-            const artifactClient = new artifact.DefaultArtifactClient();
+            const artifactClient = new DefaultArtifactClient();
             
-            // Upload the artifact
+            // Upload the artifact with proper root directory
             const {id, size} = await artifactClient.uploadArtifact(
               outputsName,
               files,
+              path.resolve(workingDirectory),
               {
                 retentionDays: 90
               }
