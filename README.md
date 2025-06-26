@@ -50,7 +50,7 @@ jobs:
           lint: "**/*.smd"
 ```
 
-#### Render Documents and Store Outputs
+#### Render Documents and Store Assets
 
 ```yaml
 name: Render Documents
@@ -65,7 +65,7 @@ jobs:
       - uses: stencila/action@v1
         with:
           render: report.smd 
-          outputs: "*.pdf"
+          assets: "*.pdf"
 ```
 
 ## Inputs
@@ -79,8 +79,11 @@ jobs:
 | `lint`              | Shortcut for `command: lint` with these arguments            | No       | -         |
 | `execute`           | Shortcut for `command: execute` with these arguments         | No       | -         |
 | `render`            | Shortcut for `command: render` with these arguments          | No       | -         |
-| `outputs`           | Path pattern for files to upload as artifacts                | No       | -         |
-| `outputs-name`      | Name for the uploaded artifact                               | No       | `outputs` |
+| `assets`           | Path pattern for files to upload as artifacts                | No       | -         |
+| `assets-name`      | Name for the uploaded artifact                               | No       | `assets` |
+| `releases`           | Enable releases on tags. When set to `true` (the default) uses the `assets` path pattern, but can also be set as a custom path pattern for releases | No       | `true`   |
+| `release-name`      | Template string or file for release name (auto-detects `release-name.*`)           | No       | -         |
+| `release-notes`     | Template string or file for release notes (auto-detects `release-notes.*`)      | No       | -         |
 | `cache`             | Whether to cache the .stencila folder between runs           | No       | `true`    |
 | `working-directory` | Working directory to run Stencila commands                   | No       | `.`       |
 
@@ -93,7 +96,7 @@ jobs:
 
 ## Advanced Usage
 
-### Storing outputs
+### Storing output assets
 
 After successfully rendering documents, you can automatically upload the output files as GitHub Actions artifacts:
 
@@ -101,13 +104,13 @@ After successfully rendering documents, you can automatically upload the output 
 - uses: stencila/action@v1
   with:
     render: "report.smd report.docx"
-    outputs: "*.docx"
+    assets: "*.docx"
 ```
 
 This is useful for:
 
 - Preserving rendered documents (PDFs, HTML, etc.) from CI runs
-- Sharing outputs with team members
+- Sharing assets with team members
 - Creating downloadable assets for releases
 
 You can use glob patterns to match multiple files:
@@ -116,12 +119,96 @@ You can use glob patterns to match multiple files:
 - uses: stencila/action@v1
   with:
     render: "**/*.smd"
-    outputs: |
+    assets: |
       **/*.pdf
       **/*.html
       !**/temp.*
 ```
 
+### GitHub Releases
+
+Automatically create GitHub releases when tags are pushed and upload rendered documents as release assets:
+
+```yaml
+- uses: stencila/action@v1
+  with:
+    render: "report.smd report.pdf"
+    assets: "*.pdf"
+    releases: true  # Uses assets pattern for release files
+    release-name: "Report Release"
+    release-notes: "Automated release with rendered documents"
+```
+
+This feature:
+- **Detects tags automatically**: Only runs when `GITHUB_REF` starts with `refs/tags/`
+- **Creates releases**: Uses the tag name as the release name (unless overridden)
+- **Uploads individual files**: Each file becomes a separate downloadable asset (not zipped)
+- **Supports glob patterns**: Match multiple files with patterns like `dist/**/*`
+- **Auto-detects release files**: Automatically finds `release-notes.*` and `release-name.*` files
+- **Template rendering**: Uses Stencila to render templates with variables like `{{ tag }}`, `{{ date }}`
+
+#### Release with Custom Pattern
+
+```yaml
+- uses: stencila/action@v1
+  with:
+    render: "**/*.smd"
+    releases: "**/*.pdf"  # Custom pattern for release files
+    release-notes: "CHANGELOG.md"  # Read notes from file
+```
+
+#### Auto-Detection of Release Files
+
+The action automatically detects release files in your repository root without needing to specify them:
+
+**Auto-detected files** (case-insensitive, `-` or `_` variations):
+- `release-notes.*` → Used for release notes (e.g., `RELEASE_NOTES.md`, `release_notes.smd`)
+- `release-name.*` → Used for release name (e.g., `release-name.txt`, `RELEASE_NAME.smd`)
+
+**Available template variables:**
+- `{{ tag }}` - Git tag name (e.g., "v1.2.0")
+- `{{ date }}` - Date (e.g., "2025-01-26")
+- `{{ datetime }}` - Full datetime (e.g., "2025-01-26 14:30:15")
+- `{{ year }}`, `{{ month }}`, `{{ day }}` - Date components
+- `{{ monthname }}` - Month name (e.g., "January")
+- `{{ commit }}` - Short commit SHA (e.g., "a1b2c3d")
+- `{{ repo }}`, `{{ owner }}` - Repository info
+- `{{ workflow }}` - Workflow name
+- `{{ build }}` - Build number
+
+**Example `release-notes.smd`:**
+```markdown
+# {{ repo }} Release {{ tag }}
+
+Released on {{ monthname }} {{ day }}, {{ year }}
+
+This release contains improvements and fixes for {{ repo }}.
+
+Build: {{ build }} | Commit: {{ commit }}
+```
+
+#### Workflow Setup for Releases
+
+```yaml
+name: Release
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Required for creating releases
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: stencila/action@v1
+        with:
+          render: "docs/report.smd"
+          assets: "docs/*.pdf"
+          releases: true  # Will auto-detect release-notes.* files
+```
 
 ### Custom Working Directory
 

@@ -2,6 +2,7 @@ const { DefaultArtifactClient } = require('@actions/artifact');
 const cache = require('@actions/cache');
 const core = require('@actions/core');
 const exec = require('@actions/exec');
+const github = require('@actions/github');
 const glob = require('@actions/glob');
 const tc = require('@actions/tool-cache');
 const fs = require('fs');
@@ -17,8 +18,25 @@ async function run() {
     let args = core.getInput('args');
     const workingDirectory = core.getInput('working-directory') || '.';
     const useCache = core.getBooleanInput('cache');
-    const outputsPath = core.getInput('outputs');
-    const outputsName = core.getInput('outputs-name') || 'outputs';
+    const assetsPath = core.getInput('assets');
+    const assetsName = core.getInput('assets-name') || 'assets';
+    const releasesInput = core.getInput('releases');
+    const releaseName = core.getInput('release-name');
+    const releaseNotes = core.getInput('release-notes');
+    
+    // Parse release input - can be boolean or string pattern
+    let enableReleases = false;
+    let releasesPath = '';
+    if (releasesInput && releasesInput !== 'false') {
+      enableReleases = true;
+      if (releasesInput === 'true') {
+        // Use assets pattern if release is true
+        releasesPath = assetsPath;
+      } else {
+        // Use the provided pattern
+        releasesPath = releasesInput;
+      }
+    }
     
     // Check for simplified command syntax
     const commands = ['convert', 'lint', 'execute', 'render'];
@@ -232,17 +250,17 @@ async function run() {
         }
       }
       
-      // Upload artifacts if specified
-      if (outputsPath && exitCode === 0) {
+      // Upload assets artifact if specified
+      if (assetsPath && exitCode === 0) {
         try {
-          core.info(`Looking for files matching: ${outputsPath}`);
+          core.info(`Looking for files matching: ${assetsPath}`);
           
           // Create globber with the artifact path pattern
-          const globber = await glob.create(path.join(workingDirectory, outputsPath));
+          const globber = await glob.create(path.join(workingDirectory, assetsPath));
           const files = await globber.glob();
           
           if (files.length === 0) {
-            core.warning(`No files found matching pattern: ${outputsPath}`);
+            core.warning(`No files found matching pattern: ${assetsPath}`);
           } else {
             core.info(`Found ${files.length} file(s) to upload`);
             
@@ -251,7 +269,7 @@ async function run() {
             
             // Upload the artifact with proper root directory
             const {id, size} = await artifactClient.uploadArtifact(
-              outputsName,
+              assetsName,
               files,
               path.resolve(workingDirectory),
               {
@@ -259,12 +277,194 @@ async function run() {
               }
             );
             
-            core.info(`Successfully uploaded artifact '${outputsName}' (ID: ${id}, Size: ${size} bytes) with ${files.length} file(s)`);
+            core.info(`Successfully uploaded artifact '${assetsName}' (ID: ${id}, Size: ${size} bytes) with ${files.length} file(s)`);
           }
         } catch (error) {
           core.warning(`Failed to upload artifacts: ${error.message}`);
         }
       }
+    }
+
+    // Handle GitHub releases if enabled
+    if (enableReleases && process.env.GITHUB_REF && process.env.GITHUB_REF.startsWith('refs/tags/')) {
+      try {
+        const tagName = process.env.GITHUB_REF.replace('refs/tags/', '');
+        const token = process.env.GITHUB_TOKEN;
+        
+        if (!token) {
+          core.warning('GITHUB_TOKEN is required for release creation. Please ensure your workflow has proper permissions.');
+          return;
+        }
+        
+        core.info(`Creating release for tag: ${tagName}`);
+        
+        const octokit = github.getOctokit(token);
+        const context = github.context;
+        
+        // Auto-detect release files if not specified
+        const autoDetectFile = (baseName, userSpecified) => {
+          if (userSpecified) return userSpecified;
+          
+          // Case insensitive patterns with - or _
+          const patterns = [
+            baseName.toLowerCase(),
+            baseName.toUpperCase(),
+            baseName.toLowerCase().replace('-', '_'),
+            baseName.toUpperCase().replace('-', '_')
+          ];
+          
+          try {
+            const files = fs.readdirSync(workingDirectory);
+            for (const file of files) {
+              const fileStem = path.parse(file).name;
+              if (patterns.includes(fileStem)) {
+                return file;
+              }
+            }
+          } catch (error) {
+            // Ignore errors reading directory
+          }
+          
+          return null;
+        };
+        
+        // Auto-detect release-notes and release-name files
+        const detectedReleaseNotes = autoDetectFile('release-notes', releaseNotes);
+        const detectedReleaseName = autoDetectFile('release-name', releaseName);
+        
+        // Prepare template variables for Stencila
+        const now = new Date();
+        const templateVars = [
+          `--tag=${tagName}`,
+          `--datetime=${now.toISOString().replace('T', ' ').substring(0, 19)}`,
+          `--date=${now.toISOString().substring(0, 10)}`,
+          `--year=${now.getFullYear()}`,
+          `--month=${(now.getMonth() + 1).toString().padStart(2, '0')}`,
+          `--monthname=${now.toLocaleString('en-US', { month: 'long' })}`,
+          `--day=${now.getDate().toString().padStart(2, '0')}`,
+          `--commit=${context.sha.substring(0, 7)}`,
+          `--repo=${context.repo.repo}`,
+          `--owner=${context.repo.owner}`,
+          `--workflow=${context.workflow}`,
+          `--build=${context.runNumber}`
+        ];
+        
+        // Helper function to render template using Stencila
+        const renderTemplate = async (template, defaultValue) => {
+          if (!template) return defaultValue;
+          
+          try {
+            const isFile = fs.existsSync(path.resolve(workingDirectory, template));
+            let result = '';
+            
+            if (isFile) {
+              // Render file
+              const exitCode = await exec.exec('stencila', [
+                'render', 
+                path.resolve(workingDirectory, template), 
+                '--to=md',
+                '--',
+                ...templateVars
+              ], {
+                cwd: workingDirectory,
+                listeners: {
+                  stdout: (data) => {
+                    result += data.toString();
+                  }
+                },
+                ignoreReturnCode: true
+              });
+              
+              if (exitCode !== 0) {
+                core.warning(`Failed to render template file: ${template}`);
+                return defaultValue;
+              }
+            } else {
+              // Render string via stdin
+              const exitCode = await exec.exec('stencila', [
+                'render',
+                '--to=md',
+                '--',
+                ...templateVars
+              ], {
+                cwd: workingDirectory,
+                input: Buffer.from(template),
+                listeners: {
+                  stdout: (data) => {
+                    result += data.toString();
+                  }
+                },
+                ignoreReturnCode: true
+              });
+              
+              if (exitCode !== 0) {
+                core.warning(`Failed to render template string: ${template}`);
+                return defaultValue;
+              }
+            }
+            
+            return result.trim();
+          } catch (error) {
+            core.warning(`Error rendering template: ${error.message}`);
+            return defaultValue;
+          }
+        };
+        
+        // Render release name and notes
+        const finalReleaseName = await renderTemplate(detectedReleaseName, tagName);
+        const finalReleaseNotes = await renderTemplate(detectedReleaseNotes, '');
+        
+        // Create the release
+        const releaseResponse = await octokit.rest.repos.createRelease({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          tag_name: tagName,
+          name: finalReleaseName,
+          body: finalReleaseNotes,
+          draft: false,
+          prerelease: tagName.includes('alpha') || tagName.includes('beta') || tagName.includes('rc')
+        });
+        
+        core.info(`Created release: ${releaseResponse.data.html_url}`);
+        
+        // Upload release assets if specified
+        if (releasesPath) {
+          core.info(`Looking for release files matching: ${releasesPath}`);
+          
+          const globber = await glob.create(path.join(workingDirectory, releasesPath));
+          const files = await globber.glob();
+          
+          if (files.length === 0) {
+            core.warning(`No release files found matching pattern: ${releasesPath}`);
+          } else {
+            core.info(`Found ${files.length} file(s) to upload as release assets`);
+            
+            for (const file of files) {
+              const fileName = path.basename(file);
+              const fileContent = fs.readFileSync(file);
+              
+              try {
+                await octokit.rest.repos.uploadReleaseAsset({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  release_id: releaseResponse.data.id,
+                  name: fileName,
+                  data: fileContent
+                });
+                
+                core.info(`Uploaded release asset: ${fileName}`);
+              } catch (uploadError) {
+                core.warning(`Failed to upload ${fileName}: ${uploadError.message}`);
+              }
+            }
+          }
+        }
+        
+      } catch (error) {
+        core.warning(`Failed to create release: ${error.message}`);
+      }
+    } else if (enableReleases) {
+      core.info('Release creation enabled but not on a tag. Skipping release.');
     }
 
   } catch (error) {

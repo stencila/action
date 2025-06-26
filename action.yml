@@ -28,13 +28,23 @@ inputs:
   render:
     description: 'Run "stencila render" with these arguments'
     required: false
-  outputs:
-    description: 'Path pattern for outputs files to upload as artifacts (e.g., "*.pdf", "output/**/*")'
+  assets:
+    description: 'Path pattern for assets files to store after each run (e.g., "*.pdf", "output/**/*")'
     required: false
-  outputs-name:
-    description: 'Name for the uploaded outputs artifact (if outputs is specified)'
+  assets-name:
+    description: 'Name for the uploaded assets artifact (if assets is specified)'
     required: false
-    default: 'outputs'
+    default: 'assets'
+  releases:
+    description: 'Enable releases on tags. Set to true to use assets pattern, or provide a custom pattern (e.g., "*.pdf")'
+    required: false
+    default: 'true'
+  release-name:
+    description: 'Jinja template string or path to document to be rendered by Stencila into release name (defaults to tag name)'
+    required: false
+  release-notes:
+    description: 'Jinja template string or path to document to be rendered by Stencila into release notes'
+    required: false
   working-directory:
     description: 'Working directory to run Stencila commands'
     required: false
