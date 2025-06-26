@@ -11,10 +11,23 @@ async function run() {
   try {
     // Get inputs
     const version = core.getInput('version') || 'latest';
-    const command = core.getInput('command');
-    const args = core.getInput('args');
+    let command = core.getInput('command');
+    let args = core.getInput('args');
     const workingDirectory = core.getInput('working-directory') || '.';
     const useCache = core.getBooleanInput('cache');
+    
+    // Check for simplified command syntax
+    const commands = ['convert', 'lint', 'execute', 'render'];
+    for (const cmd of commands) {
+      const cmdArgs = core.getInput(cmd);
+      if (cmdArgs) {
+        if (command) {
+          throw new Error(`Cannot specify both 'command' and '${cmd}' inputs`);
+        }
+        command = cmd;
+        args = cmdArgs;
+      }
+    }
 
     // Determine platform
     const platform = os.platform();

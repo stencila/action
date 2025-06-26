@@ -16,6 +16,18 @@ inputs:
   args:
     description: 'Arguments to pass to the Stencila command'
     required: false
+  convert:
+    description: 'Run "stencila convert" with these arguments'
+    required: false
+  lint:
+    description: 'Run "stencila lint" with these arguments'
+    required: false
+  execute:
+    description: 'Run "stencila execute" with these arguments'
+    required: false
+  render:
+    description: 'Run "stencila render" with these arguments'
+    required: false
   working-directory:
     description: 'Working directory to run Stencila commands'
     required: false

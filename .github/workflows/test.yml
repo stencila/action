@@ -48,3 +48,8 @@ jobs:
         uses: ./
         with:
           command: init
+
+      - name: Test execution
+        uses: ./
+        with:
+          execute: test/test.smd

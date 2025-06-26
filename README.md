@@ -14,7 +14,15 @@ Just install Stencila CLI without running any commands:
 
 ### Install and Run Commands
 
-Install Stencila CLI and run a command:
+Install Stencila CLI and run a command using the simplified syntax:
+
+```yaml
+- uses: stencila/action@v1
+  with:
+    render: report.smd
+```
+
+Or using the alternative syntax:
 
 ```yaml
 - uses: stencila/action@v1
@@ -39,8 +47,7 @@ jobs:
 
       - uses: stencila/action@v1
         with:
-          command: lint
-          args: "**/*.smd"
+          lint: "**/*.smd"
 ```
 
 #### Multi-Platform Testing
@@ -60,9 +67,7 @@ jobs:
 
       - uses: stencila/action@v1
         with:
-          version: latest
-          command: execute
-          args: "tests/**/*.smd"
+          execute: "tests/**/*.smd"
 ```
 
 ## Inputs
@@ -72,6 +77,10 @@ jobs:
 | `version`           | Version of Stencila CLI to install (e.g., "latest", "2.0.0") | No       | `latest` |
 | `command`           | Stencila command to run (e.g., "lint", "release", "push")    | No       | -        |
 | `args`              | Arguments to pass to the Stencila command                    | No       | -        |
+| `convert`           | Shortcut for `command: convert` with these arguments         | No       | -        |
+| `lint`              | Shortcut for `command: lint` with these arguments            | No       | -        |
+| `execute`           | Shortcut for `command: execute` with these arguments         | No       | -        |
+| `render`            | Shortcut for `command: render` with these arguments          | No       | -        |
 | `working-directory` | Working directory to run Stencila commands                   | No       | `.`      |
 | `cache`             | Whether to cache the .stencila folder between runs           | No       | `true`   |
 
@@ -91,8 +100,7 @@ Run commands in a specific directory:
 ```yaml
 - uses: stencila/action@v1
   with:
-    command: lint
-    args: "report.smd"
+    lint: "report.smd"
     working-directory: ./docs
 ```
 
@@ -121,8 +129,7 @@ To disable caching:
 ```yaml
 - uses: stencila/action@v1
   with:
-    command: execute
-    args: "report.smd"
+    execute: "report.smd"
     cache: false
 ```
 
