@@ -1,6 +1,7 @@
 const core = require('@actions/core');
 const exec = require('@actions/exec');
 const tc = require('@actions/tool-cache');
+const cache = require('@actions/cache');
 const fs = require('fs');
 const https = require('https');
 const os = require('os');
@@ -13,6 +14,7 @@ async function run() {
     const command = core.getInput('command');
     const args = core.getInput('args');
     const workingDirectory = core.getInput('working-directory') || '.';
+    const useCache = core.getBooleanInput('cache');
 
     // Determine platform
     const platform = os.platform();
@@ -155,6 +157,34 @@ async function run() {
     core.setOutput('version', installedVersion.trim());
     core.info(`Stencila CLI ${installedVersion.trim()} installed successfully`);
 
+    // Cache restoration logic
+    let cacheRestored = false;
+    const stencilaCachePath = path.join(workingDirectory, '.stencila');
+    let cacheKey = '';
+    
+    if (useCache && command) {
+      // Generate cache key based on OS, Stencila version, and workflow file hash
+      cacheKey = `stencila-cache-${platform}-${arch}-${actualVersion}-${process.env.GITHUB_SHA || 'default'}`;
+      const restoreKeys = [
+        `stencila-cache-${platform}-${arch}-${actualVersion}-`,
+        `stencila-cache-${platform}-${arch}-`
+      ];
+      
+      try {
+        core.info(`Restoring .stencila cache with key: ${cacheKey}`);
+        const cacheHit = await cache.restoreCache([stencilaCachePath], cacheKey, restoreKeys);
+        
+        if (cacheHit) {
+          core.info(`Cache restored from key: ${cacheHit}`);
+          cacheRestored = true;
+        } else {
+          core.info('No cache found, starting fresh');
+        }
+      } catch (error) {
+        core.warning(`Failed to restore cache: ${error.message}`);
+      }
+    }
+
     // Run command if provided
     if (command) {
       core.info(`Running: stencila ${command} ${args || ''}`);
@@ -168,6 +198,21 @@ async function run() {
       
       if (exitCode !== 0) {
         core.setFailed(`Stencila command failed with exit code ${exitCode}`);
+      }
+      
+      // Save cache after command execution
+      if (useCache && fs.existsSync(stencilaCachePath)) {
+        try {
+          core.info(`Saving .stencila cache with key: ${cacheKey}`);
+          await cache.saveCache([stencilaCachePath], cacheKey);
+          core.info('Cache saved successfully');
+        } catch (error) {
+          if (error.name === 'ValidationError' && error.message.includes('already exists')) {
+            core.info('Cache already exists, skipping save');
+          } else {
+            core.warning(`Failed to save cache: ${error.message}`);
+          }
+        }
       }
     }
 

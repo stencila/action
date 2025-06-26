@@ -73,6 +73,7 @@ jobs:
 | `command`           | Stencila command to run (e.g., "lint", "release", "push")    | No       | -        |
 | `args`              | Arguments to pass to the Stencila command                    | No       | -        |
 | `working-directory` | Working directory to run Stencila commands                   | No       | `.`      |
+| `cache`             | Whether to cache the .stencila folder between runs           | No       | `true`   |
 
 ## Outputs
 
@@ -105,6 +106,24 @@ Install a specific version of Stencila CLI:
     version: 2.0.0
     command: lint
     args: report.smd
+```
+
+### Caching
+
+By default, this action caches the `.stencila` folder between runs to speed up subsequent executions. The cache is keyed by:
+- Operating system
+- Architecture
+- Stencila version
+- Git commit SHA
+
+To disable caching:
+
+```yaml
+- uses: stencila/action@v1
+  with:
+    command: execute
+    args: "report.smd"
+    cache: false
 ```
 
 ## License

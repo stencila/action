@@ -2,7 +2,7 @@ name: 'Stencila Action'
 description: 'Setup Stencila CLI in GitHub Actions workflows to lint, release, and push executable documents'
 author: 'Stencila'
 branding:
-  icon: 'check-circle'
+  icon: 'file-text'
   color: 'blue'
 
 inputs:
@@ -20,6 +20,10 @@ inputs:
     description: 'Working directory to run Stencila commands'
     required: false
     default: '.'
+  cache:
+    description: 'Whether to cache the .stencila folder between runs'
+    required: false
+    default: 'true'
 
 outputs:
   version:
