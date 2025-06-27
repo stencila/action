@@ -55,7 +55,6 @@ jobs:
           render: test.smd test.json test.md
           assets: test.*
           releases: false
-          working-directory: test
 
       - name: Test multiple commands (should fail gracefully)
         uses: ./
@@ -63,6 +62,5 @@ jobs:
           run: nonexistent-command
           lint: test.smd
           continue-on-error: true
-          working-directory: test
         continue-on-error: true  # Don't fail the workflow when this step fails
 
