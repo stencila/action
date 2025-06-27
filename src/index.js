@@ -56,10 +56,23 @@ async function run() {
     for (const cmdName of commands) {
       const cmdArgs = core.getInput(cmdName);
       if (cmdArgs) {
-        commandsToRun.push({
-          command: cmdName,
-          args: cmdArgs
-        });
+        // Special handling for render command to support multi-line inputs
+        if (cmdName === "render") {
+          const renderCommands = cmdArgs
+            .split('\n')
+            .filter(line => line.trim())
+            .map(args => ({
+              command: cmdName,
+              args
+            }));
+          commandsToRun.push(...renderCommands);
+        } else {
+          // Other commands use the input as is
+          commandsToRun.push({
+            command: cmdName,
+            args: cmdArgs
+          });
+        }
       }
     }
 
@@ -219,9 +232,10 @@ async function run() {
         },
       },
     });
+    installedVersion = installedVersion.trim();
 
-    core.setOutput("version", installedVersion.trim());
-    core.info(`Stencila CLI ${installedVersion.trim()} installed successfully`);
+    core.setOutput("version", installedVersion);
+    core.info(`Stencila CLI ${installedVersion} installed successfully`);
 
     // Cache restoration logic
     let cacheRestored = false;

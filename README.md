@@ -30,6 +30,21 @@ Or using the alternative syntax:
     run: lint report.smd
 ```
 
+#### Rendering Multiple Files
+
+You can render multiple files with different outputs using multi-line YAML:
+
+```yaml
+- uses: stencila/action@v1
+  with:
+    render: |
+      summary.md summary.pdf
+      main.md main.pdf main.docx
+      report.smd report.html
+```
+
+Each line is executed as a separate `stencila render` command.
+
 ### Complete Workflow Examples
 
 #### Lint Documents

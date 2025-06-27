@@ -56,6 +56,13 @@ jobs:
           assets: test.*
           releases: false
 
+      - name: Test multi-line render
+        uses: ./
+        with:
+          render: |
+            test.smd test.json
+            test.smd test.md
+
       - name: Test multiple commands (should fail gracefully)
         uses: ./
         with:
