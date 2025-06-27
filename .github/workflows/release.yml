@@ -1,0 +1,21 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Release
+        uses: ./
+        with:
+          # This release is primarily done as a test of the following config
+          # Release notes should be autodetected as "release-notes.smd"
+          render: test.smd test.md test.yaml test.json
+          releases: test.*
+          release-name: "{{ owner }}/{{ repo }} {{ tag }}"
+          release-filenames: "{{ filestem }}-{{ datetime }}.{{ fileext }}"

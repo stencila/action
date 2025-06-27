@@ -140,12 +140,35 @@ Automatically create GitHub releases when tags are pushed and upload rendered do
     release-notes: "Automated release with rendered documents"
 ```
 
+#### Prerequisites
+
+Releases are **only created when pushing tags**. Your workflow must be triggered by tag pushes:
+
+```yaml
+# Option 1: Only run on tags
+on:
+  push:
+    tags: ['v*']
+
+# Option 2: Run on all pushes (including tags) and PRs
+on: [push, pull_request]
+
+# Option 3: Explicit configuration
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+```
+
+**Important**: The action checks if `GITHUB_REF` starts with `refs/tags/`. Regular branch pushes or pull requests will not trigger release creation, even if `releases: true` is set.
+
 This feature:
 - **Detects tags automatically**: Only runs when `GITHUB_REF` starts with `refs/tags/`
 - **Creates releases**: Uses the tag name as the release name (unless overridden)
 - **Uploads individual files**: Each file becomes a separate downloadable asset (not zipped)
 - **Supports glob patterns**: Match multiple files with patterns like `dist/**/*`
-- **Auto-detects release files**: Automatically finds `release-notes.*` and `release-name.*` files
+- **Auto-detects release files**: Automatically finds `release-notes.*`, `release-name.*`, and `release-filenames.*` files
 - **Template rendering**: Uses Stencila to render templates with variables like `{{ tag }}`, `{{ date }}`
 
 #### Release with Custom Pattern
@@ -178,6 +201,7 @@ The action automatically detects release files in your repository root without n
 - `{{ build }}` - Build number
 
 **Example `release-notes.smd`:**
+
 ```markdown
 # {{ repo }} Release {{ tag }}
 
@@ -264,9 +288,14 @@ Run commands in a specific directory:
 ```yaml
 - uses: stencila/action@v1
   with:
-    lint: "report.smd"
+    lint: report.smd
     working-directory: ./docs
 ```
+
+**Important**: All path patterns (`assets`, `releases`, file arguments) are relative to the `working-directory`:
+- Auto-detected files (`release-notes.*`, `release-name.*`, `release-filenames.*`) are searched for in the working directory
+- With `working-directory: docs` and `assets: "*.pdf"`, the action looks for `docs/*.pdf`
+- With `working-directory: .` (default) and `releases: "dist/*"`, the action looks for `dist/*` from the repository root
 
 ### Specific Version
 
@@ -276,8 +305,7 @@ Install a specific version of Stencila CLI:
 - uses: stencila/action@v1
   with:
     version: 2.0.0
-    command: lint
-    args: report.smd
+    lint: report.smd
 ```
 
 ### Caching
@@ -289,7 +317,7 @@ To disable caching:
 ```yaml
 - uses: stencila/action@v1
   with:
-    execute: "report.smd"
+    execute: report.smd
     cache: false
 ```
 

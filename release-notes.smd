@@ -1,0 +1,6 @@
+# Release {{ tag }}
+
+This is release {{ tag }} of {{ owner }}/{{ repo }}. Built from commit {{ commit }} by workflow {{ workflow }} build number {{ build }} at {{ datetime }} ({{ day }} {{ monthname }} {{ year }}).
+
+> [!INFO]
+> These release notes were generated from [this file](https://github.com/stencila/action/blob/main/release-notes.smd) as a test of this action's GitHub Releases integration.
