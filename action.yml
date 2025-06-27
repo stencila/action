@@ -10,11 +10,8 @@ inputs:
     description: 'Version of Stencila CLI to install (e.g., "latest", "2.0.0")'
     required: false
     default: 'latest'
-  command:
-    description: 'Stencila command to run (e.g., "lint", "release", "push")'
-    required: false
-  args:
-    description: 'Arguments to pass to the Stencila command'
+  run:
+    description: 'Stencila command and arguments to run (e.g., "lint report.smd", "render --to=md *.smd")'
     required: false
   convert:
     description: 'Run "stencila convert" with these arguments'
@@ -56,6 +53,10 @@ inputs:
     description: 'Whether to cache the .stencila folder between runs'
     required: false
     default: 'true'
+  continue-on-error:
+    description: 'Whether to continue running subsequent commands if one fails'
+    required: false
+    default: 'false'
 
 outputs:
   version:

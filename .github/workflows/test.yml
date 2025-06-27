@@ -14,7 +14,7 @@ jobs:
       - name: Install Stencila on ${{ matrix.os }}
         uses: ./
         with:
-          command: --version
+          run: --version
         id: install
 
       - name: Verify installation
@@ -26,7 +26,7 @@ jobs:
       - name: Test caching of .stencila directory
         uses: ./
         with:
-          command: init
+          run: init
 
   test-ubuntu:
     runs-on: ubuntu-latest
@@ -46,4 +46,23 @@ jobs:
           artifact-name: stored-assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Required for creating releases
+
+      - name: Test multiple commands
+        uses: ./
+        with:
+          run: "--version"
+          lint: test.smd
+          render: test.smd test.json test.md
+          assets: test.*
+          releases: false
+          working-directory: test
+
+      - name: Test multiple commands (should fail gracefully)
+        uses: ./
+        with:
+          run: nonexistent-command
+          lint: test.smd
+          continue-on-error: true
+          working-directory: test
+        continue-on-error: true  # Don't fail the workflow when this step fails
 

@@ -14,8 +14,7 @@ async function run() {
   try {
     // Get inputs
     const version = core.getInput("version") || "latest";
-    let command = core.getInput("command");
-    let args = core.getInput("args");
+    let runInput = core.getInput("run");
     const assetsPath = core.getInput("assets");
     const artifactName = core.getInput("artifact-name") || "assets";
     const releasesInput = core.getInput("releases");
@@ -24,6 +23,7 @@ async function run() {
     const releaseFilenames = core.getInput("release-filenames");
     const workingDirectory = core.getInput("working-directory") || ".";
     const useCache = core.getBooleanInput("cache");
+    const continueOnError = core.getBooleanInput("continue-on-error");
 
     // Parse release input - can be boolean or string pattern
     let enableReleases = false;
@@ -39,16 +39,27 @@ async function run() {
       }
     }
 
+    // Collect all commands to run
+    const commandsToRun = [];
+    
+    // Parse run input if provided
+    if (runInput) {
+      const cmdParts = runInput.trim().split(/\s+/);
+      commandsToRun.push({
+        command: cmdParts[0],
+        args: cmdParts.slice(1).join(" ")
+      });
+    }
+
     // Check for simplified command syntax
     const commands = ["convert", "lint", "execute", "render"];
-    for (const cmd of commands) {
-      const cmdArgs = core.getInput(cmd);
+    for (const cmdName of commands) {
+      const cmdArgs = core.getInput(cmdName);
       if (cmdArgs) {
-        if (command) {
-          throw new Error(`Cannot specify both 'command' and '${cmd}' inputs`);
-        }
-        command = cmd;
-        args = cmdArgs;
+        commandsToRun.push({
+          command: cmdName,
+          args: cmdArgs
+        });
       }
     }
 
@@ -217,7 +228,7 @@ async function run() {
     const stencilaCachePath = path.join(workingDirectory, ".stencila");
     let cacheKey = "";
 
-    if (useCache && command) {
+    if (useCache && commandsToRun.length > 0) {
       // Generate cache key based on OS, Stencila version, and workflow file hash
       cacheKey = `stencila-cache-${platform}-${arch}-${actualVersion}-${
         process.env.GITHUB_SHA || "default"
@@ -246,23 +257,45 @@ async function run() {
       }
     }
 
-    // Run command if provided
-    if (command) {
-      core.info(`Running: stencila ${command} ${args || ""}`);
+    // Run commands if provided
+    let overallSuccess = true;
+    let lastExitCode = 0;
+    
+    if (commandsToRun.length > 0) {
+      for (let i = 0; i < commandsToRun.length; i++) {
+        const { command, args } = commandsToRun[i];
+        core.info(`Running command ${i + 1}/${commandsToRun.length}: stencila ${command} ${args || ""}`);
 
-      const exitCode = await exec.exec(
-        "stencila",
-        [command, ...(args ? args.split(" ") : [])],
-        {
-          cwd: workingDirectory,
-          ignoreReturnCode: true,
+        const exitCode = await exec.exec(
+          "stencila",
+          [command, ...(args ? args.split(" ") : [])],
+          {
+            cwd: workingDirectory,
+            ignoreReturnCode: true,
+          }
+        );
+
+        lastExitCode = exitCode;
+
+        if (exitCode !== 0) {
+          overallSuccess = false;
+          core.error(`Command ${i + 1} failed with exit code ${exitCode}`);
+          
+          if (!continueOnError) {
+            core.setFailed(`Stencila command failed with exit code ${exitCode}`);
+            break;
+          }
+        } else {
+          core.info(`Command ${i + 1} completed successfully`);
         }
-      );
+      }
 
-      core.setOutput("exit-code", exitCode.toString());
-
-      if (exitCode !== 0) {
-        core.setFailed(`Stencila command failed with exit code ${exitCode}`);
+      // Set final exit code to the last command's exit code
+      core.setOutput("exit-code", lastExitCode.toString());
+      
+      // If continue-on-error is true and any command failed, still fail the action at the end
+      if (!overallSuccess && continueOnError) {
+        core.setFailed(`One or more Stencila commands failed`);
       }
 
       // Save cache after command execution
@@ -282,8 +315,8 @@ async function run() {
         }
       }
 
-      // Upload assets artifact if specified
-      if (assetsPath && exitCode === 0) {
+      // Upload assets artifact if specified and all commands succeeded
+      if (assetsPath && overallSuccess) {
         try {
           core.info(`Looking for files matching: ${assetsPath}`);
 

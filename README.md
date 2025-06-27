@@ -27,8 +27,7 @@ Or using the alternative syntax:
 ```yaml
 - uses: stencila/action@v1
   with:
-    command: lint
-    args: report.smd
+    run: lint report.smd
 ```
 
 ### Complete Workflow Examples
@@ -73,12 +72,11 @@ jobs:
 | Input               | Description                                                  | Required | Default   |
 | ------------------- | ------------------------------------------------------------ | -------- | --------- |
 | `version`           | Version of Stencila CLI to install (e.g., "latest", "2.0.0") | No       | `latest`  |
-| `command`           | Stencila command to run (e.g., "lint", "release", "push")    | No       | -         |
-| `args`              | Arguments to pass to the Stencila command                    | No       | -         |
-| `convert`           | Shortcut for `command: convert` with these arguments         | No       | -         |
-| `lint`              | Shortcut for `command: lint` with these arguments            | No       | -         |
-| `execute`           | Shortcut for `command: execute` with these arguments         | No       | -         |
-| `render`            | Shortcut for `command: render` with these arguments          | No       | -         |
+| `run`               | Stencila command and arguments to run (e.g., "lint report.smd", "render --to=md *.smd") | No       | -         |
+| `convert`           | Shortcut for `run: convert` with these arguments         | No       | -         |
+| `lint`              | Shortcut for `run: lint` with these arguments            | No       | -         |
+| `execute`           | Shortcut for `run: execute` with these arguments         | No       | -         |
+| `render`            | Shortcut for `run: render` with these arguments          | No       | -         |
 | `assets`           | Path pattern for files to upload as artifacts                | No       | -         |
 | `artifact-name`      | Name for the uploaded artifact                               | No       | `assets` |
 | `releases`           | Enable releases on tags. When set to `true` (the default) uses the `assets` path pattern, but can also be set as a custom path pattern for releases | No       | `true`   |
@@ -86,6 +84,7 @@ jobs:
 | `release-notes`     | Template string or file for release notes (auto-detects `release-notes.*`)      | No       | -         |
 | `release-filenames`     | Template string or file for renaming release assets | No       | -         |
 | `cache`             | Whether to cache the .stencila folder between runs           | No       | `true`    |
+| `continue-on-error` | Whether to continue running subsequent commands if one fails | No       | `false`   |
 | `working-directory` | Working directory to run Stencila commands                   | No       | `.`       |
 
 ## Outputs
@@ -125,6 +124,42 @@ You can use glob patterns to match multiple files:
       **/*.html
       !**/temp.*
 ```
+
+### Multiple Commands
+
+You can run multiple commands in a single step by specifying multiple command inputs:
+
+```yaml
+- uses: stencila/action@v1
+  with:
+    lint: "**/*.smd"
+    render: "**/*.smd"
+    assets: "**/*.pdf"
+    continue-on-error: false  # Stop on first failure (default)
+```
+
+This will:
+1. Run `stencila lint **/*.smd`
+2. Run `stencila render **/*.smd` 
+3. Upload artifacts matching `**/*.pdf`
+
+**Error Handling Options:**
+- `continue-on-error: false` (default) - Stop on first command failure
+- `continue-on-error: true` - Run all commands even if some fail, but still fail the action if any failed
+
+**Command Execution Order:**
+Commands are executed in the order `run`, `convert`, `lint`, `execute`, `render` regardless of the order they appear in e.g.
+
+```yaml
+- uses: stencila/action@v1
+  with:
+    lint: "**/*.smd"
+    run: "format --check ."
+    render: "report.smd"
+    continue-on-error: true
+```
+
+This runs: `format --check .`, then `lint **/*.smd`, then `render report.smd`
 
 ### GitHub Releases
 
