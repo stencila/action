@@ -138,6 +138,8 @@ Automatically create GitHub releases when tags are pushed and upload rendered do
     releases: true  # Uses assets pattern for release files
     release-name: "Report Release"
     release-notes: "Automated release with rendered documents"
+  env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 #### Prerequisites
@@ -233,6 +235,8 @@ jobs:
           render: "docs/report.smd"
           assets: "docs/*.pdf"
           releases: true  # Will auto-detect release-notes.* files
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 ### Template-Based Asset Renaming

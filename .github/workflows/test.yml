@@ -44,3 +44,6 @@ jobs:
           release-name: "{{ owner }}/{{ repo }} {{ tag }}"
           release-filenames: "{{ filestem }}-{{ datetime }}.{{ fileext }}"
           artifact-name: stored-assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Required for creating releases
+

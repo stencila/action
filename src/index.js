@@ -241,7 +241,6 @@ async function run() {
         try {
           core.info(`Saving .stencila cache with key: ${cacheKey}`);
           await cache.saveCache([stencilaCachePath], cacheKey);
-          core.info('Cache saved successfully');
         } catch (error) {
           if (error.name === 'ValidationError' && error.message.includes('already exists')) {
             core.info('Cache already exists, skipping save');
@@ -293,7 +292,7 @@ async function run() {
         const token = process.env.GITHUB_TOKEN;
         
         if (!token) {
-          throw new Error('Please add "permissions: contents: write" to your workflow job to enable release creation.');
+          throw new Error('GITHUB_TOKEN is required for release creation. Please set "env: GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}" and add "permissions: contents: write" to your workflow job.');
         }
         
         core.info(`Creating release for tag: ${tagName}`);
@@ -493,7 +492,7 @@ async function run() {
         }
         
       } catch (error) {
-        core.warning(`Failed to create release: ${error.message}`);
+        core.setFailed(`Failed to create release: ${error.message}`);
       }
     } else if (enableReleases) {
       core.info('Release creation enabled but not on a tag. Skipping release.');
