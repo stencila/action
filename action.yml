@@ -33,13 +33,13 @@ inputs:
     required: false
     default: 'true'
   release-name:
-    description: 'Jinja template string or path to document to be rendered by Stencila into release name (defaults to tag name)'
+    description: 'Markdown string or path to document to be rendered by Stencila into release name (defaults to tag name)'
     required: false
   release-notes:
-    description: 'Jinja template string or path to document to be rendered by Stencila into release notes'
+    description: 'Markdown string or path to document to be rendered by Stencila into release notes'
     required: false
   release-filenames:
-    description: 'Jinja template string or path to document for renaming uploaded files (defaults to no renaming)'
+    description: 'Markdown string or path to document for renaming uploaded files (defaults to no renaming)'
     required: false
   working-directory:
     description: 'Working directory to run Stencila commands'
