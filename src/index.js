@@ -28,7 +28,7 @@ async function run() {
     // Parse release input - can be boolean or string pattern
     let enableReleases = false;
     let releasesPath = '';
-    if (releasesInput && releasesInput !== 'false') {
+    if (releasesInput && releasesInput !== 'false' && assetsPath) {
       enableReleases = true;
       if (releasesInput === 'true') {
         // Use assets pattern if release is true
@@ -293,8 +293,7 @@ async function run() {
         const token = process.env.GITHUB_TOKEN;
         
         if (!token) {
-          core.warning('GITHUB_TOKEN is required for release creation. Please ensure your workflow has proper permissions.');
-          return;
+          throw new Error('Please add "permissions: contents: write" to your workflow job to enable release creation.');
         }
         
         core.info(`Creating release for tag: ${tagName}`);

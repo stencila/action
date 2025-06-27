@@ -30,18 +30,17 @@ jobs:
 
   test-ubuntu:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Required for creating releases
     steps:
       - uses: actions/checkout@v4
 
-      - name: Test with specific version
-        uses: ./
-        with:
-          version: 2.3.0
-          command: --version
-
-      - name: Test storing of assets
+      - name: Render test document
         uses: ./
         with:
           render: test.smd test.json test.md
           assets: test.*
+          releases: test.*
+          release-name: "{{ owner }}/{{ repo }} {{ tag }}"
+          release-filenames: "{{ filestem }}-{{ datetime }}.{{ fileext }}"
           artifact-name: stored-assets
