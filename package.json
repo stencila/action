@@ -1,6 +1,6 @@
 {
   "name": "stencila-action",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "GitHub Action to setup and use Stencila CLI",
   "main": "dist/index.js",
   "scripts": {
