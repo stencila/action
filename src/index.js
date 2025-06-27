@@ -329,25 +329,26 @@ async function run() {
           return null;
         };
         
-        // Auto-detect release-notes and release-name files
+        // Auto-detect release-notes, release-name, and release-filenames files
         const detectedReleaseNotes = autoDetectFile('release-notes', releaseNotes);
         const detectedReleaseName = autoDetectFile('release-name', releaseName);
+        const detectedReleaseFilenames = autoDetectFile('release-filenames', releaseFilenames);
         
         // Prepare template variables for Stencila
         const now = new Date();
         const templateVars = [
-          `--tag=${tagName}`,
-          `--datetime=${now.toISOString().replace('T', '-').substring(0, 19)}`,
-          `--date=${now.toISOString().substring(0, 10)}`,
-          `--year=${now.getFullYear()}`,
-          `--month=${(now.getMonth() + 1).toString().padStart(2, '0')}`,
-          `--monthname=${now.toLocaleString('en-US', { month: 'long' })}`,
-          `--day=${now.getDate().toString().padStart(2, '0')}`,
-          `--commit=${context.sha.substring(0, 7)}`,
-          `--repo=${context.repo.repo}`,
-          `--owner=${context.repo.owner}`,
-          `--workflow=${context.workflow}`,
-          `--build=${context.runNumber}`
+          `tag=${tagName}`,
+          `datetime=${now.toISOString().replace('T', '-').substring(0, 19)}`,
+          `date=${now.toISOString().substring(0, 10)}`,
+          `year=${now.getFullYear()}`,
+          `month=${(now.getMonth() + 1).toString().padStart(2, '0')}`,
+          `monthname=${now.toLocaleString('en-US', { month: 'long' })}`,
+          `day=${now.getDate().toString().padStart(2, '0')}`,
+          `commit=${context.sha.substring(0, 7)}`,
+          `repo=${context.repo.repo}`,
+          `owner=${context.repo.owner}`,
+          `workflow=${context.workflow}`,
+          `build=${context.runNumber}`
         ];
         
         // Helper function to render template using Stencila
@@ -415,20 +416,20 @@ async function run() {
         
         // Helper function to render filename using Stencila with file-specific variables
         const renderFilename = async (filePath) => {
-          if (!releaseFilenames) return path.basename(filePath);
+          if (!detectedReleaseFilenames) return path.basename(filePath);
           
           try {
             const parsedPath = path.parse(filePath);
             
             const fileVars = [
-              `--filepath=${filePath}`,
-              `--dirname=${parsedPath.dir}`,
-              `--filename=${parsedPath.base}`,
-              `--filestem=${parsedPath.name}`,
-              `--fileext=${parsedPath.ext}`,
+              `filepath=${filePath}`,
+              `dirname=${parsedPath.dir}`,
+              `filename=${parsedPath.base}`,
+              `filestem=${parsedPath.name}`,
+              `fileext=${parsedPath.ext}`,
             ];
             
-            const newName = await renderTemplate(releaseFilenames, parsedPath.base, fileVars);
+            const newName = await renderTemplate(detectedReleaseFilenames, parsedPath.base, fileVars);
             return newName || parsedPath.base;
           } catch (error) {
             core.warning(`Error rendering filename for ${filePath}: ${error.message}`);
