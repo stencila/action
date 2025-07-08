@@ -53,6 +53,10 @@ inputs:
     description: 'Whether to cache the .stencila folder between runs'
     required: false
     default: 'true'
+  install-tools:
+    description: 'Run `stencila tools install` to ensure that workspace dependencies are available'
+    required: false
+    default: 'true'
   continue-on-error:
     description: 'Whether to continue running subsequent commands if one fails'
     required: false

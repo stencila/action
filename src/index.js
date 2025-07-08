@@ -23,6 +23,7 @@ async function run() {
     const releaseFilenames = core.getInput("release-filenames");
     const workingDirectory = core.getInput("working-directory") || ".";
     const useCache = core.getBooleanInput("cache");
+    const installTools = core.getBooleanInput("install-tools");
     const continueOnError = core.getBooleanInput("continue-on-error");
 
     // Parse release input - can be boolean or string pattern
@@ -268,6 +269,22 @@ async function run() {
         }
       } catch (error) {
         core.warning(`Failed to restore cache: ${error.message}`);
+      }
+    }
+
+
+    // Install tools if requested
+    if (installTools) {
+      core.info("Installing Stencila tools...");
+      const installExitCode = await exec.exec("stencila", ["install", "tools"], {
+        cwd: workingDirectory,
+        ignoreReturnCode: true,
+      });
+      
+      if (installExitCode !== 0) {
+        core.warning(`Failed to install tools with exit code ${installExitCode}`);
+      } else {
+        core.info("Tools installed successfully");
       }
     }
 
