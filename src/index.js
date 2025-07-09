@@ -42,13 +42,13 @@ async function run() {
 
     // Collect all commands to run
     const commandsToRun = [];
-    
+
     // Parse run input if provided
     if (runInput) {
       const cmdParts = runInput.trim().split(/\s+/);
       commandsToRun.push({
         command: cmdParts[0],
-        args: cmdParts.slice(1).join(" ")
+        args: cmdParts.slice(1).join(" "),
       });
     }
 
@@ -60,18 +60,18 @@ async function run() {
         // Special handling for render command to support multi-line inputs
         if (cmdName === "render") {
           const renderCommands = cmdArgs
-            .split('\n')
-            .filter(line => line.trim())
-            .map(args => ({
+            .split("\n")
+            .filter((line) => line.trim())
+            .map((args) => ({
               command: cmdName,
-              args
+              args,
             }));
           commandsToRun.push(...renderCommands);
         } else {
           // Other commands use the input as is
           commandsToRun.push({
             command: cmdName,
-            args: cmdArgs
+            args: cmdArgs,
           });
         }
       }
@@ -239,7 +239,6 @@ async function run() {
     core.info(`Stencila CLI ${installedVersion} installed successfully`);
 
     // Cache restoration logic
-    let cacheRestored = false;
     const stencilaCachePath = path.join(workingDirectory, ".stencila");
     let cacheKey = "";
 
@@ -263,7 +262,6 @@ async function run() {
 
         if (cacheHit) {
           core.info(`Cache restored from key: ${cacheHit}`);
-          cacheRestored = true;
         } else {
           core.info("No cache found, starting fresh");
         }
@@ -272,17 +270,22 @@ async function run() {
       }
     }
 
-
     // Install tools if requested
     if (installTools) {
       core.info("Installing Stencila tools...");
-      const installExitCode = await exec.exec("stencila", ["install", "tools"], {
-        cwd: workingDirectory,
-        ignoreReturnCode: true,
-      });
-      
+      const installExitCode = await exec.exec(
+        "stencila",
+        ["install", "tools"],
+        {
+          cwd: workingDirectory,
+          ignoreReturnCode: true,
+        }
+      );
+
       if (installExitCode !== 0) {
-        core.warning(`Failed to install tools with exit code ${installExitCode}`);
+        core.warning(
+          `Failed to install tools with exit code ${installExitCode}`
+        );
       } else {
         core.info("Tools installed successfully");
       }
@@ -291,11 +294,15 @@ async function run() {
     // Run commands if provided
     let overallSuccess = true;
     let lastExitCode = 0;
-    
+
     if (commandsToRun.length > 0) {
       for (let i = 0; i < commandsToRun.length; i++) {
         const { command, args } = commandsToRun[i];
-        core.info(`Running command ${i + 1}/${commandsToRun.length}: stencila ${command} ${args || ""}`);
+        core.info(
+          `Running command ${i + 1}/${
+            commandsToRun.length
+          }: stencila ${command} ${args || ""}`
+        );
 
         const exitCode = await exec.exec(
           "stencila",
@@ -311,9 +318,11 @@ async function run() {
         if (exitCode !== 0) {
           overallSuccess = false;
           core.error(`Command ${i + 1} failed with exit code ${exitCode}`);
-          
+
           if (!continueOnError) {
-            core.setFailed(`Stencila command failed with exit code ${exitCode}`);
+            core.setFailed(
+              `Stencila command failed with exit code ${exitCode}`
+            );
             break;
           }
         } else {
@@ -323,7 +332,7 @@ async function run() {
 
       // Set final exit code to the last command's exit code
       core.setOutput("exit-code", lastExitCode.toString());
-      
+
       // If continue-on-error is true and any command failed, still fail the action at the end
       if (!overallSuccess && continueOnError) {
         core.setFailed(`One or more Stencila commands failed`);
@@ -426,7 +435,7 @@ async function run() {
                 return file;
               }
             }
-          } catch (error) {
+          } catch {
             // Ignore errors reading directory
           }
 
