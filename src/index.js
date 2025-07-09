@@ -24,6 +24,7 @@ async function run() {
     const workingDirectory = core.getInput("working-directory") || ".";
     const useCache = core.getBooleanInput("cache");
     const installTools = core.getBooleanInput("install-tools");
+    const assumeAnswer = core.getInput("assume-answer") || "yes";
     const continueOnError = core.getBooleanInput("continue-on-error");
 
     // Parse release input - can be boolean or string pattern
@@ -275,7 +276,7 @@ async function run() {
       core.info("Installing Stencila tools...");
       const installExitCode = await exec.exec(
         "stencila",
-        ["install", "tools"],
+        ["install", "tools", `--${assumeAnswer}`],
         {
           cwd: workingDirectory,
           ignoreReturnCode: true,
@@ -306,7 +307,7 @@ async function run() {
 
         const exitCode = await exec.exec(
           "stencila",
-          [command, ...(args ? args.split(" ") : [])],
+          [command, ...(args ? args.split(" ") : []), `--${assumeAnswer}`],
           {
             cwd: workingDirectory,
             ignoreReturnCode: true,
@@ -497,6 +498,7 @@ async function run() {
                   "render",
                   path.resolve(workingDirectory, template),
                   "--to=md",
+                  `--${assumeAnswer}`,
                   "--",
                   ...allVars,
                 ],
@@ -519,7 +521,14 @@ async function run() {
               // Render string via stdin
               const exitCode = await exec.exec(
                 "stencila",
-                ["render", "-", "--to=md", "--", ...allVars],
+                [
+                  "render",
+                  "-",
+                  "--to=md",
+                  `--${assumeAnswer}`,
+                  "--",
+                  ...allVars,
+                ],
                 {
                   cwd: workingDirectory,
                   input: Buffer.from(template),

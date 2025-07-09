@@ -57,6 +57,10 @@ inputs:
     description: 'Run `stencila tools install` to ensure that workspace dependencies are available'
     required: false
     default: 'true'
+  assume-answer:
+    description: 'Assumed answer to any interactive prompts. Options: "yes", "no", or "cancel"'
+    required: false
+    default: 'yes'
   continue-on-error:
     description: 'Whether to continue running subsequent commands if one fails'
     required: false
