@@ -4094,6 +4094,7 @@ const cacheTwirpClient = __importStar(__nccwpck_require__(96819));
 const config_1 = __nccwpck_require__(17606);
 const tar_1 = __nccwpck_require__(95321);
 const constants_1 = __nccwpck_require__(58287);
+const http_client_1 = __nccwpck_require__(54844);
 class ValidationError extends Error {
     constructor(message) {
         super(message);
@@ -4130,7 +4131,17 @@ function checkKey(key) {
  * @returns boolean return true if Actions cache service feature is available, otherwise false
  */
 function isFeatureAvailable() {
-    return !!process.env['ACTIONS_CACHE_URL'];
+    const cacheServiceVersion = (0, config_1.getCacheServiceVersion)();
+    // Check availability based on cache service version
+    switch (cacheServiceVersion) {
+        case 'v2':
+            // For v2, we need ACTIONS_RESULTS_URL
+            return !!process.env['ACTIONS_RESULTS_URL'];
+        case 'v1':
+        default:
+            // For v1, we only need ACTIONS_CACHE_URL
+            return !!process.env['ACTIONS_CACHE_URL'];
+    }
 }
 exports.isFeatureAvailable = isFeatureAvailable;
 /**
@@ -4215,8 +4226,16 @@ function restoreCacheV1(paths, primaryKey, restoreKeys, options, enableCrossOsAr
                 throw error;
             }
             else {
-                // Supress all non-validation cache related errors because caching should be optional
-                core.warning(`Failed to restore: ${error.message}`);
+                // warn on cache restore failure and continue build
+                // Log server errors (5xx) as errors, all other errors as warnings
+                if (typedError instanceof http_client_1.HttpClientError &&
+                    typeof typedError.statusCode === 'number' &&
+                    typedError.statusCode >= 500) {
+                    core.error(`Failed to restore: ${error.message}`);
+                }
+                else {
+                    core.warning(`Failed to restore: ${error.message}`);
+                }
             }
         }
         finally {
@@ -4269,7 +4288,13 @@ function restoreCacheV2(paths, primaryKey, restoreKeys, options, enableCrossOsAr
                 core.debug(`Cache not found for version ${request.version} of keys: ${keys.join(', ')}`);
                 return undefined;
             }
-            core.info(`Cache hit for: ${request.key}`);
+            const isRestoreKeyMatch = request.key !== response.matchedKey;
+            if (isRestoreKeyMatch) {
+                core.info(`Cache hit for restore-key: ${response.matchedKey}`);
+            }
+            else {
+                core.info(`Cache hit for: ${response.matchedKey}`);
+            }
             if (options === null || options === void 0 ? void 0 : options.lookupOnly) {
                 core.info('Lookup only - skipping download');
                 return response.matchedKey;
@@ -4294,7 +4319,15 @@ function restoreCacheV2(paths, primaryKey, restoreKeys, options, enableCrossOsAr
             }
             else {
                 // Supress all non-validation cache related errors because caching should be optional
-                core.warning(`Failed to restore: ${error.message}`);
+                // Log server errors (5xx) as errors, all other errors as warnings
+                if (typedError instanceof http_client_1.HttpClientError &&
+                    typeof typedError.statusCode === 'number' &&
+                    typedError.statusCode >= 500) {
+                    core.error(`Failed to restore: ${error.message}`);
+                }
+                else {
+                    core.warning(`Failed to restore: ${error.message}`);
+                }
             }
         }
         finally {
@@ -4397,7 +4430,15 @@ function saveCacheV1(paths, key, options, enableCrossOsArchive = false) {
                 core.info(`Failed to save: ${typedError.message}`);
             }
             else {
-                core.warning(`Failed to save: ${typedError.message}`);
+                // Log server errors (5xx) as errors, all other errors as warnings
+                if (typedError instanceof http_client_1.HttpClientError &&
+                    typeof typedError.statusCode === 'number' &&
+                    typedError.statusCode >= 500) {
+                    core.error(`Failed to save: ${typedError.message}`);
+                }
+                else {
+                    core.warning(`Failed to save: ${typedError.message}`);
+                }
             }
         }
         finally {
@@ -4493,7 +4534,15 @@ function saveCacheV2(paths, key, options, enableCrossOsArchive = false) {
                 core.info(`Failed to save: ${typedError.message}`);
             }
             else {
-                core.warning(`Failed to save: ${typedError.message}`);
+                // Log server errors (5xx) as errors, all other errors as warnings
+                if (typedError instanceof http_client_1.HttpClientError &&
+                    typeof typedError.statusCode === 'number' &&
+                    typedError.statusCode >= 500) {
+                    core.error(`Failed to save: ${typedError.message}`);
+                }
+                else {
+                    core.warning(`Failed to save: ${typedError.message}`);
+                }
             }
         }
         finally {
@@ -63998,7 +64047,7 @@ exports.colors = [6, 2, 3, 4, 5, 1];
 try {
 	// Optional dependency (as in, doesn't need to be installed, NOT like optionalDependencies in package.json)
 	// eslint-disable-next-line import/no-extraneous-dependencies
-	const supportsColor = __nccwpck_require__(60075);
+	const supportsColor = __nccwpck_require__(21450);
 
 	if (supportsColor && (supportsColor.stderr || supportsColor).level >= 2) {
 		exports.colors = [
@@ -66421,6 +66470,22 @@ function patch (fs) {
     return false
   }
 }
+
+
+/***/ }),
+
+/***/ 83813:
+/***/ ((module) => {
+
+"use strict";
+
+
+module.exports = (flag, argv = process.argv) => {
+	const prefix = flag.startsWith('-') ? '' : (flag.length === 1 ? '-' : '--');
+	const position = argv.indexOf(prefix + flag);
+	const terminatorPosition = argv.indexOf('--');
+	return position !== -1 && (terminatorPosition === -1 || position < terminatorPosition);
+};
 
 
 /***/ }),
@@ -87619,6 +87684,149 @@ function simpleWrite(buf) {
 function simpleEnd(buf) {
   return buf && buf.length ? this.write(buf) : '';
 }
+
+/***/ }),
+
+/***/ 21450:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+const os = __nccwpck_require__(70857);
+const tty = __nccwpck_require__(52018);
+const hasFlag = __nccwpck_require__(83813);
+
+const {env} = process;
+
+let forceColor;
+if (hasFlag('no-color') ||
+	hasFlag('no-colors') ||
+	hasFlag('color=false') ||
+	hasFlag('color=never')) {
+	forceColor = 0;
+} else if (hasFlag('color') ||
+	hasFlag('colors') ||
+	hasFlag('color=true') ||
+	hasFlag('color=always')) {
+	forceColor = 1;
+}
+
+if ('FORCE_COLOR' in env) {
+	if (env.FORCE_COLOR === 'true') {
+		forceColor = 1;
+	} else if (env.FORCE_COLOR === 'false') {
+		forceColor = 0;
+	} else {
+		forceColor = env.FORCE_COLOR.length === 0 ? 1 : Math.min(parseInt(env.FORCE_COLOR, 10), 3);
+	}
+}
+
+function translateLevel(level) {
+	if (level === 0) {
+		return false;
+	}
+
+	return {
+		level,
+		hasBasic: true,
+		has256: level >= 2,
+		has16m: level >= 3
+	};
+}
+
+function supportsColor(haveStream, streamIsTTY) {
+	if (forceColor === 0) {
+		return 0;
+	}
+
+	if (hasFlag('color=16m') ||
+		hasFlag('color=full') ||
+		hasFlag('color=truecolor')) {
+		return 3;
+	}
+
+	if (hasFlag('color=256')) {
+		return 2;
+	}
+
+	if (haveStream && !streamIsTTY && forceColor === undefined) {
+		return 0;
+	}
+
+	const min = forceColor || 0;
+
+	if (env.TERM === 'dumb') {
+		return min;
+	}
+
+	if (process.platform === 'win32') {
+		// Windows 10 build 10586 is the first Windows release that supports 256 colors.
+		// Windows 10 build 14931 is the first release that supports 16m/TrueColor.
+		const osRelease = os.release().split('.');
+		if (
+			Number(osRelease[0]) >= 10 &&
+			Number(osRelease[2]) >= 10586
+		) {
+			return Number(osRelease[2]) >= 14931 ? 3 : 2;
+		}
+
+		return 1;
+	}
+
+	if ('CI' in env) {
+		if (['TRAVIS', 'CIRCLECI', 'APPVEYOR', 'GITLAB_CI', 'GITHUB_ACTIONS', 'BUILDKITE'].some(sign => sign in env) || env.CI_NAME === 'codeship') {
+			return 1;
+		}
+
+		return min;
+	}
+
+	if ('TEAMCITY_VERSION' in env) {
+		return /^(9\.(0*[1-9]\d*)\.|\d{2,}\.)/.test(env.TEAMCITY_VERSION) ? 1 : 0;
+	}
+
+	if (env.COLORTERM === 'truecolor') {
+		return 3;
+	}
+
+	if ('TERM_PROGRAM' in env) {
+		const version = parseInt((env.TERM_PROGRAM_VERSION || '').split('.')[0], 10);
+
+		switch (env.TERM_PROGRAM) {
+			case 'iTerm.app':
+				return version >= 3 ? 3 : 2;
+			case 'Apple_Terminal':
+				return 2;
+			// No default
+		}
+	}
+
+	if (/-256(color)?$/i.test(env.TERM)) {
+		return 2;
+	}
+
+	if (/^screen|^xterm|^vt100|^vt220|^rxvt|color|ansi|cygwin|linux/i.test(env.TERM)) {
+		return 1;
+	}
+
+	if ('COLORTERM' in env) {
+		return 1;
+	}
+
+	return min;
+}
+
+function getSupportLevel(stream) {
+	const level = supportsColor(stream, stream && stream.isTTY);
+	return translateLevel(level);
+}
+
+module.exports = {
+	supportsColor: getSupportLevel,
+	stdout: translateLevel(supportsColor(true, tty.isatty(1))),
+	stderr: translateLevel(supportsColor(true, tty.isatty(2)))
+};
+
 
 /***/ }),
 
@@ -115624,14 +115832,6 @@ module.exports = eval("require")("encoding");
 
 /***/ }),
 
-/***/ 60075:
-/***/ ((module) => {
-
-module.exports = eval("require")("supports-color");
-
-
-/***/ }),
-
 /***/ 42613:
 /***/ ((module) => {
 
@@ -137354,7 +137554,7 @@ module.exports = /*#__PURE__*/JSON.parse('{"name":"@actions/artifact","version":
 /***/ ((module) => {
 
 "use strict";
-module.exports = /*#__PURE__*/JSON.parse('{"name":"@actions/cache","version":"4.0.3","preview":true,"description":"Actions cache lib","keywords":["github","actions","cache"],"homepage":"https://github.com/actions/toolkit/tree/main/packages/cache","license":"MIT","main":"lib/cache.js","types":"lib/cache.d.ts","directories":{"lib":"lib","test":"__tests__"},"files":["lib","!.DS_Store"],"publishConfig":{"access":"public"},"repository":{"type":"git","url":"git+https://github.com/actions/toolkit.git","directory":"packages/cache"},"scripts":{"audit-moderate":"npm install && npm audit --json --audit-level=moderate > audit.json","test":"echo \\"Error: run tests from root\\" && exit 1","tsc":"tsc"},"bugs":{"url":"https://github.com/actions/toolkit/issues"},"dependencies":{"@actions/core":"^1.11.1","@actions/exec":"^1.0.1","@actions/glob":"^0.1.0","@actions/http-client":"^2.1.1","@actions/io":"^1.0.1","@azure/abort-controller":"^1.1.0","@azure/ms-rest-js":"^2.6.0","@azure/storage-blob":"^12.13.0","@protobuf-ts/plugin":"^2.9.4","semver":"^6.3.1"},"devDependencies":{"@types/node":"^22.13.9","@types/semver":"^6.0.0","typescript":"^5.2.2"}}');
+module.exports = /*#__PURE__*/JSON.parse('{"name":"@actions/cache","version":"4.0.5","preview":true,"description":"Actions cache lib","keywords":["github","actions","cache"],"homepage":"https://github.com/actions/toolkit/tree/main/packages/cache","license":"MIT","main":"lib/cache.js","types":"lib/cache.d.ts","directories":{"lib":"lib","test":"__tests__"},"files":["lib","!.DS_Store"],"publishConfig":{"access":"public"},"repository":{"type":"git","url":"git+https://github.com/actions/toolkit.git","directory":"packages/cache"},"scripts":{"audit-moderate":"npm install && npm audit --json --audit-level=moderate > audit.json","test":"echo \\"Error: run tests from root\\" && exit 1","tsc":"tsc"},"bugs":{"url":"https://github.com/actions/toolkit/issues"},"dependencies":{"@actions/core":"^1.11.1","@actions/exec":"^1.0.1","@actions/glob":"^0.1.0","@protobuf-ts/runtime-rpc":"^2.11.1","@actions/http-client":"^2.1.1","@actions/io":"^1.0.1","@azure/abort-controller":"^1.1.0","@azure/ms-rest-js":"^2.6.0","@azure/storage-blob":"^12.13.0","semver":"^6.3.1"},"devDependencies":{"@types/node":"^22.13.9","@types/semver":"^6.0.0","@protobuf-ts/plugin":"^2.9.4","typescript":"^5.2.2"}}');
 
 /***/ }),
 
@@ -137442,6 +137642,8 @@ async function run() {
     const releaseFilenames = core.getInput("release-filenames");
     const workingDirectory = core.getInput("working-directory") || ".";
     const useCache = core.getBooleanInput("cache");
+    const installTools = core.getBooleanInput("install-tools");
+    const assumeAnswer = core.getInput("assume-answer") || "yes";
     const continueOnError = core.getBooleanInput("continue-on-error");
 
     // Parse release input - can be boolean or string pattern
@@ -137460,13 +137662,13 @@ async function run() {
 
     // Collect all commands to run
     const commandsToRun = [];
-    
+
     // Parse run input if provided
     if (runInput) {
       const cmdParts = runInput.trim().split(/\s+/);
       commandsToRun.push({
         command: cmdParts[0],
-        args: cmdParts.slice(1).join(" ")
+        args: cmdParts.slice(1).join(" "),
       });
     }
 
@@ -137478,18 +137680,18 @@ async function run() {
         // Special handling for render command to support multi-line inputs
         if (cmdName === "render") {
           const renderCommands = cmdArgs
-            .split('\n')
-            .filter(line => line.trim())
-            .map(args => ({
+            .split("\n")
+            .filter((line) => line.trim())
+            .map((args) => ({
               command: cmdName,
-              args
+              args,
             }));
           commandsToRun.push(...renderCommands);
         } else {
           // Other commands use the input as is
           commandsToRun.push({
             command: cmdName,
-            args: cmdArgs
+            args: cmdArgs,
           });
         }
       }
@@ -137657,7 +137859,6 @@ async function run() {
     core.info(`Stencila CLI ${installedVersion} installed successfully`);
 
     // Cache restoration logic
-    let cacheRestored = false;
     const stencilaCachePath = path.join(workingDirectory, ".stencila");
     let cacheKey = "";
 
@@ -137681,7 +137882,6 @@ async function run() {
 
         if (cacheHit) {
           core.info(`Cache restored from key: ${cacheHit}`);
-          cacheRestored = true;
         } else {
           core.info("No cache found, starting fresh");
         }
@@ -137690,18 +137890,43 @@ async function run() {
       }
     }
 
+    // Install tools if requested
+    if (installTools) {
+      core.info("Installing Stencila tools...");
+      const installExitCode = await exec.exec(
+        "stencila",
+        ["install", "tools", `--${assumeAnswer}`],
+        {
+          cwd: workingDirectory,
+          ignoreReturnCode: true,
+        }
+      );
+
+      if (installExitCode !== 0) {
+        core.warning(
+          `Failed to install tools with exit code ${installExitCode}`
+        );
+      } else {
+        core.info("Tools installed successfully");
+      }
+    }
+
     // Run commands if provided
     let overallSuccess = true;
     let lastExitCode = 0;
-    
+
     if (commandsToRun.length > 0) {
       for (let i = 0; i < commandsToRun.length; i++) {
         const { command, args } = commandsToRun[i];
-        core.info(`Running command ${i + 1}/${commandsToRun.length}: stencila ${command} ${args || ""}`);
+        core.info(
+          `Running command ${i + 1}/${
+            commandsToRun.length
+          }: stencila ${command} ${args || ""}`
+        );
 
         const exitCode = await exec.exec(
           "stencila",
-          [command, ...(args ? args.split(" ") : [])],
+          [command, ...(args ? args.split(" ") : []), `--${assumeAnswer}`],
           {
             cwd: workingDirectory,
             ignoreReturnCode: true,
@@ -137713,9 +137938,11 @@ async function run() {
         if (exitCode !== 0) {
           overallSuccess = false;
           core.error(`Command ${i + 1} failed with exit code ${exitCode}`);
-          
+
           if (!continueOnError) {
-            core.setFailed(`Stencila command failed with exit code ${exitCode}`);
+            core.setFailed(
+              `Stencila command failed with exit code ${exitCode}`
+            );
             break;
           }
         } else {
@@ -137725,7 +137952,7 @@ async function run() {
 
       // Set final exit code to the last command's exit code
       core.setOutput("exit-code", lastExitCode.toString());
-      
+
       // If continue-on-error is true and any command failed, still fail the action at the end
       if (!overallSuccess && continueOnError) {
         core.setFailed(`One or more Stencila commands failed`);
@@ -137828,7 +138055,7 @@ async function run() {
                 return file;
               }
             }
-          } catch (error) {
+          } catch {
             // Ignore errors reading directory
           }
 
@@ -137890,6 +138117,7 @@ async function run() {
                   "render",
                   path.resolve(workingDirectory, template),
                   "--to=md",
+                  `--${assumeAnswer}`,
                   "--",
                   ...allVars,
                 ],
@@ -137912,7 +138140,14 @@ async function run() {
               // Render string via stdin
               const exitCode = await exec.exec(
                 "stencila",
-                ["render", "-", "--to=md", "--", ...allVars],
+                [
+                  "render",
+                  "-",
+                  "--to=md",
+                  `--${assumeAnswer}`,
+                  "--",
+                  ...allVars,
+                ],
                 {
                   cwd: workingDirectory,
                   input: Buffer.from(template),
