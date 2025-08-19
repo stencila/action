@@ -63,7 +63,7 @@ jobs:
             test.smd test.json
             test.smd test.md
 
-      - name: Test multiple commands (should fail gracefully)
+      - name: Test continue-on-error (should fail gracefully)
         uses: ./
         with:
           run: nonexistent-command
