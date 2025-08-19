@@ -31,7 +31,7 @@ inputs:
   releases:
     description: 'Enable releases on tags. Set to true to use assets pattern, or provide a custom pattern (e.g., "*.pdf")'
     required: false
-    default: 'true'
+    default: 'false'
   release-name:
     description: 'Markdown string or path to document to be rendered by Stencila into release name (defaults to tag name)'
     required: false

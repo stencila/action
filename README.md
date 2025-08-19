@@ -9,7 +9,7 @@ A GitHub Action to setup and use Stencila CLI in your workflows. This action ins
 Just install Stencila CLI without running any commands:
 
 ```yaml
-- uses: stencila/action@v1
+- uses: stencila/action@v0
 ```
 
 ### Install and Run Commands
@@ -17,7 +17,7 @@ Just install Stencila CLI without running any commands:
 Install Stencila CLI and run a command using the simplified syntax:
 
 ```yaml
-- uses: stencila/action@v1
+- uses: stencila/action@v0
   with:
     render: report.smd
 ```
@@ -25,7 +25,7 @@ Install Stencila CLI and run a command using the simplified syntax:
 Or using the alternative syntax:
 
 ```yaml
-- uses: stencila/action@v1
+- uses: stencila/action@v0
   with:
     run: lint report.smd
 ```
@@ -35,7 +35,7 @@ Or using the alternative syntax:
 You can render multiple files with different outputs using multi-line YAML:
 
 ```yaml
-- uses: stencila/action@v1
+- uses: stencila/action@v0
   with:
     render: |
       summary.md summary.pdf
@@ -59,7 +59,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: stencila/action@v1
+      - uses: stencila/action@v0
         with:
           lint: "**/*.smd"
 ```
@@ -76,7 +76,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: stencila/action@v1
+      - uses: stencila/action@v0
         with:
           render: report.smd 
           assets: "*.pdf"
@@ -94,7 +94,7 @@ jobs:
 | `render`            | Shortcut for `run: render` with these arguments          | No       | -         |
 | `assets`           | Path pattern for files to upload as artifacts                | No       | -         |
 | `artifact-name`      | Name for the uploaded artifact                               | No       | `assets` |
-| `releases`           | Enable releases on tags. When set to `true` (the default) uses the `assets` path pattern, but can also be set as a custom path pattern for releases | No       | `true`   |
+| `releases`           | Enable releases on tags. When set to `true` uses the `assets` path pattern, but can also be set as a custom path pattern for releases | No       | `false`   |
 | `release-name`      | Template string or file for release name (auto-detects `release-name.*`)           | No       | -         |
 | `release-notes`     | Template string or file for release notes (auto-detects `release-notes.*`)      | No       | -         |
 | `release-filenames`     | Template string or file for renaming release assets | No       | -         |
@@ -116,7 +116,7 @@ jobs:
 After successfully rendering documents, you can automatically upload the output files as GitHub Actions artifacts:
 
 ```yaml
-- uses: stencila/action@v1
+- uses: stencila/action@v0
   with:
     render: "report.smd report.docx"
     assets: "*.docx"
@@ -131,7 +131,7 @@ This is useful for:
 You can use glob patterns to match multiple files:
 
 ```yaml
-- uses: stencila/action@v1
+- uses: stencila/action@v0
   with:
     render: "**/*.smd"
     assets: |
@@ -145,7 +145,7 @@ You can use glob patterns to match multiple files:
 You can run multiple commands in a single step by specifying multiple command inputs:
 
 ```yaml
-- uses: stencila/action@v1
+- uses: stencila/action@v0
   with:
     lint: "**/*.smd"
     render: "**/*.smd"
@@ -166,7 +166,7 @@ This will:
 Commands are executed in the order `run`, `convert`, `lint`, `execute`, `render` regardless of the order they appear in e.g.
 
 ```yaml
-- uses: stencila/action@v1
+- uses: stencila/action@v0
   with:
     lint: "**/*.smd"
     run: "format --check ."
@@ -181,7 +181,7 @@ This runs: `format --check .`, then `lint **/*.smd`, then `render report.smd`
 Automatically create GitHub releases when tags are pushed and upload rendered documents as release assets:
 
 ```yaml
-- uses: stencila/action@v1
+- uses: stencila/action@v0
   with:
     render: "report.smd report.pdf"
     assets: "*.pdf"
@@ -226,7 +226,7 @@ This feature:
 #### Release with Custom Pattern
 
 ```yaml
-- uses: stencila/action@v1
+- uses: stencila/action@v0
   with:
     render: "**/*.smd"
     releases: "**/*.pdf"  # Custom pattern for release files
@@ -280,7 +280,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - uses: stencila/action@v1
+      - uses: stencila/action@v0
         with:
           render: "docs/report.smd"
           assets: "docs/*.pdf"
@@ -294,7 +294,7 @@ jobs:
 Rename uploaded files using Stencila templates with access to file-specific variables:
 
 ```yaml
-- uses: stencila/action@v1
+- uses: stencila/action@v0
   with:
     render: "docs/*.smd"
     releases: "docs/*.pdf"
@@ -324,7 +324,7 @@ Create `asset-rename.smd`:
 
 Use in workflow:
 ```yaml
-- uses: stencila/action@v1
+- uses: stencila/action@v0
   with:
     render: "**/*.smd"
     releases: "**/*.pdf"
@@ -340,7 +340,7 @@ This would rename files like:
 Run commands in a specific directory:
 
 ```yaml
-- uses: stencila/action@v1
+- uses: stencila/action@v0
   with:
     lint: report.smd
     working-directory: ./docs
@@ -356,7 +356,7 @@ Run commands in a specific directory:
 Install a specific version of Stencila CLI:
 
 ```yaml
-- uses: stencila/action@v1
+- uses: stencila/action@v0
   with:
     version: 2.0.0
     lint: report.smd
@@ -369,7 +369,7 @@ By default, this action caches the `.stencila` folder between runs to speed up s
 To disable caching:
 
 ```yaml
-- uses: stencila/action@v1
+- uses: stencila/action@v0
   with:
     execute: report.smd
     cache: false
