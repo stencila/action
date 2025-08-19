@@ -276,7 +276,7 @@ async function run() {
       core.info("Installing Stencila tools...");
       const installExitCode = await exec.exec(
         "stencila",
-        ["install", "tools", `--${assumeAnswer}`],
+        ["tools", "install", `--${assumeAnswer}`],
         {
           cwd: workingDirectory,
           ignoreReturnCode: true,
