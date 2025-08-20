@@ -4,9 +4,7 @@ const core = require("@actions/core");
 const exec = require("@actions/exec");
 const github = require("@actions/github");
 const glob = require("@actions/glob");
-const tc = require("@actions/tool-cache");
 const fs = require("fs");
-const https = require("https");
 const path = require("path");
 
 // Import new modules (strangler pattern - gradual migration)
@@ -22,23 +20,14 @@ async function run() {
     await core.group("Parse inputs", () => parseInputs(context));
     await core.group("Setup environment", () => resolveEnvironment(context));
     
+    // Phase 2: Use new stencila module for installation
+    const { ensureStencila } = await import("./stencila.js");
+    await core.group("Install Stencila", () => ensureStencila(context));
+    
     // Extract values from context for backward compatibility with existing code
     const { inputs, env } = context;
-    
-    // Use values from the new inputs module
-    const version = inputs.version;
-    const runInput = inputs.run;
-    const assetsPath = inputs.assets;
-    const artifactName = inputs.artifactName;
-    const releasesInput = inputs.releases;
-    const releaseName = inputs.releaseName;
-    const releaseNotes = inputs.releaseNotes;
-    const releaseFilenames = inputs.releaseFilenames;
-    const workingDirectory = inputs.workingDirectory;
-    const useCache = inputs.cache;
-    const installTools = inputs.installTools;
-    const assumeAnswer = inputs.assumeAnswer;
-    const continueOnError = inputs.continueOnError;
+    const { workingDirectory, useCache, installTools, assumeAnswer } = inputs;
+    const { assetsPath, artifactName, releasesInput, releaseName, releaseNotes, releaseFilenames } = inputs;
 
     // Parse release input - already handled in inputs module
     let enableReleases = false;
@@ -54,182 +43,19 @@ async function run() {
       }
     }
 
-    // Collect all commands to run
-    const commandsToRun = [];
-
-    // Parse run input if provided
-    if (runInput) {
-      const cmdParts = runInput.trim().split(/\s+/);
-      commandsToRun.push({
-        command: cmdParts[0],
-        args: cmdParts.slice(1).join(" "),
-      });
-    }
-
-    // Check for simplified command syntax
-    const commands = ["convert", "lint", "execute", "render"];
-    for (const cmdName of commands) {
-      const cmdArgs = inputs[cmdName];
-      if (cmdArgs) {
-        // Special handling for render command to support multi-line inputs
-        if (cmdName === "render") {
-          const renderCommands = cmdArgs
-            .split("\n")
-            .filter((line) => line.trim())
-            .map((args) => ({
-              command: cmdName,
-              args,
-            }));
-          commandsToRun.push(...renderCommands);
-        } else {
-          // Other commands use the input as is
-          commandsToRun.push({
-            command: cmdName,
-            args: cmdArgs,
-          });
-        }
-      }
-    }
-
-    // Platform info now comes from environment module
-    const { platform, arch, platformString, extension } = env;
-
-    // Resolve actual version for caching
-    let actualVersion = version;
-    let downloadUrl;
-
-    if (version === "latest") {
-      // For latest, follow the redirect to get the actual version
-      const latestVersion = await new Promise((resolve, reject) => {
-        https
-          .get(
-            "https://github.com/stencila/stencila/releases/latest",
-            (res) => {
-              if (res.statusCode === 302 && res.headers.location) {
-                // Extract version from redirect URL like /stencila/stencila/releases/tag/v2.3.0
-                const match = res.headers.location.match(/\/tag\/(v[\d.]+)$/);
-                if (match) {
-                  resolve(match[1]);
-                } else {
-                  reject(new Error("Could not parse version from redirect"));
-                }
-              } else {
-                reject(new Error("Expected redirect from latest release URL"));
-              }
-            }
-          )
-          .on("error", reject);
-      });
-
-      actualVersion = latestVersion;
-      downloadUrl = `https://github.com/stencila/stencila/releases/download/${latestVersion}/cli-${latestVersion}-${platformString}.${extension}`;
-    } else {
-      downloadUrl = `https://github.com/stencila/stencila/releases/download/v${version}/cli-v${version}-${platformString}.${extension}`;
-    }
-
-    // Check if Stencila is already cached/installed using actual version
-    let cachedPath = tc.find("stencila", actualVersion);
-    let stencilaPath;
-
-    if (cachedPath) {
-      // Use cached version
-      core.info(`✅ Using cached Stencila CLI from ${cachedPath}`);
-      stencilaPath = path.join(
-        cachedPath,
-        platform === "win32" ? "stencila.exe" : "stencila"
-      );
-    } else {
-      // Download and install
-      core.info(`📦 Downloading Stencila CLI from ${downloadUrl}`);
-
-      const downloadPath = await tc.downloadTool(downloadUrl);
-      let extractPath;
-      if (extension === "zip") {
-        extractPath = await tc.extractZip(downloadPath);
-      } else {
-        extractPath = await tc.extractTar(downloadPath);
-      }
-
-      // Find the stencila binary - it's nested in a folder
-      // First, find the extracted folder (it should be named like cli-v2.3.0-x86_64-unknown-linux-gnu)
-      const extractedItems = fs.readdirSync(extractPath);
-
-      // Look for the stencila binary in the extracted folder
-      for (const item of extractedItems) {
-        const itemPath = path.join(extractPath, item);
-        const stats = fs.statSync(itemPath);
-
-        if (stats.isDirectory()) {
-          // Check if stencila binary exists in this directory
-          const binaryPath = path.join(
-            itemPath,
-            platform === "win32" ? "stencila.exe" : "stencila"
-          );
-          if (fs.existsSync(binaryPath)) {
-            stencilaPath = binaryPath;
-            break;
-          }
-        }
-      }
-
-      if (!stencilaPath) {
-        // If not found in subdirectory, check root
-        stencilaPath = path.join(
-          extractPath,
-          platform === "win32" ? "stencila.exe" : "stencila"
-        );
-        if (!fs.existsSync(stencilaPath)) {
-          throw new Error(
-            "Could not find stencila binary in extracted archive"
-          );
-        }
-      }
-
-      // Make it executable on Unix-like systems
-      if (platform !== "win32") {
-        await exec.exec("chmod", ["+x", stencilaPath]);
-      }
-
-      // Cache the extracted binary directory for future use
-      const binaryDir = path.dirname(stencilaPath);
-      cachedPath = await tc.cacheDir(binaryDir, "stencila", actualVersion);
-      core.info(`💾 Cached Stencila CLI to ${cachedPath}`);
-
-      // Update path to cached location
-      stencilaPath = path.join(
-        cachedPath,
-        platform === "win32" ? "stencila.exe" : "stencila"
-      );
-    }
-
-    // Add to PATH
-    core.addPath(path.dirname(stencilaPath));
-
-    // Get installed version
-    let installedVersion = "";
-    await exec.exec("stencila", ["--version"], {
-      listeners: {
-        stdout: (data) => {
-          installedVersion += data.toString();
-        },
-      },
-    });
-    installedVersion = installedVersion.trim();
-
-    core.setOutput("version", installedVersion);
-    core.info(`✅ Stencila CLI ${installedVersion} installed successfully`);
-
     // Cache restoration logic
     const stencilaCachePath = path.join(workingDirectory, ".stencila");
     let cacheKey = "";
 
-    if (useCache && commandsToRun.length > 0) {
+    if (useCache) {
       // Generate cache key based on OS, Stencila version, and workflow file hash
-      cacheKey = `stencila-cache-${platform}-${arch}-${actualVersion}-${
+      const { platform, arch } = env;
+      const { resolvedVersion } = context.stencila;
+      cacheKey = `stencila-cache-${platform}-${arch}-${resolvedVersion}-${
         process.env.GITHUB_SHA || "default"
       }`;
       const restoreKeys = [
-        `stencila-cache-${platform}-${arch}-${actualVersion}-`,
+        `stencila-cache-${platform}-${arch}-${resolvedVersion}-`,
         `stencila-cache-${platform}-${arch}-`,
       ];
 
@@ -272,106 +98,65 @@ async function run() {
       }
     }
 
-    // Run commands if provided
-    let overallSuccess = true;
-    let lastExitCode = 0;
+    // Phase 3: Use new runner module for command execution
+    const { runCommands } = await import("./runner.js");
+    await core.group("Run commands", () => runCommands(context));
 
-    if (commandsToRun.length > 0) {
-      for (let i = 0; i < commandsToRun.length; i++) {
-        const { command, args } = commandsToRun[i];
-        core.info(
-          `⚡ Running command ${i + 1}/${
-            commandsToRun.length
-          }: stencila ${command} ${args || ""}`
-        );
+    // Extract results for backward compatibility
+    const overallSuccess = context.results ? context.results.every(r => r.exitCode === 0) : true;
 
-        const exitCode = await exec.exec(
-          "stencila",
-          [command, ...(args ? args.split(" ") : []), `--${assumeAnswer}`],
-          {
-            cwd: workingDirectory,
-            ignoreReturnCode: true,
-          }
-        );
-
-        lastExitCode = exitCode;
-
-        if (exitCode !== 0) {
-          overallSuccess = false;
-          core.error(`❌ Command ${i + 1} failed with exit code ${exitCode}`);
-
-          if (!continueOnError) {
-            core.setFailed(
-              `Stencila command failed with exit code ${exitCode}`
-            );
-            break;
-          }
+    // Save cache after command execution
+    if (useCache && context.results && context.results.length > 0 && fs.existsSync(stencilaCachePath)) {
+      try {
+        core.info(`💾 Saving .stencila cache with key: ${cacheKey}`);
+        await cache.saveCache([stencilaCachePath], cacheKey);
+      } catch (error) {
+        if (
+          error.name === "ValidationError" &&
+          error.message.includes("already exists")
+        ) {
+          core.info("ℹ️ Cache already exists, skipping save");
         } else {
-          core.info(`✅ Command ${i + 1} completed successfully`);
+          core.warning(`⚠️ Failed to save cache: ${error.message}`);
         }
       }
+    }
 
-      // Set final exit code to the last command's exit code
-      core.setOutput("exit-code", lastExitCode.toString());
+    // Upload assets artifact if specified and all commands succeeded
+    if (assetsPath && overallSuccess) {
+      try {
+        core.info(`🔍 Looking for files matching: ${assetsPath}`);
 
-      // If continue-on-error is true and any command failed, still fail the action at the end
-      if (!overallSuccess && continueOnError) {
-        core.setFailed(`One or more Stencila commands failed`);
-      }
+        // Create globber with the artifact path pattern
+        const globber = await glob.create(
+          path.join(workingDirectory, assetsPath)
+        );
+        const files = await globber.glob();
 
-      // Save cache after command execution
-      if (useCache && fs.existsSync(stencilaCachePath)) {
-        try {
-          core.info(`💾 Saving .stencila cache with key: ${cacheKey}`);
-          await cache.saveCache([stencilaCachePath], cacheKey);
-        } catch (error) {
-          if (
-            error.name === "ValidationError" &&
-            error.message.includes("already exists")
-          ) {
-            core.info("ℹ️ Cache already exists, skipping save");
-          } else {
-            core.warning(`⚠️ Failed to save cache: ${error.message}`);
-          }
-        }
-      }
+        if (files.length === 0) {
+          core.warning(`⚠️ No files found matching pattern: ${assetsPath}`);
+        } else {
+          core.info(`📁 Found ${files.length} file(s) to upload`);
 
-      // Upload assets artifact if specified and all commands succeeded
-      if (assetsPath && overallSuccess) {
-        try {
-          core.info(`🔍 Looking for files matching: ${assetsPath}`);
+          // Create artifact client
+          const artifactClient = new DefaultArtifactClient();
 
-          // Create globber with the artifact path pattern
-          const globber = await glob.create(
-            path.join(workingDirectory, assetsPath)
+          // Upload the artifact with proper root directory
+          const { id, size } = await artifactClient.uploadArtifact(
+            artifactName,
+            files,
+            path.resolve(workingDirectory),
+            {
+              retentionDays: 90,
+            }
           );
-          const files = await globber.glob();
 
-          if (files.length === 0) {
-            core.warning(`⚠️ No files found matching pattern: ${assetsPath}`);
-          } else {
-            core.info(`📁 Found ${files.length} file(s) to upload`);
-
-            // Create artifact client
-            const artifactClient = new DefaultArtifactClient();
-
-            // Upload the artifact with proper root directory
-            const { id, size } = await artifactClient.uploadArtifact(
-              artifactName,
-              files,
-              path.resolve(workingDirectory),
-              {
-                retentionDays: 90,
-              }
-            );
-
-            core.info(
-              `✅ Successfully uploaded artifact '${artifactName}' (ID: ${id}, Size: ${size} bytes) with ${files.length} file(s)`
-            );
-          }
-        } catch (error) {
-          core.warning(`⚠️ Failed to upload artifacts: ${error.message}`);
+          core.info(
+            `✅ Successfully uploaded artifact '${artifactName}' (ID: ${id}, Size: ${size} bytes) with ${files.length} file(s)`
+          );
         }
+      } catch (error) {
+        core.warning(`⚠️ Failed to upload artifacts: ${error.message}`);
       }
     }
 
