@@ -18,12 +18,14 @@
     "types": ["node"]
   },
   "include": [
-    "src/inputs.js",
-    "src/environment.js", 
-    "src/stencila.js",
-    "src/runner.js",
     "src/artifacts.js",
+    "src/cache.js",
+    "src/environment.js", 
+    "src/inputs.js",
     "src/release.js",
+    "src/runner.js",
+    "src/stencila.js",
+    "src/tools.js",
     "src/**/*.d.ts"
   ],
   "exclude": [

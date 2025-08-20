@@ -70,6 +70,18 @@ export interface ReleaseInfo {
   assets: string[];
 }
 
+export interface CacheInfo {
+  key: string;
+  path: string;
+  wasRestored: boolean;
+}
+
+export interface ToolsInfo {
+  success: boolean;
+  exitCode?: number;
+  error?: string;
+}
+
 export interface Context {
   inputs?: ActionInputs;
   env?: Environment;
@@ -77,5 +89,7 @@ export interface Context {
   results?: CommandResult[];
   artifacts?: ArtifactInfo[];
   release?: ReleaseInfo;
+  cache?: CacheInfo;
+  toolsInstalled?: ToolsInfo;
   errors?: Error[];
 }

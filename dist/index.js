@@ -2042,7 +2042,7 @@ const utils_1 = __nccwpck_require__(97864);
 const plugin_request_log_1 = __nccwpck_require__(6966);
 const plugin_retry_1 = __nccwpck_require__(33450);
 const artifact_twirp_client_1 = __nccwpck_require__(87417);
-const util_1 = __nccwpck_require__(64012);
+const util_1 = __nccwpck_require__(41631);
 const generated_1 = __nccwpck_require__(44216);
 const get_artifact_1 = __nccwpck_require__(2327);
 const errors_1 = __nccwpck_require__(45655);
@@ -2160,7 +2160,7 @@ const user_agent_1 = __nccwpck_require__(89387);
 const config_1 = __nccwpck_require__(72938);
 const artifact_twirp_client_1 = __nccwpck_require__(87417);
 const generated_1 = __nccwpck_require__(44216);
-const util_1 = __nccwpck_require__(64012);
+const util_1 = __nccwpck_require__(41631);
 const errors_1 = __nccwpck_require__(45655);
 const scrubQueryParameters = (url) => {
     const parsed = new URL(url);
@@ -2391,7 +2391,7 @@ const core = __importStar(__nccwpck_require__(37484));
 const utils_1 = __nccwpck_require__(97864);
 const retry_options_1 = __nccwpck_require__(38361);
 const plugin_request_log_1 = __nccwpck_require__(6966);
-const util_1 = __nccwpck_require__(64012);
+const util_1 = __nccwpck_require__(41631);
 const user_agent_1 = __nccwpck_require__(89387);
 const artifact_twirp_client_1 = __nccwpck_require__(87417);
 const generated_1 = __nccwpck_require__(44216);
@@ -2503,7 +2503,7 @@ const utils_1 = __nccwpck_require__(97864);
 const plugin_request_log_1 = __nccwpck_require__(6966);
 const plugin_retry_1 = __nccwpck_require__(33450);
 const artifact_twirp_client_1 = __nccwpck_require__(87417);
-const util_1 = __nccwpck_require__(64012);
+const util_1 = __nccwpck_require__(41631);
 const generated_1 = __nccwpck_require__(44216);
 // Limiting to 1000 for perf reasons
 const maximumArtifactCount = 1000;
@@ -2712,7 +2712,7 @@ const generated_1 = __nccwpck_require__(44216);
 const config_1 = __nccwpck_require__(72938);
 const user_agent_1 = __nccwpck_require__(89387);
 const errors_1 = __nccwpck_require__(45655);
-const util_1 = __nccwpck_require__(64012);
+const util_1 = __nccwpck_require__(41631);
 class ArtifactHttpClient {
     constructor(userAgent, maxAttempts, baseRetryIntervalMilliseconds, retryMultiplier) {
         this.maxAttempts = 5;
@@ -3046,7 +3046,7 @@ exports.getUserAgentString = getUserAgentString;
 
 /***/ }),
 
-/***/ 64012:
+/***/ 41631:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 
@@ -3494,7 +3494,7 @@ const retention_1 = __nccwpck_require__(47252);
 const path_and_artifact_name_validation_1 = __nccwpck_require__(89190);
 const artifact_twirp_client_1 = __nccwpck_require__(87417);
 const upload_zip_specification_1 = __nccwpck_require__(5067);
-const util_1 = __nccwpck_require__(64012);
+const util_1 = __nccwpck_require__(41631);
 const blob_upload_1 = __nccwpck_require__(30645);
 const zip_1 = __nccwpck_require__(37257);
 const generated_1 = __nccwpck_require__(44216);
@@ -6487,7 +6487,7 @@ UsageError.isUsageErrorMessage = (msg) => {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getUserAgentString = void 0;
 // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
-const packageJson = __nccwpck_require__(41631);
+const packageJson = __nccwpck_require__(64012);
 /**
  * Ensure that this User Agent String is used in all HTTP calls so that we can monitor telemetry between different versions of this package
  */
@@ -137031,7 +137031,7 @@ module.exports = /*#__PURE__*/JSON.parse('{"name":"@actions/artifact","version":
 
 /***/ }),
 
-/***/ 41631:
+/***/ 64012:
 /***/ ((module) => {
 
 module.exports = /*#__PURE__*/JSON.parse('{"name":"@actions/cache","version":"4.0.5","preview":true,"description":"Actions cache lib","keywords":["github","actions","cache"],"homepage":"https://github.com/actions/toolkit/tree/main/packages/cache","license":"MIT","main":"lib/cache.js","types":"lib/cache.d.ts","directories":{"lib":"lib","test":"__tests__"},"files":["lib","!.DS_Store"],"publishConfig":{"access":"public"},"repository":{"type":"git","url":"git+https://github.com/actions/toolkit.git","directory":"packages/cache"},"scripts":{"audit-moderate":"npm install && npm audit --json --audit-level=moderate > audit.json","test":"echo \\"Error: run tests from root\\" && exit 1","tsc":"tsc"},"bugs":{"url":"https://github.com/actions/toolkit/issues"},"dependencies":{"@actions/core":"^1.11.1","@actions/exec":"^1.0.1","@actions/glob":"^0.1.0","@protobuf-ts/runtime-rpc":"^2.11.1","@actions/http-client":"^2.1.1","@actions/io":"^1.0.1","@azure/abort-controller":"^1.1.0","@azure/ms-rest-js":"^2.6.0","@azure/storage-blob":"^12.13.0","semver":"^6.3.1"},"devDependencies":{"@types/node":"^22.13.9","@types/semver":"^6.0.0","@protobuf-ts/plugin":"^2.9.4","typescript":"^5.2.2"}}');
@@ -137097,22 +137097,8 @@ module.exports = /*#__PURE__*/JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45
 /************************************************************************/
 var __webpack_exports__ = {};
 
-// EXTERNAL MODULE: ./node_modules/@actions/artifact/lib/artifact.js
-var artifact = __nccwpck_require__(76846);
-// EXTERNAL MODULE: ./node_modules/@actions/cache/lib/cache.js
-var cache = __nccwpck_require__(5116);
 // EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
 var core = __nccwpck_require__(37484);
-// EXTERNAL MODULE: ./node_modules/@actions/exec/lib/exec.js
-var exec = __nccwpck_require__(95236);
-// EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
-var github = __nccwpck_require__(93228);
-// EXTERNAL MODULE: ./node_modules/@actions/glob/lib/glob.js
-var glob = __nccwpck_require__(47206);
-// EXTERNAL MODULE: external "fs"
-var external_fs_ = __nccwpck_require__(79896);
-// EXTERNAL MODULE: external "path"
-var external_path_ = __nccwpck_require__(16928);
 ;// CONCATENATED MODULE: ./src/inputs.js
 // @ts-check
 
@@ -137249,6 +137235,8 @@ function checkDeprecatedInputs(inputs) {
 
 // EXTERNAL MODULE: external "os"
 var external_os_ = __nccwpck_require__(70857);
+// EXTERNAL MODULE: external "path"
+var external_path_ = __nccwpck_require__(16928);
 ;// CONCATENATED MODULE: ./src/environment.js
 // @ts-check
 
@@ -137377,6 +137365,10 @@ function getStencilaCachePath() {
 
 // EXTERNAL MODULE: ./node_modules/@actions/tool-cache/lib/tool-cache.js
 var tool_cache = __nccwpck_require__(33472);
+// EXTERNAL MODULE: ./node_modules/@actions/exec/lib/exec.js
+var exec = __nccwpck_require__(95236);
+// EXTERNAL MODULE: external "fs"
+var external_fs_ = __nccwpck_require__(79896);
 // EXTERNAL MODULE: external "https"
 var external_https_ = __nccwpck_require__(65692);
 // EXTERNAL MODULE: external "crypto"
@@ -137776,6 +137768,218 @@ async function ensureStencila(context) {
 }
 
 
+// EXTERNAL MODULE: ./node_modules/@actions/cache/lib/cache.js
+var cache = __nccwpck_require__(5116);
+;// CONCATENATED MODULE: ./src/cache.js
+// @ts-check
+
+
+
+
+
+
+/**
+ * @typedef {import('./types.d.ts').Context} Context
+ */
+
+/**
+ * Restore Stencila cache if caching is enabled
+ * @param {Context} context - The context object to update
+ * @returns {Promise<Context>} The context with cache information
+ */
+async function restoreCache(context) {
+  if (!context.inputs) {
+    throw new Error("Context must have inputs populated before restoring cache");
+  }
+
+  if (!context.env) {
+    throw new Error("Context must have environment populated before restoring cache");
+  }
+
+  if (!context.stencila) {
+    throw new Error("Context must have Stencila info populated before restoring cache");
+  }
+
+  const { inputs, env, stencila } = context;
+  const { workingDirectory, cache: useCache } = inputs;
+  
+  if (!useCache) {
+    core.debug("📦 Cache disabled, skipping cache operations");
+    return context;
+  }
+
+  try {
+    // Generate cache key based on OS, Stencila version, and workflow file hash
+    const { platform, arch } = env;
+    const { resolvedVersion } = stencila;
+    const cacheKey = `stencila-cache-${platform}-${arch}-${resolvedVersion}-${
+      process.env.GITHUB_SHA || "default"
+    }`;
+    const restoreKeys = [
+      `stencila-cache-${platform}-${arch}-${resolvedVersion}-`,
+      `stencila-cache-${platform}-${arch}-`,
+    ];
+
+    const stencilaCachePath = external_path_.join(workingDirectory, ".stencila");
+
+    core.info(`🔄 Restoring .stencila cache with key: ${cacheKey}`);
+    const cacheHit = await cache.restoreCache(
+      [stencilaCachePath],
+      cacheKey,
+      restoreKeys
+    );
+
+    if (cacheHit) {
+      core.info(`✅ Cache restored from key: ${cacheHit}`);
+    } else {
+      core.info("ℹ️ No cache found, starting fresh");
+    }
+
+    // Store cache info in context for later save operation
+    context.cache = {
+      key: cacheKey,
+      path: stencilaCachePath,
+      wasRestored: !!cacheHit
+    };
+
+    return context;
+
+  } catch (error) {
+    core.warning(`⚠️ Failed to restore cache: ${error.message}`);
+    return context;
+  }
+}
+
+/**
+ * Save Stencila cache if caching is enabled and commands were executed
+ * @param {Context} context - The context object
+ * @returns {Promise<Context>} The context unchanged
+ */
+async function saveCache(context) {
+  if (!context.inputs) {
+    throw new Error("Context must have inputs populated before saving cache");
+  }
+
+  const { inputs } = context;
+  const { cache: useCache } = inputs;
+  
+  if (!useCache) {
+    core.debug("📦 Cache disabled, skipping save");
+    return context;
+  }
+
+  if (!context.cache) {
+    core.debug("📦 No cache info available, skipping save");
+    return context;
+  }
+
+  if (!context.results || context.results.length === 0) {
+    core.debug("📦 No commands executed, skipping cache save");
+    return context;
+  }
+
+  const { key: cacheKey, path: stencilaCachePath } = context.cache;
+
+  if (!external_fs_.existsSync(stencilaCachePath)) {
+    core.debug(`📦 Cache path does not exist: ${stencilaCachePath}`);
+    return context;
+  }
+
+  try {
+    core.info(`💾 Saving .stencila cache with key: ${cacheKey}`);
+    await cache.saveCache([stencilaCachePath], cacheKey);
+    core.info("✅ Cache saved successfully");
+  } catch (error) {
+    if (
+      error.name === "ValidationError" &&
+      error.message.includes("already exists")
+    ) {
+      core.info("ℹ️ Cache already exists, skipping save");
+    } else {
+      core.warning(`⚠️ Failed to save cache: ${error.message}`);
+    }
+  }
+
+  return context;
+}
+
+
+;// CONCATENATED MODULE: ./src/tools.js
+// @ts-check
+
+
+
+
+/**
+ * @typedef {import('./types.d.ts').Context} Context
+ */
+
+/**
+ * Install Stencila tools if requested
+ * @param {Context} context - The context object to update
+ * @returns {Promise<Context>} The context with tool installation results
+ */
+async function installTools(context) {
+  if (!context.inputs) {
+    throw new Error("Context must have inputs populated before installing tools");
+  }
+
+  const { inputs } = context;
+  const { workingDirectory, installTools: shouldInstallTools, assumeAnswer } = inputs;
+
+  if (!shouldInstallTools) {
+    core.debug("🔧 Tool installation disabled, skipping");
+    return context;
+  }
+
+  try {
+    core.info("🔧 Installing Stencila tools...");
+    
+    const installExitCode = await exec.exec(
+      "stencila",
+      ["tools", "install", `--${assumeAnswer}`],
+      {
+        cwd: workingDirectory,
+        ignoreReturnCode: true,
+      }
+    );
+
+    if (installExitCode !== 0) {
+      core.warning(
+        `⚠️ Failed to install tools with exit code ${installExitCode}`
+      );
+      
+      // Store tool installation result in context
+      context.toolsInstalled = {
+        success: false,
+        exitCode: installExitCode
+      };
+    } else {
+      core.info("✅ Tools installed successfully");
+      
+      // Store tool installation result in context
+      context.toolsInstalled = {
+        success: true,
+        exitCode: 0
+      };
+    }
+
+    return context;
+
+  } catch (error) {
+    core.warning(`⚠️ Error installing tools: ${error.message}`);
+    
+    // Store tool installation error in context
+    context.toolsInstalled = {
+      success: false,
+      error: error.message
+    };
+    
+    return context;
+  }
+}
+
+
 ;// CONCATENATED MODULE: ./src/runner.js
 // @ts-check
 
@@ -137956,8 +138160,8 @@ function collectCommands(inputs) {
       if (cmdName === "render") {
         const renderCommands = cmdArgs
           .split("\\n")
-          .filter(line => line.trim())
-          .map(args => ({
+          .filter((line) => line.trim())
+          .map((args) => ({
             command: cmdName,
             args
           }));
@@ -138074,6 +138278,645 @@ function registerProblemMatcher() {
 }
 
 
+// EXTERNAL MODULE: ./node_modules/@actions/artifact/lib/artifact.js
+var artifact = __nccwpck_require__(76846);
+// EXTERNAL MODULE: ./node_modules/@actions/glob/lib/glob.js
+var glob = __nccwpck_require__(47206);
+;// CONCATENATED MODULE: ./src/artifacts.js
+// @ts-check
+
+
+
+
+
+
+
+/**
+ * @typedef {import('./types.d.ts').Context} Context
+ * @typedef {import('./types.d.ts').ArtifactInfo} ArtifactInfo
+ */
+
+/**
+ * Maximum file size for artifacts (500MB)
+ */
+const MAX_FILE_SIZE = 500 * 1024 * 1024;
+
+/**
+ * Maximum path length for artifacts
+ */
+const MAX_PATH_LENGTH = 260;
+
+/**
+ * Upload artifacts from workspace files
+ * @param {Context} context - The context object to update
+ * @returns {Promise<Context>} The context with populated artifact info
+ */
+async function uploadArtifacts(context) {
+  if (!context.inputs) {
+    throw new Error("Context must have inputs populated before uploading artifacts");
+  }
+
+  if (!context.results) {
+    throw new Error("Context must have command results before uploading artifacts");
+  }
+
+  const { inputs } = context;
+  const { assets: assetsPath, artifactName, workingDirectory } = inputs;
+
+  // Only upload artifacts if assetsPath is specified and commands succeeded
+  if (!assetsPath) {
+    core.info("ℹ️ No assets path specified, skipping artifact upload");
+    context.artifacts = [];
+    return context;
+  }
+
+  const overallSuccess = context.results.every(r => r.exitCode === 0);
+  if (!overallSuccess) {
+    core.warning("⚠️ Skipping artifact upload due to command failures");
+    context.artifacts = [];
+    return context;
+  }
+
+  try {
+    core.info(`🔍 Looking for files matching: ${assetsPath}`);
+
+    // Create globber with the artifact path pattern
+    const globber = await glob.create(
+      external_path_.join(workingDirectory, assetsPath),
+      {
+        followSymbolicLinks: false,
+        implicitDescendants: false,
+        omitBrokenSymbolicLinks: true
+      }
+    );
+    
+    const files = await globber.glob();
+    const validatedFiles = await validateFiles(files, workingDirectory);
+
+    if (validatedFiles.length === 0) {
+      core.warning(`⚠️ No valid files found matching pattern: ${assetsPath}`);
+      context.artifacts = [];
+      return context;
+    }
+
+    core.info(`📁 Found ${validatedFiles.length} valid file(s) to upload`);
+
+    // Create artifact client
+    const artifactClient = new artifact.DefaultArtifactClient();
+
+    // Upload the artifact with proper root directory
+    const { id, size } = await artifactClient.uploadArtifact(
+      artifactName,
+      validatedFiles,
+      external_path_.resolve(workingDirectory),
+      {
+        retentionDays: 90,
+        compressionLevel: 6
+      }
+    );
+
+    const artifactInfo = {
+      name: artifactName,
+      files: validatedFiles.map(f => external_path_.relative(workingDirectory, f)),
+      size
+    };
+
+    context.artifacts = [artifactInfo];
+
+    core.info(
+      `✅ Successfully uploaded artifact '${artifactName}' (ID: ${id}, Size: ${formatBytes(size)}) with ${validatedFiles.length} file(s)`
+    );
+
+    return context;
+
+  } catch (error) {
+    core.warning(`⚠️ Failed to upload artifacts: ${error.message}`);
+    context.artifacts = [];
+    return context;
+  }
+}
+
+/**
+ * Validate files for artifact upload
+ * @param {string[]} files - List of file paths to validate
+ * @param {string} workingDirectory - Working directory for relative path calculation
+ * @returns {Promise<string[]>} List of valid file paths
+ */
+async function validateFiles(files, workingDirectory) {
+  const validFiles = [];
+  let totalSize = 0;
+
+  for (const filePath of files) {
+    try {
+      // Skip hidden files and directories (dot files)
+      const relativePath = external_path_.relative(workingDirectory, filePath);
+      if (relativePath.split(external_path_.sep).some(segment => segment.startsWith('.'))) {
+        core.debug(`Skipping hidden file: ${relativePath}`);
+        continue;
+      }
+
+      // Check if file exists and get stats
+      const stats = external_fs_.statSync(filePath);
+      
+      // Skip directories
+      if (stats.isDirectory()) {
+        core.debug(`Skipping directory: ${relativePath}`);
+        continue;
+      }
+
+      // Validate path length
+      if (filePath.length > MAX_PATH_LENGTH) {
+        core.warning(`⚠️ Skipping file with path too long (${filePath.length} > ${MAX_PATH_LENGTH}): ${relativePath}`);
+        continue;
+      }
+
+      // Validate file size
+      if (stats.size > MAX_FILE_SIZE) {
+        core.warning(`⚠️ Skipping file too large (${formatBytes(stats.size)} > ${formatBytes(MAX_FILE_SIZE)}): ${relativePath}`);
+        continue;
+      }
+
+      // Check for reasonable total size (1GB limit for all files combined)
+      totalSize += stats.size;
+      if (totalSize > 1024 * 1024 * 1024) {
+        core.warning(`⚠️ Skipping remaining files - total size limit reached (1GB)`);
+        break;
+      }
+
+      validFiles.push(filePath);
+      core.debug(`✅ Validated file: ${relativePath} (${formatBytes(stats.size)})`);
+
+    } catch (error) {
+      const relativePath = external_path_.relative(workingDirectory, filePath);
+      core.warning(`⚠️ Skipping file due to error: ${relativePath} - ${error.message}`);
+    }
+  }
+
+  return validFiles;
+}
+
+/**
+ * Format bytes to human readable string
+ * @param {number} bytes - Number of bytes
+ * @returns {string} Formatted string
+ */
+function formatBytes(bytes) {
+  if (bytes === 0) return '0 Bytes';
+
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+
+// EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
+var github = __nccwpck_require__(93228);
+;// CONCATENATED MODULE: ./src/release.js
+// @ts-check
+
+
+
+
+
+
+
+
+/**
+ * @typedef {import('./types.d.ts').Context} Context
+ * @typedef {import('./types.d.ts').ReleaseInfo} ReleaseInfo
+ */
+
+/**
+ * Maximum filename length for release assets
+ */
+const MAX_FILENAME_LENGTH = 100;
+
+/**
+ * Create GitHub release with assets
+ * @param {Context} context - The context object to update
+ * @returns {Promise<Context>} The context with populated release info
+ */
+async function createRelease(context) {
+  if (!context.inputs) {
+    throw new Error("Context must have inputs populated before creating release");
+  }
+
+  const { inputs } = context;
+  const { releases: releasesInput, assets: assetsPath, releaseName, releaseNotes, releaseFilenames, workingDirectory, assumeAnswer } = inputs;
+
+  // Check if releases are enabled and we're on a tag
+  if (!releasesInput) {
+    core.info("ℹ️ Release creation disabled");
+    return context;
+  }
+
+  if (!process.env.GITHUB_REF || !process.env.GITHUB_REF.startsWith("refs/tags/")) {
+    core.info("ℹ️ Release creation enabled but not on a tag. Skipping release.");
+    return context;
+  }
+
+  const tagName = process.env.GITHUB_REF.replace("refs/tags/", "");
+  const token = process.env.GITHUB_TOKEN;
+
+  if (!token) {
+    throw new Error(
+      'GITHUB_TOKEN is required for release creation. Please set "env: GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}" and add "permissions: contents: write" to your workflow job.'
+    );
+  }
+
+  try {
+    core.info(`🚀 Creating release for tag: ${tagName}`);
+
+    const octokit = github.getOctokit(token);
+    const githubContext = github.context;
+
+    // Determine release assets path
+    let releasesPath = "";
+    if (releasesInput === true) {
+      // Use assets pattern if release is true
+      releasesPath = assetsPath || "";
+    } else if (typeof releasesInput === "string") {
+      // Use the provided pattern
+      releasesPath = releasesInput;
+    }
+
+    // Auto-detect release files if not specified
+    const detectedReleaseNotes = await autoDetectFile("release-notes", releaseNotes, workingDirectory);
+    const detectedReleaseName = await autoDetectFile("release-name", releaseName, workingDirectory);
+    const detectedReleaseFilenames = await autoDetectFile("release-filenames", releaseFilenames, workingDirectory);
+
+    // Prepare template variables for Stencila
+    const templateVars = await prepareTemplateVariables(tagName, githubContext);
+
+    // Render release name and notes using Stencila
+    const finalReleaseName = await renderTemplate(
+      detectedReleaseName,
+      tagName,
+      templateVars,
+      workingDirectory,
+      assumeAnswer
+    );
+    
+    const finalReleaseNotes = await renderTemplate(
+      detectedReleaseNotes,
+      "",
+      templateVars,
+      workingDirectory,
+      assumeAnswer
+    );
+
+    // Detect if this is a prerelease
+    const isPrerelease = detectPrerelease(tagName);
+
+    // Create the release
+    const releaseResponse = await octokit.rest.repos.createRelease({
+      owner: githubContext.repo.owner,
+      repo: githubContext.repo.repo,
+      tag_name: tagName,
+      name: finalReleaseName,
+      body: finalReleaseNotes,
+      draft: false,
+      prerelease: isPrerelease
+    });
+
+    core.info(`✅ Created release: ${releaseResponse.data.html_url}`);
+
+    const releaseInfo = {
+      id: releaseResponse.data.id,
+      tag: tagName,
+      name: finalReleaseName,
+      notes: finalReleaseNotes,
+      prerelease: isPrerelease,
+      assets: []
+    };
+
+    // Upload release assets if specified
+    if (releasesPath) {
+      releaseInfo.assets = await uploadReleaseAssets(
+        octokit,
+        githubContext,
+        releaseResponse.data.id,
+        releasesPath,
+        detectedReleaseFilenames,
+        templateVars,
+        workingDirectory,
+        assumeAnswer
+      );
+    }
+
+    context.release = releaseInfo;
+    return context;
+
+  } catch (error) {
+    throw new Error(`Failed to create release: ${error.message}`);
+  }
+}
+
+/**
+ * Auto-detect release configuration files
+ * @param {string} baseName - Base name to search for
+ * @param {string} userSpecified - User-specified file path
+ * @param {string} workingDirectory - Working directory
+ * @returns {Promise<string|null>} Detected file path or null
+ */
+async function autoDetectFile(baseName, userSpecified, workingDirectory) {
+  if (userSpecified) return userSpecified;
+
+  // Case insensitive patterns with - or _
+  const patterns = [
+    baseName.toLowerCase(),
+    baseName.toUpperCase(),
+    baseName.toLowerCase().replace("-", "_"),
+    baseName.toUpperCase().replace("-", "_")
+  ];
+
+  try {
+    const files = external_fs_.readdirSync(workingDirectory);
+    for (const file of files) {
+      const fileStem = external_path_.parse(file).name;
+      if (patterns.includes(fileStem)) {
+        return file;
+      }
+    }
+  } catch {
+    // Ignore errors reading directory
+  }
+
+  return null;
+}
+
+/**
+ * Prepare template variables for Stencila rendering
+ * @param {string} tagName - Git tag name
+ * @param {object} githubContext - GitHub context
+ * @returns {Promise<string[]>} Array of template variables
+ */
+async function prepareTemplateVariables(tagName, githubContext) {
+  const now = new Date();
+  return [
+    `tag=${tagName}`,
+    `datetime=${now
+      .toISOString()
+      .replace("T", "-")
+      .replace(".", "-")
+      .substring(0, 19)}`,
+    `date=${now.toISOString().substring(0, 10)}`,
+    `year=${now.getFullYear()}`,
+    `month=${(now.getMonth() + 1).toString().padStart(2, "0")}`,
+    `monthname=${now.toLocaleString("en-US", { month: "long" })}`,
+    `day=${now.getDate().toString().padStart(2, "0")}`,
+    `commit=${githubContext.sha.substring(0, 7)}`,
+    `repo=${githubContext.repo.repo}`,
+    `owner=${githubContext.repo.owner}`,
+    `workflow=${githubContext.workflow}`,
+    `build=${githubContext.runNumber}`
+  ];
+}
+
+/**
+ * Render template using Stencila
+ * @param {string|null} template - Template content or file path
+ * @param {string} defaultValue - Default value if template fails
+ * @param {string[]} templateVars - Template variables
+ * @param {string} workingDirectory - Working directory
+ * @param {string} assumeAnswer - Assume answer for prompts
+ * @returns {Promise<string>} Rendered content
+ */
+async function renderTemplate(template, defaultValue, templateVars, workingDirectory, assumeAnswer) {
+  if (!template) return defaultValue;
+
+  try {
+    const isFile = external_fs_.existsSync(external_path_.resolve(workingDirectory, template));
+    let result = "";
+
+    if (isFile) {
+      // Render file
+      const exitCode = await exec.exec(
+        "stencila",
+        [
+          "render",
+          external_path_.resolve(workingDirectory, template),
+          "--to=md",
+          `--${assumeAnswer}`,
+          "--",
+          ...templateVars
+        ],
+        {
+          cwd: workingDirectory,
+          listeners: {
+            stdout: (data) => {
+              result += data.toString();
+            }
+          },
+          ignoreReturnCode: true
+        }
+      );
+
+      if (exitCode !== 0) {
+        core.warning(`⚠️ Failed to render template file: ${template}`);
+        return defaultValue;
+      }
+    } else {
+      // Render string via stdin
+      const exitCode = await exec.exec(
+        "stencila",
+        [
+          "render",
+          "-",
+          "--to=md",
+          `--${assumeAnswer}`,
+          "--",
+          ...templateVars
+        ],
+        {
+          cwd: workingDirectory,
+          input: Buffer.from(template),
+          listeners: {
+            stdout: (data) => {
+              result += data.toString();
+            }
+          },
+          ignoreReturnCode: true
+        }
+      );
+
+      if (exitCode !== 0) {
+        core.warning(`⚠️ Failed to render template string: ${template}`);
+        return defaultValue;
+      }
+    }
+
+    return result.trim();
+  } catch (error) {
+    core.warning(`⚠️ Error rendering template: ${error.message}`);
+    return defaultValue;
+  }
+}
+
+/**
+ * Detect if tag represents a prerelease
+ * @param {string} tagName - Git tag name
+ * @returns {boolean} True if prerelease
+ */
+function detectPrerelease(tagName) {
+  const prereleasePatterns = [
+    /alpha/i,
+    /beta/i,
+    /rc/i,
+    /pre/i,
+    /dev/i,
+    /-\d+$/,  // Trailing number (e.g., v1.0.0-1)
+    /snapshot/i
+  ];
+
+  return prereleasePatterns.some(pattern => pattern.test(tagName));
+}
+
+/**
+ * Sanitize filename for release assets
+ * @param {string} filename - Original filename
+ * @returns {string} Sanitized filename
+ */
+function sanitizeFilename(filename) {
+  // Remove or replace problematic characters
+  let sanitized = filename
+    .replace(/[<>:"/\\|?*]/g, "_")  // Replace invalid characters
+    .replace(/\s+/g, "_")          // Replace spaces with underscores
+    .replace(/_{2,}/g, "_")        // Replace multiple underscores with single
+    .replace(/^_+|_+$/g, "");      // Trim underscores from start/end
+
+  // Ensure filename isn't too long
+  if (sanitized.length > MAX_FILENAME_LENGTH) {
+    const ext = external_path_.extname(sanitized);
+    const basename = external_path_.basename(sanitized, ext);
+    const maxBasename = MAX_FILENAME_LENGTH - ext.length;
+    sanitized = basename.substring(0, maxBasename) + ext;
+  }
+
+  // Ensure we have a valid filename
+  if (!sanitized || sanitized === ".") {
+    sanitized = "asset";
+  }
+
+  return sanitized;
+}
+
+/**
+ * Upload assets to GitHub release
+ * @param {object} octokit - GitHub API client
+ * @param {object} githubContext - GitHub context
+ * @param {number} releaseId - Release ID
+ * @param {string} releasesPath - Pattern for release assets
+ * @param {string|null} releaseFilenames - Template for asset renaming
+ * @param {string[]} templateVars - Template variables
+ * @param {string} workingDirectory - Working directory
+ * @param {string} assumeAnswer - Assume answer for prompts
+ * @returns {Promise<string[]>} Array of uploaded asset names
+ */
+async function uploadReleaseAssets(octokit, githubContext, releaseId, releasesPath, releaseFilenames, templateVars, workingDirectory, assumeAnswer) {
+  core.info(`🔍 Looking for release files matching: ${releasesPath}`);
+
+  const globber = await glob.create(
+    external_path_.join(workingDirectory, releasesPath),
+    {
+      followSymbolicLinks: false,
+      implicitDescendants: false,
+      omitBrokenSymbolicLinks: true
+    }
+  );
+  
+  const files = await globber.glob();
+
+  if (files.length === 0) {
+    core.warning(`⚠️ No release files found matching pattern: ${releasesPath}`);
+    return [];
+  }
+
+  core.info(`📁 Found ${files.length} file(s) to upload as release assets`);
+
+  const uploadedAssets = [];
+
+  for (let i = 0; i < files.length; i++) {
+    const filePath = files[i];
+    const originalFileName = external_path_.basename(filePath);
+    
+    try {
+      // Render filename using template if provided
+      const finalFileName = await renderAssetFilename(
+        filePath,
+        releaseFilenames,
+        templateVars,
+        workingDirectory,
+        assumeAnswer
+      );
+      
+      const sanitizedFileName = sanitizeFilename(finalFileName);
+      const fileContent = external_fs_.readFileSync(filePath);
+
+      await octokit.rest.repos.uploadReleaseAsset({
+        owner: githubContext.repo.owner,
+        repo: githubContext.repo.repo,
+        release_id: releaseId,
+        name: sanitizedFileName,
+        data: fileContent
+      });
+
+      uploadedAssets.push(sanitizedFileName);
+
+      if (sanitizedFileName !== originalFileName) {
+        core.info(`✅ Uploaded release asset: ${originalFileName} → ${sanitizedFileName}`);
+      } else {
+        core.info(`✅ Uploaded release asset: ${sanitizedFileName}`);
+      }
+    } catch (uploadError) {
+      core.warning(`⚠️ Failed to upload ${originalFileName}: ${uploadError.message}`);
+    }
+  }
+
+  return uploadedAssets;
+}
+
+/**
+ * Render filename using Stencila template
+ * @param {string} filePath - Path to the file
+ * @param {string|null} releaseFilenames - Filename template
+ * @param {string[]} templateVars - Template variables
+ * @param {string} workingDirectory - Working directory
+ * @param {string} assumeAnswer - Assume answer for prompts
+ * @returns {Promise<string>} Rendered filename
+ */
+async function renderAssetFilename(filePath, releaseFilenames, templateVars, workingDirectory, assumeAnswer) {
+  if (!releaseFilenames) return external_path_.basename(filePath);
+
+  try {
+    const parsedPath = external_path_.parse(filePath);
+    const fileVars = [
+      `filepath=${filePath}`,
+      `dirname=${parsedPath.dir}`,
+      `filename=${parsedPath.base}`,
+      `filestem=${parsedPath.name}`,
+      `fileext=${parsedPath.ext}`
+    ];
+
+    const allVars = [...templateVars, ...fileVars];
+    const newName = await renderTemplate(
+      releaseFilenames,
+      parsedPath.base,
+      allVars,
+      workingDirectory,
+      assumeAnswer
+    );
+    
+    return newName || parsedPath.base;
+  } catch (error) {
+    core.warning(`⚠️ Error rendering filename for ${filePath}: ${error.message}`);
+    return external_path_.basename(filePath);
+  }
+}
+
+
 ;// CONCATENATED MODULE: ./src/index.js
 
 
@@ -138084,427 +138927,20 @@ function registerProblemMatcher() {
 
 
 
-// Import new modules (strangler pattern - gradual migration)
-
-
-
 
 
 async function run() {
   try {
-    // Initialize context object
     const context = {};
-    
-    // Phase 1: Use new modules for input parsing and environment resolution
     await core.group("Parse inputs", () => parseInputs(context));
     await core.group("Setup environment", () => resolveEnvironment(context));
-    
-    // Phase 2: Use new stencila module for installation
     await core.group("Install Stencila", () => ensureStencila(context));
-    
-    // Extract values from context for backward compatibility with existing code
-    const { inputs, env } = context;
-    const { workingDirectory, useCache, installTools, assumeAnswer } = inputs;
-    const { assetsPath, artifactName, releasesInput, releaseName, releaseNotes, releaseFilenames } = inputs;
-
-    // Parse release input - already handled in inputs module
-    let enableReleases = false;
-    let releasesPath = "";
-    if (releasesInput && releasesInput !== false && assetsPath) {
-      enableReleases = true;
-      if (releasesInput === true) {
-        // Use assets pattern if release is true
-        releasesPath = assetsPath;
-      } else {
-        // Use the provided pattern (it's a string)
-        releasesPath = releasesInput;
-      }
-    }
-
-    // Cache restoration logic
-    const stencilaCachePath = external_path_.join(workingDirectory, ".stencila");
-    let cacheKey = "";
-
-    if (useCache) {
-      // Generate cache key based on OS, Stencila version, and workflow file hash
-      const { platform, arch } = env;
-      const { resolvedVersion } = context.stencila;
-      cacheKey = `stencila-cache-${platform}-${arch}-${resolvedVersion}-${
-        process.env.GITHUB_SHA || "default"
-      }`;
-      const restoreKeys = [
-        `stencila-cache-${platform}-${arch}-${resolvedVersion}-`,
-        `stencila-cache-${platform}-${arch}-`,
-      ];
-
-      try {
-        core.info(`🔄 Restoring .stencila cache with key: ${cacheKey}`);
-        const cacheHit = await cache.restoreCache(
-          [stencilaCachePath],
-          cacheKey,
-          restoreKeys
-        );
-
-        if (cacheHit) {
-          core.info(`✅ Cache restored from key: ${cacheHit}`);
-        } else {
-          core.info("ℹ️ No cache found, starting fresh");
-        }
-      } catch (error) {
-        core.warning(`⚠️ Failed to restore cache: ${error.message}`);
-      }
-    }
-
-    // Install tools if requested
-    if (installTools) {
-      core.info("🔧 Installing Stencila tools...");
-      const installExitCode = await exec.exec(
-        "stencila",
-        ["tools", "install", `--${assumeAnswer}`],
-        {
-          cwd: workingDirectory,
-          ignoreReturnCode: true,
-        }
-      );
-
-      if (installExitCode !== 0) {
-        core.warning(
-          `⚠️ Failed to install tools with exit code ${installExitCode}`
-        );
-      } else {
-        core.info("✅ Tools installed successfully");
-      }
-    }
-
-    // Phase 3: Use new runner module for command execution
+    await core.group("Restore cache", () => restoreCache(context));
+    await core.group("Install tools", () => installTools(context));
     await core.group("Run commands", () => runCommands(context));
-
-    // Extract results for backward compatibility
-    const overallSuccess = context.results ? context.results.every(r => r.exitCode === 0) : true;
-
-    // Save cache after command execution
-    if (useCache && context.results && context.results.length > 0 && external_fs_.existsSync(stencilaCachePath)) {
-      try {
-        core.info(`💾 Saving .stencila cache with key: ${cacheKey}`);
-        await cache.saveCache([stencilaCachePath], cacheKey);
-      } catch (error) {
-        if (
-          error.name === "ValidationError" &&
-          error.message.includes("already exists")
-        ) {
-          core.info("ℹ️ Cache already exists, skipping save");
-        } else {
-          core.warning(`⚠️ Failed to save cache: ${error.message}`);
-        }
-      }
-    }
-
-    // Upload assets artifact if specified and all commands succeeded
-    if (assetsPath && overallSuccess) {
-      try {
-        core.info(`🔍 Looking for files matching: ${assetsPath}`);
-
-        // Create globber with the artifact path pattern
-        const globber = await glob.create(
-          external_path_.join(workingDirectory, assetsPath)
-        );
-        const files = await globber.glob();
-
-        if (files.length === 0) {
-          core.warning(`⚠️ No files found matching pattern: ${assetsPath}`);
-        } else {
-          core.info(`📁 Found ${files.length} file(s) to upload`);
-
-          // Create artifact client
-          const artifactClient = new artifact.DefaultArtifactClient();
-
-          // Upload the artifact with proper root directory
-          const { id, size } = await artifactClient.uploadArtifact(
-            artifactName,
-            files,
-            external_path_.resolve(workingDirectory),
-            {
-              retentionDays: 90,
-            }
-          );
-
-          core.info(
-            `✅ Successfully uploaded artifact '${artifactName}' (ID: ${id}, Size: ${size} bytes) with ${files.length} file(s)`
-          );
-        }
-      } catch (error) {
-        core.warning(`⚠️ Failed to upload artifacts: ${error.message}`);
-      }
-    }
-
-    // Handle GitHub releases if enabled
-    if (
-      enableReleases &&
-      process.env.GITHUB_REF &&
-      process.env.GITHUB_REF.startsWith("refs/tags/")
-    ) {
-      try {
-        const tagName = process.env.GITHUB_REF.replace("refs/tags/", "");
-        const token = process.env.GITHUB_TOKEN;
-
-        if (!token) {
-          throw new Error(
-            'GITHUB_TOKEN is required for release creation. Please set "env: GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}" and add "permissions: contents: write" to your workflow job.'
-          );
-        }
-
-        core.info(`🚀 Creating release for tag: ${tagName}`);
-
-        const octokit = github.getOctokit(token);
-        const context = github.context;
-
-        // Auto-detect release files if not specified
-        const autoDetectFile = (baseName, userSpecified) => {
-          if (userSpecified) return userSpecified;
-
-          // Case insensitive patterns with - or _
-          const patterns = [
-            baseName.toLowerCase(),
-            baseName.toUpperCase(),
-            baseName.toLowerCase().replace("-", "_"),
-            baseName.toUpperCase().replace("-", "_"),
-          ];
-
-          try {
-            const files = external_fs_.readdirSync(workingDirectory);
-            for (const file of files) {
-              const fileStem = external_path_.parse(file).name;
-              if (patterns.includes(fileStem)) {
-                return file;
-              }
-            }
-          } catch {
-            // Ignore errors reading directory
-          }
-
-          return null;
-        };
-
-        // Auto-detect release-notes, release-name, and release-filenames files
-        const detectedReleaseNotes = autoDetectFile(
-          "release-notes",
-          releaseNotes
-        );
-        const detectedReleaseName = autoDetectFile("release-name", releaseName);
-        const detectedReleaseFilenames = autoDetectFile(
-          "release-filenames",
-          releaseFilenames
-        );
-
-        // Prepare template variables for Stencila
-        const now = new Date();
-        const templateVars = [
-          `tag=${tagName}`,
-          `datetime=${now
-            .toISOString()
-            .replace("T", "-")
-            .replace(".", "-")
-            .substring(0, 19)}`,
-          `date=${now.toISOString().substring(0, 10)}`,
-          `year=${now.getFullYear()}`,
-          `month=${(now.getMonth() + 1).toString().padStart(2, "0")}`,
-          `monthname=${now.toLocaleString("en-US", { month: "long" })}`,
-          `day=${now.getDate().toString().padStart(2, "0")}`,
-          `commit=${context.sha.substring(0, 7)}`,
-          `repo=${context.repo.repo}`,
-          `owner=${context.repo.owner}`,
-          `workflow=${context.workflow}`,
-          `build=${context.runNumber}`,
-        ];
-
-        // Helper function to render template using Stencila
-        const renderTemplate = async (
-          template,
-          defaultValue,
-          extraVars = []
-        ) => {
-          if (!template) return defaultValue;
-
-          try {
-            const isFile = external_fs_.existsSync(
-              external_path_.resolve(workingDirectory, template)
-            );
-            let result = "";
-            const allVars = [...templateVars, ...extraVars];
-
-            if (isFile) {
-              // Render file
-              const exitCode = await exec.exec(
-                "stencila",
-                [
-                  "render",
-                  external_path_.resolve(workingDirectory, template),
-                  "--to=md",
-                  `--${assumeAnswer}`,
-                  "--",
-                  ...allVars,
-                ],
-                {
-                  cwd: workingDirectory,
-                  listeners: {
-                    stdout: (data) => {
-                      result += data.toString();
-                    },
-                  },
-                  ignoreReturnCode: true,
-                }
-              );
-
-              if (exitCode !== 0) {
-                core.warning(`⚠️ Failed to render template file: ${template}`);
-                return defaultValue;
-              }
-            } else {
-              // Render string via stdin
-              const exitCode = await exec.exec(
-                "stencila",
-                [
-                  "render",
-                  "-",
-                  "--to=md",
-                  `--${assumeAnswer}`,
-                  "--",
-                  ...allVars,
-                ],
-                {
-                  cwd: workingDirectory,
-                  input: Buffer.from(template),
-                  listeners: {
-                    stdout: (data) => {
-                      result += data.toString();
-                    },
-                  },
-                  ignoreReturnCode: true,
-                }
-              );
-
-              if (exitCode !== 0) {
-                core.warning(`⚠️ Failed to render template string: ${template}`);
-                return defaultValue;
-              }
-            }
-
-            return result.trim();
-          } catch (error) {
-            core.warning(`⚠️ Error rendering template: ${error.message}`);
-            return defaultValue;
-          }
-        };
-
-        // Helper function to render filename using Stencila with file-specific variables
-        const renderFilename = async (filePath) => {
-          if (!detectedReleaseFilenames) return external_path_.basename(filePath);
-
-          try {
-            const parsedPath = external_path_.parse(filePath);
-
-            const fileVars = [
-              `filepath=${filePath}`,
-              `dirname=${parsedPath.dir}`,
-              `filename=${parsedPath.base}`,
-              `filestem=${parsedPath.name}`,
-              `fileext=${parsedPath.ext}`,
-            ];
-
-            const newName = await renderTemplate(
-              detectedReleaseFilenames,
-              parsedPath.base,
-              fileVars
-            );
-            return newName || parsedPath.base;
-          } catch (error) {
-            core.warning(
-              `⚠️ Error rendering filename for ${filePath}: ${error.message}`
-            );
-            return external_path_.basename(filePath);
-          }
-        };
-
-        // Render release name and notes
-        const finalReleaseName = await renderTemplate(
-          detectedReleaseName,
-          tagName
-        );
-        const finalReleaseNotes = await renderTemplate(
-          detectedReleaseNotes,
-          ""
-        );
-
-        // Create the release
-        const releaseResponse = await octokit.rest.repos.createRelease({
-          owner: context.repo.owner,
-          repo: context.repo.repo,
-          tag_name: tagName,
-          name: finalReleaseName,
-          body: finalReleaseNotes,
-          draft: false,
-          prerelease:
-            tagName.includes("alpha") ||
-            tagName.includes("beta") ||
-            tagName.includes("rc"),
-        });
-
-        core.info(`✅ Created release: ${releaseResponse.data.html_url}`);
-
-        // Upload release assets if specified
-        if (releasesPath) {
-          core.info(`🔍 Looking for release files matching: ${releasesPath}`);
-
-          const globber = await glob.create(
-            external_path_.join(workingDirectory, releasesPath)
-          );
-          const files = await globber.glob();
-
-          if (files.length === 0) {
-            core.warning(
-              `⚠️ No release files found matching pattern: ${releasesPath}`
-            );
-          } else {
-            core.info(
-              `📁 Found ${files.length} file(s) to upload as release assets`
-            );
-
-            for (let i = 0; i < files.length; i++) {
-              const file = files[i];
-              const originalFileName = external_path_.basename(file);
-              const finalFileName = await renderFilename(file);
-              const fileContent = external_fs_.readFileSync(file);
-
-              try {
-                await octokit.rest.repos.uploadReleaseAsset({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  release_id: releaseResponse.data.id,
-                  name: finalFileName,
-                  data: fileContent,
-                });
-
-                if (finalFileName !== originalFileName) {
-                  core.info(
-                    `✅ Uploaded release asset: ${originalFileName} → ${finalFileName}`
-                  );
-                } else {
-                  core.info(`✅ Uploaded release asset: ${finalFileName}`);
-                }
-              } catch (uploadError) {
-                core.warning(
-                  `⚠️ Failed to upload ${originalFileName}: ${uploadError.message}`
-                );
-              }
-            }
-          }
-        }
-      } catch (error) {
-        core.setFailed(`Failed to create release: ${error.message}`);
-      }
-    } else if (enableReleases) {
-      core.info("ℹ️ Release creation enabled but not on a tag. Skipping release.");
-    }
+    await core.group("Save cache", () => saveCache(context));
+    await core.group("Upload artifacts", () => uploadArtifacts(context));
+    await core.group("Create release", () => createRelease(context));
   } catch (error) {
     core.setFailed(error.message);
   }
