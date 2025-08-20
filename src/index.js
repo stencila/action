@@ -133,14 +133,14 @@ async function run() {
 
     if (cachedPath) {
       // Use cached version
-      core.info(`Using cached Stencila CLI from ${cachedPath}`);
+      core.info(`✅ Using cached Stencila CLI from ${cachedPath}`);
       stencilaPath = path.join(
         cachedPath,
         platform === "win32" ? "stencila.exe" : "stencila"
       );
     } else {
       // Download and install
-      core.info(`Downloading Stencila CLI from ${downloadUrl}`);
+      core.info(`📦 Downloading Stencila CLI from ${downloadUrl}`);
 
       const downloadPath = await tc.downloadTool(downloadUrl);
       let extractPath;
@@ -193,7 +193,7 @@ async function run() {
       // Cache the extracted binary directory for future use
       const binaryDir = path.dirname(stencilaPath);
       cachedPath = await tc.cacheDir(binaryDir, "stencila", actualVersion);
-      core.info(`Cached Stencila CLI to ${cachedPath}`);
+      core.info(`💾 Cached Stencila CLI to ${cachedPath}`);
 
       // Update path to cached location
       stencilaPath = path.join(
@@ -217,7 +217,7 @@ async function run() {
     installedVersion = installedVersion.trim();
 
     core.setOutput("version", installedVersion);
-    core.info(`Stencila CLI ${installedVersion} installed successfully`);
+    core.info(`✅ Stencila CLI ${installedVersion} installed successfully`);
 
     // Cache restoration logic
     const stencilaCachePath = path.join(workingDirectory, ".stencila");
@@ -234,7 +234,7 @@ async function run() {
       ];
 
       try {
-        core.info(`Restoring .stencila cache with key: ${cacheKey}`);
+        core.info(`🔄 Restoring .stencila cache with key: ${cacheKey}`);
         const cacheHit = await cache.restoreCache(
           [stencilaCachePath],
           cacheKey,
@@ -242,18 +242,18 @@ async function run() {
         );
 
         if (cacheHit) {
-          core.info(`Cache restored from key: ${cacheHit}`);
+          core.info(`✅ Cache restored from key: ${cacheHit}`);
         } else {
-          core.info("No cache found, starting fresh");
+          core.info("ℹ️ No cache found, starting fresh");
         }
       } catch (error) {
-        core.warning(`Failed to restore cache: ${error.message}`);
+        core.warning(`⚠️ Failed to restore cache: ${error.message}`);
       }
     }
 
     // Install tools if requested
     if (installTools) {
-      core.info("Installing Stencila tools...");
+      core.info("🔧 Installing Stencila tools...");
       const installExitCode = await exec.exec(
         "stencila",
         ["tools", "install", `--${assumeAnswer}`],
@@ -265,10 +265,10 @@ async function run() {
 
       if (installExitCode !== 0) {
         core.warning(
-          `Failed to install tools with exit code ${installExitCode}`
+          `⚠️ Failed to install tools with exit code ${installExitCode}`
         );
       } else {
-        core.info("Tools installed successfully");
+        core.info("✅ Tools installed successfully");
       }
     }
 
@@ -280,7 +280,7 @@ async function run() {
       for (let i = 0; i < commandsToRun.length; i++) {
         const { command, args } = commandsToRun[i];
         core.info(
-          `Running command ${i + 1}/${
+          `⚡ Running command ${i + 1}/${
             commandsToRun.length
           }: stencila ${command} ${args || ""}`
         );
@@ -298,7 +298,7 @@ async function run() {
 
         if (exitCode !== 0) {
           overallSuccess = false;
-          core.error(`Command ${i + 1} failed with exit code ${exitCode}`);
+          core.error(`❌ Command ${i + 1} failed with exit code ${exitCode}`);
 
           if (!continueOnError) {
             core.setFailed(
@@ -307,7 +307,7 @@ async function run() {
             break;
           }
         } else {
-          core.info(`Command ${i + 1} completed successfully`);
+          core.info(`✅ Command ${i + 1} completed successfully`);
         }
       }
 
@@ -322,16 +322,16 @@ async function run() {
       // Save cache after command execution
       if (useCache && fs.existsSync(stencilaCachePath)) {
         try {
-          core.info(`Saving .stencila cache with key: ${cacheKey}`);
+          core.info(`💾 Saving .stencila cache with key: ${cacheKey}`);
           await cache.saveCache([stencilaCachePath], cacheKey);
         } catch (error) {
           if (
             error.name === "ValidationError" &&
             error.message.includes("already exists")
           ) {
-            core.info("Cache already exists, skipping save");
+            core.info("ℹ️ Cache already exists, skipping save");
           } else {
-            core.warning(`Failed to save cache: ${error.message}`);
+            core.warning(`⚠️ Failed to save cache: ${error.message}`);
           }
         }
       }
@@ -339,7 +339,7 @@ async function run() {
       // Upload assets artifact if specified and all commands succeeded
       if (assetsPath && overallSuccess) {
         try {
-          core.info(`Looking for files matching: ${assetsPath}`);
+          core.info(`🔍 Looking for files matching: ${assetsPath}`);
 
           // Create globber with the artifact path pattern
           const globber = await glob.create(
@@ -348,9 +348,9 @@ async function run() {
           const files = await globber.glob();
 
           if (files.length === 0) {
-            core.warning(`No files found matching pattern: ${assetsPath}`);
+            core.warning(`⚠️ No files found matching pattern: ${assetsPath}`);
           } else {
-            core.info(`Found ${files.length} file(s) to upload`);
+            core.info(`📁 Found ${files.length} file(s) to upload`);
 
             // Create artifact client
             const artifactClient = new DefaultArtifactClient();
@@ -366,11 +366,11 @@ async function run() {
             );
 
             core.info(
-              `Successfully uploaded artifact '${artifactName}' (ID: ${id}, Size: ${size} bytes) with ${files.length} file(s)`
+              `✅ Successfully uploaded artifact '${artifactName}' (ID: ${id}, Size: ${size} bytes) with ${files.length} file(s)`
             );
           }
         } catch (error) {
-          core.warning(`Failed to upload artifacts: ${error.message}`);
+          core.warning(`⚠️ Failed to upload artifacts: ${error.message}`);
         }
       }
     }
@@ -391,7 +391,7 @@ async function run() {
           );
         }
 
-        core.info(`Creating release for tag: ${tagName}`);
+        core.info(`🚀 Creating release for tag: ${tagName}`);
 
         const octokit = github.getOctokit(token);
         const context = github.context;
@@ -494,7 +494,7 @@ async function run() {
               );
 
               if (exitCode !== 0) {
-                core.warning(`Failed to render template file: ${template}`);
+                core.warning(`⚠️ Failed to render template file: ${template}`);
                 return defaultValue;
               }
             } else {
@@ -522,14 +522,14 @@ async function run() {
               );
 
               if (exitCode !== 0) {
-                core.warning(`Failed to render template string: ${template}`);
+                core.warning(`⚠️ Failed to render template string: ${template}`);
                 return defaultValue;
               }
             }
 
             return result.trim();
           } catch (error) {
-            core.warning(`Error rendering template: ${error.message}`);
+            core.warning(`⚠️ Error rendering template: ${error.message}`);
             return defaultValue;
           }
         };
@@ -557,7 +557,7 @@ async function run() {
             return newName || parsedPath.base;
           } catch (error) {
             core.warning(
-              `Error rendering filename for ${filePath}: ${error.message}`
+              `⚠️ Error rendering filename for ${filePath}: ${error.message}`
             );
             return path.basename(filePath);
           }
@@ -587,11 +587,11 @@ async function run() {
             tagName.includes("rc"),
         });
 
-        core.info(`Created release: ${releaseResponse.data.html_url}`);
+        core.info(`✅ Created release: ${releaseResponse.data.html_url}`);
 
         // Upload release assets if specified
         if (releasesPath) {
-          core.info(`Looking for release files matching: ${releasesPath}`);
+          core.info(`🔍 Looking for release files matching: ${releasesPath}`);
 
           const globber = await glob.create(
             path.join(workingDirectory, releasesPath)
@@ -600,11 +600,11 @@ async function run() {
 
           if (files.length === 0) {
             core.warning(
-              `No release files found matching pattern: ${releasesPath}`
+              `⚠️ No release files found matching pattern: ${releasesPath}`
             );
           } else {
             core.info(
-              `Found ${files.length} file(s) to upload as release assets`
+              `📁 Found ${files.length} file(s) to upload as release assets`
             );
 
             for (let i = 0; i < files.length; i++) {
@@ -624,14 +624,14 @@ async function run() {
 
                 if (finalFileName !== originalFileName) {
                   core.info(
-                    `Uploaded release asset: ${originalFileName} → ${finalFileName}`
+                    `✅ Uploaded release asset: ${originalFileName} → ${finalFileName}`
                   );
                 } else {
-                  core.info(`Uploaded release asset: ${finalFileName}`);
+                  core.info(`✅ Uploaded release asset: ${finalFileName}`);
                 }
               } catch (uploadError) {
                 core.warning(
-                  `Failed to upload ${originalFileName}: ${uploadError.message}`
+                  `⚠️ Failed to upload ${originalFileName}: ${uploadError.message}`
                 );
               }
             }
@@ -641,7 +641,7 @@ async function run() {
         core.setFailed(`Failed to create release: ${error.message}`);
       }
     } else if (enableReleases) {
-      core.info("Release creation enabled but not on a tag. Skipping release.");
+      core.info("ℹ️ Release creation enabled but not on a tag. Skipping release.");
     }
   } catch (error) {
     core.setFailed(error.message);

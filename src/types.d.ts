@@ -39,9 +39,12 @@ export interface Environment {
 
 export interface StencilaInfo {
   version: string;
+  resolvedVersion: string;
   binaryPath: string;
   wasAlreadyInstalled: boolean;
   downloadUrl: string;
+  checksumVerified: boolean;
+  installDuration: number;
 }
 
 export interface CommandResult {

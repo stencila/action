@@ -19,7 +19,8 @@
   },
   "include": [
     "src/inputs.js",
-    "src/environment.js",
+    "src/environment.js", 
+    "src/stencila.js",
     "src/**/*.d.ts"
   ],
   "exclude": [
