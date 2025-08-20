@@ -201,6 +201,80 @@ describe("runner.js", () => {
         expect.stringContaining("Failed to register problem matcher")
       );
     });
+
+    it("should create patterns that match actual Stencila lint output", () => {
+      let capturedMatcher;
+      
+      // Capture the matcher content when written
+      vi.mocked(fs.writeFileSync).mockImplementation((path, content) => {
+        if (typeof content === 'string') {
+          capturedMatcher = JSON.parse(content);
+        }
+      });
+
+      registerProblemMatcher();
+
+      expect(capturedMatcher).toBeDefined();
+      expect(capturedMatcher.owner).toBe("stencila-lint");
+      expect(capturedMatcher.pattern).toHaveLength(3);
+
+      // Test actual Stencila lint output patterns generated from
+      // FORCE_COLOR=true stencila lint test-lint.smd
+      const actualOutput = `[31mError:[0m Citation error 
+   [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m test-lint.smd:1:73 [38;5;246m][0m
+   [38;5;246m│[0m
+ [38;5;246m1 │[0m [38;5;249mA[0m[38;5;249m [0m[38;5;249ms[0m[38;5;249mm[0m[38;5;249ma[0m[38;5;249ml[0m[38;5;249ml[0m[38;5;249m [0m[38;5;249mt[0m[38;5;249me[0m[38;5;249ms[0m[38;5;249mt[0m[38;5;249m [0m[38;5;249md[0m[38;5;249mo[0m[38;5;249mc[0m[38;5;249mu[0m[38;5;249mm[0m[38;5;249me[0m[38;5;249mn[0m[38;5;249mt[0m[38;5;249m [0m[38;5;249mw[0m[38;5;249mi[0m[38;5;249mt[0m[38;5;249mh[0m[38;5;249m [0m[38;5;249ml[0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249mt[0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249mg[0m[38;5;249m [0m[38;5;249mw[0m[38;5;249ma[0m[38;5;249mr[0m[38;5;249mn[0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249mg[0m[38;5;249ms[0m[38;5;249m [0m[38;5;249ma[0m[38;5;249mn[0m[38;5;249md[0m[38;5;249m [0m[38;5;249me[0m[38;5;249mr[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249ms[0m[38;5;249m [0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249mc[0m[38;5;249ml[0m[38;5;249mu[0m[38;5;249md[0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249mg[0m[38;5;249m [0m[38;5;249mc[0m[38;5;249mi[0m[38;5;249mt[0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249mg[0m[38;5;249m [0m[@foo][38;5;249m.[0m
+ [38;5;240m  │[0m                                                                         ───┬──  
+ [38;5;240m  │[0m                                                                            ╰──── Unable to resolve citation target \`foo\`
+[38;5;246m───╯[0m`;
+
+      const lines = actualOutput.split('\n');
+
+      // Test pattern 1: Should match severity line
+      const severityPattern = new RegExp(capturedMatcher.pattern[0].regexp);
+      expect(severityPattern.test(lines[0])).toBe(true);
+      const severityMatch = lines[0].match(severityPattern);
+      expect(severityMatch[1]).toBe("Error");
+
+      // Test pattern 2: Should match file location
+      const fileLocationPattern = new RegExp(capturedMatcher.pattern[1].regexp);
+      let foundFileMatch = false;
+      for (const line of lines) {
+        if (fileLocationPattern.test(line)) {
+          const match = line.match(fileLocationPattern);
+          expect(match[1]).toBe("test-lint.smd");
+          expect(match[2]).toBe("1");
+          expect(match[3]).toBe("73");
+          foundFileMatch = true;
+          break;
+        }
+      }
+      expect(foundFileMatch).toBe(true);
+
+      // Test pattern 3: Should match detailed message
+      const messagePattern = new RegExp(capturedMatcher.pattern[2].regexp);
+      expect(messagePattern.test(lines[5])).toBe(true);
+      const messageMatch = lines[5].match(messagePattern);
+      expect(messageMatch[1]).toBe("Unable to resolve citation target `foo`");
+    });
+
+    it("should match Warning severity as well", () => {
+      let capturedMatcher;
+      
+      vi.mocked(fs.writeFileSync).mockImplementation((path, content) => {
+        if (typeof content === 'string') {
+          capturedMatcher = JSON.parse(content);
+        }
+      });
+
+      registerProblemMatcher();
+
+      const warningOutput = `[33mWarning:[0m Python CodeChunk Linting warning`;
+      const severityPattern = new RegExp(capturedMatcher.pattern[0].regexp);
+      expect(severityPattern.test(warningOutput)).toBe(true);
+      const match = warningOutput.match(severityPattern);
+      expect(match[1]).toBe("Warning");
+    });
   });
 
   describe("executeCommand", () => {

@@ -22,12 +22,22 @@ const LINT_PROBLEM_MATCHER = {
   owner: "stencila-lint",
   pattern: [
     {
-      regexp: "^(.+):(\\d+):(\\d+):\\s+(error|warning|info):\\s+(.+)$",
+      // Match the severity from the first line
+      regexp: "^\\[\\d+m(Error|Warning):\\[0m",
+      severity: 1
+    },
+    {
+      // Match the file location: e.g. test-lint.smd:1:73
+      regexp: "\\s+([^\\s:]+):(\\d+):(\\d+)\\s+",
       file: 1,
       line: 2,
-      column: 3,
-      severity: 4,
-      message: 5
+      column: 3
+    },
+    {
+      // Match the detailed message: e.g. ╰──── Unable to resolve citation target `foo`
+      regexp: "\\s*[╰─]+\\s*(.+)$",
+      message: 1,
+      loop: true
     }
   ]
 };
