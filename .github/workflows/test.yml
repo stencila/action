@@ -35,7 +35,22 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Render test document
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linting and type checking
+        run: npm run check
+
+      - name: Run tests
+        run: npm test
+
+      - name: Test rendering a document
         uses: ./
         with:
           render: test.smd test.json test.md
