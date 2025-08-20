@@ -15,8 +15,10 @@ async function publishSummary(context) {
   try {
     const summary = core.summary;
     
-    // Start with heading
-    summary.addHeading("📊 Stencila Action Results", 1);
+    // Start with heading and Stencila icon
+    summary.addRaw("# ");
+    summary.addImage('https://stencila.io/web/v2.5.1/images/favicon.png', 'Stencila logo', {width: '32', height: '32'});
+    summary.addRaw(" Stencila Action Summary");
 
     // Add setup section
     summary.addHeading("⚙️ Setup", 2);

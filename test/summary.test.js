@@ -13,6 +13,7 @@ const mockSummary = {
   addList: vi.fn().mockReturnThis(),
   addTable: vi.fn().mockReturnThis(),
   addRaw: vi.fn().mockReturnThis(),
+  addImage: vi.fn().mockReturnThis(),
   write: vi.fn().mockResolvedValue(undefined)
 };
 
@@ -36,6 +37,7 @@ describe("summary.js", () => {
     mockSummary.addList.mockReturnThis();
     mockSummary.addTable.mockReturnThis();
     mockSummary.addRaw.mockReturnThis();
+    mockSummary.addImage.mockReturnThis();
     mockSummary.write.mockResolvedValue(undefined);
   });
 
@@ -56,7 +58,8 @@ describe("summary.js", () => {
       const result = await publishSummary(context);
 
       expect(result).toBe(context);
-      expect(mockSummary.addHeading).toHaveBeenCalledWith("📊 Stencila Action Results", 1);
+      expect(mockSummary.addImage).toHaveBeenCalledWith('https://stencila.io/web/v2.5.1/images/favicon.png', 'Stencila logo', {width: '32', height: '32'});
+      expect(mockSummary.addRaw).toHaveBeenCalledWith(" Stencila Action Summary");
       expect(mockSummary.addHeading).toHaveBeenCalledWith("⚙️ Setup", 2);
       expect(mockSummary.write).toHaveBeenCalled();
     });
@@ -267,7 +270,8 @@ describe("summary.js", () => {
       await publishSummary(context);
 
       // Should have all section headings
-      expect(mockSummary.addHeading).toHaveBeenCalledWith("📊 Stencila Action Results", 1);
+      expect(mockSummary.addImage).toHaveBeenCalledWith('https://stencila.io/web/v2.5.1/images/favicon.png', 'Stencila logo', {width: '32', height: '32'});
+      expect(mockSummary.addRaw).toHaveBeenCalledWith(" Stencila Action Summary");
       expect(mockSummary.addHeading).toHaveBeenCalledWith("⚙️ Setup", 2);
       expect(mockSummary.addHeading).toHaveBeenCalledWith("🚀 Commands Executed", 2);
       expect(mockSummary.addHeading).toHaveBeenCalledWith("📦 Artifacts", 2);
