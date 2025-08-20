@@ -53,7 +53,12 @@ jobs:
       - name: Test rendering a document
         uses: ./
         with:
-          render: test.smd test.json test.md
+          run: "--version"
+          lint: test.smd
+          compile: test.smd
+          execute: test.smd
+          render: test.smd test.json test.md test.docx test.pdf
+          convert: test.smd test.myst
           assets: test.*
           releases: test.*
           release-name: "{{ owner }}/{{ repo }} {{ tag }}"
@@ -61,22 +66,6 @@ jobs:
           artifact-name: stored-assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Required for creating releases
-
-      - name: Test multiple commands
-        uses: ./
-        with:
-          run: "--version"
-          lint: test.smd
-          render: test.smd test.json test.md
-          assets: test.*
-          releases: false
-
-      - name: Test multi-line render
-        uses: ./
-        with:
-          render: |
-            test.smd test.json
-            test.smd test.md
 
       - name: Test continue-on-error (should fail gracefully)
         uses: ./
