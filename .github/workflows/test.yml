@@ -70,7 +70,7 @@ jobs:
         uses: ./
         with:
           run: nonexistent-command
-          lint: test.smd
+          lint: test-lint.smd
           continue-on-error: true
         continue-on-error: true # Don't fail the workflow when this step fails
 

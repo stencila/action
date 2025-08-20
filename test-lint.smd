@@ -1,0 +1,5 @@
+A small test document with linting warnings and errors including citing [@foo].
+
+```python exec
+a + b
+```
