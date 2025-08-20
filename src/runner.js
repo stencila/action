@@ -177,8 +177,8 @@ function collectCommands(inputs) {
       if (cmdName === "render") {
         const renderCommands = cmdArgs
           .split("\\n")
-          .filter(line => line.trim())
-          .map(args => ({
+          .filter((line) => line.trim())
+          .map((args) => ({
             command: cmdName,
             args
           }));
@@ -274,13 +274,13 @@ function maskSecrets(text) {
  */
 function registerProblemMatcher() {
   try {
-    // Write problem matcher to a temporary file
-    const matcherPath = path.join(process.cwd(), ".github", "stencila-lint-matcher.json");
+    // Use a temporary directory to avoid bundling .github directory
+    const tempDir = path.join(process.env.RUNNER_TEMP || "/tmp", "stencila-action");
+    const matcherPath = path.join(tempDir, "stencila-lint-matcher.json");
     
-    // Ensure .github directory exists
-    const githubDir = path.dirname(matcherPath);
-    if (!fs.existsSync(githubDir)) {
-      fs.mkdirSync(githubDir, { recursive: true });
+    // Ensure temp directory exists
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir, { recursive: true });
     }
 
     // Write matcher file

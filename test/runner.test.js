@@ -170,9 +170,9 @@ describe("runner.js", () => {
 
       registerProblemMatcher();
 
-      // Verify .github directory creation
+      // Verify temp directory creation
       expect(fs.mkdirSync).toHaveBeenCalledWith(
-        expect.stringContaining(".github"),
+        expect.stringContaining("stencila-action"),
         { recursive: true }
       );
 

@@ -138053,13 +138053,13 @@ function maskSecrets(text) {
  */
 function registerProblemMatcher() {
   try {
-    // Write problem matcher to a temporary file
-    const matcherPath = external_path_.join(process.cwd(), ".github", "stencila-lint-matcher.json");
+    // Use a temporary directory to avoid bundling .github directory
+    const tempDir = external_path_.join(process.env.RUNNER_TEMP || "/tmp", "stencila-action");
+    const matcherPath = external_path_.join(tempDir, "stencila-lint-matcher.json");
     
-    // Ensure .github directory exists
-    const githubDir = __nccwpck_require__.ab + ".github";
-    if (!external_fs_.existsSync(__nccwpck_require__.ab + ".github")) {
-      external_fs_.mkdirSync(__nccwpck_require__.ab + ".github", { recursive: true });
+    // Ensure temp directory exists
+    if (!external_fs_.existsSync(tempDir)) {
+      external_fs_.mkdirSync(tempDir, { recursive: true });
     }
 
     // Write matcher file
