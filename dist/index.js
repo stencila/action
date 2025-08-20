@@ -138160,8 +138160,8 @@ function collectCommands(inputs) {
       if (cmdName === "render") {
         const renderCommands = cmdArgs
           .split("\\n")
-          .filter((line) => line.trim())
-          .map((args) => ({
+          .filter(/** @param {string} line */ (line) => line.trim())
+          .map(/** @param {string} args */ (args) => ({
             command: cmdName,
             args
           }));
@@ -138202,10 +138202,16 @@ async function executeCommand(commandSpec, workingDirectory, assumeAnswer) {
       reject(new Error(`Command timed out after ${DEFAULT_TIMEOUT_MS / 1000} seconds`));
     }, DEFAULT_TIMEOUT_MS);
 
-    // Execute command
+    // Execute command with environment variables to encourage human-readable output
     exec.exec("stencila", fullArgs, {
       cwd: workingDirectory,
       ignoreReturnCode: true,
+      env: {
+        ...process.env,
+        // Force TTY-like behavior
+        FORCE_COLOR: '1',
+        NO_COLOR: undefined
+      },
       listeners: {
         stdout: (data) => {
           const output = data.toString();
