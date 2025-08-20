@@ -1,15 +1,17 @@
-const { DefaultArtifactClient } = require("@actions/artifact");
-const cache = require("@actions/cache");
-const core = require("@actions/core");
-const exec = require("@actions/exec");
-const github = require("@actions/github");
-const glob = require("@actions/glob");
-const fs = require("fs");
-const path = require("path");
+import { DefaultArtifactClient } from "@actions/artifact";
+import * as cache from "@actions/cache";
+import * as core from "@actions/core";
+import * as exec from "@actions/exec";
+import * as github from "@actions/github";
+import * as glob from "@actions/glob";
+import fs from "fs";
+import path from "path";
 
 // Import new modules (strangler pattern - gradual migration)
-const { parseInputs } = require("./inputs");
-const { resolveEnvironment } = require("./environment");
+import { parseInputs } from "./inputs.js";
+import { resolveEnvironment } from "./environment.js";
+import { ensureStencila } from "./stencila.js";
+import { runCommands } from "./runner.js";
 
 async function run() {
   try {
@@ -21,7 +23,6 @@ async function run() {
     await core.group("Setup environment", () => resolveEnvironment(context));
     
     // Phase 2: Use new stencila module for installation
-    const { ensureStencila } = await import("./stencila.js");
     await core.group("Install Stencila", () => ensureStencila(context));
     
     // Extract values from context for backward compatibility with existing code
@@ -99,7 +100,6 @@ async function run() {
     }
 
     // Phase 3: Use new runner module for command execution
-    const { runCommands } = await import("./runner.js");
     await core.group("Run commands", () => runCommands(context));
 
     // Extract results for backward compatibility

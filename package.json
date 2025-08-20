@@ -2,6 +2,7 @@
   "name": "stencila-action",
   "version": "0.3.3",
   "description": "GitHub Action to setup and use Stencila CLI",
+  "type": "module",
   "main": "dist/index.js",
   "scripts": {
     "fix": "eslint src --fix",
