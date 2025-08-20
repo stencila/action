@@ -227,14 +227,10 @@ async function executeCommand(commandSpec, workingDirectory, assumeAnswer) {
         stdout: (data) => {
           const output = data.toString();
           stdout += output;
-          // Stream to logs with secret masking
-          process.stdout.write(maskSecrets(output));
         },
         stderr: (data) => {
           const output = data.toString();
           stderr += output;
-          // Stream to logs with secret masking
-          process.stderr.write(maskSecrets(output));
         }
       }
     })
