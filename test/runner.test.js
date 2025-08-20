@@ -282,21 +282,12 @@ describe("runner.js", () => {
       const commandSpec = { command: "convert", args: "doc.md --to html" };
 
       // Mock successful execution
-      execMock.exec.mockImplementation((cmd, args, options) => {
-        // Simulate stdout output
-        if (options.listeners && options.listeners.stdout) {
-          options.listeners.stdout(Buffer.from("Converting document..."));
-          options.listeners.stdout(Buffer.from("Done"));
-        }
-        return Promise.resolve(0);
-      });
+      execMock.exec.mockResolvedValue(0);
 
       const result = await executeCommand(commandSpec, "/tmp", "yes");
 
       expect(result).toEqual({
         exitCode: 0,
-        stdout: "Converting document...Done",
-        stderr: "",
       });
 
       expect(execMock.exec).toHaveBeenCalledWith(
@@ -313,50 +304,24 @@ describe("runner.js", () => {
       const commandSpec = { command: "lint", args: "invalid.py" };
 
       // Mock failed execution
-      execMock.exec.mockImplementation((cmd, args, options) => {
-        // Simulate stderr output
-        if (options.listeners && options.listeners.stderr) {
-          options.listeners.stderr(Buffer.from("Error: File not found"));
-        }
-        return Promise.resolve(1);
-      });
+      execMock.exec.mockResolvedValue(1);
 
       const result = await executeCommand(commandSpec, "/tmp", "yes");
 
       expect(result).toEqual({
         exitCode: 1,
-        stdout: "",
-        stderr: "Error: File not found",
       });
     });
 
-    it("should handle execution timeout", async () => {
-      const commandSpec = { command: "execute", args: "slow.ipynb" };
+    it("should handle execution errors", async () => {
+      const commandSpec = { command: "execute", args: "invalid.ipynb" };
 
-      // Mock slow execution that never resolves
-      execMock.exec.mockImplementation(() => {
-        return new Promise(() => {}); // Never resolves
-      });
-
-      // Use short timeout for testing
-      const originalTimeout = 10 * 60 * 1000;
-      const shortTimeout = 100; // 100ms
-
-      // Temporarily replace the timeout constant by mocking setTimeout
-      const originalSetTimeout = global.setTimeout;
-      global.setTimeout = vi.fn((callback, delay) => {
-        if (delay === originalTimeout) {
-          // Replace with short timeout for testing
-          return originalSetTimeout(callback, shortTimeout);
-        }
-        return originalSetTimeout(callback, delay);
-      });
+      // Mock execution that throws error
+      execMock.exec.mockRejectedValue(new Error("Command not found"));
 
       await expect(executeCommand(commandSpec, "/tmp", "yes")).rejects.toThrow(
-        "Command timed out after 600 seconds"
+        "Command not found"
       );
-
-      global.setTimeout = originalSetTimeout;
     });
 
     it("should handle no args", async () => {
@@ -476,7 +441,6 @@ describe("runner.js", () => {
       expect(context.results[0]).toMatchObject({
         command: "stencila convert doc.md",
         exitCode: -1,
-        stderr: "Command not found",
       });
     });
 
