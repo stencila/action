@@ -115824,6 +115824,293 @@ ZipStream.prototype.finalize = function() {
 
 /***/ }),
 
+/***/ 86220:
+/***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
+
+"use strict";
+__nccwpck_require__.r(__webpack_exports__);
+/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   getPlatformInfo: () => (/* binding */ getPlatformInfo),
+/* harmony export */   resolveEnvironment: () => (/* binding */ resolveEnvironment)
+/* harmony export */ });
+/* harmony import */ var os__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(70857);
+/* harmony import */ var os__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(os__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(16928);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__nccwpck_require__.n(path__WEBPACK_IMPORTED_MODULE_1__);
+// @ts-check
+
+
+
+
+/**
+ * @typedef {import('./types.d.ts').Context} Context
+ * @typedef {import('./types.d.ts').Environment} Environment
+ */
+
+/**
+ * Resolve environment configuration
+ * @param {Context} context - The context object to populate
+ * @returns {Context} The context with populated env
+ */
+function resolveEnvironment(context) {
+  const platform = os__WEBPACK_IMPORTED_MODULE_0___default().platform();
+  const arch = os__WEBPACK_IMPORTED_MODULE_0___default().arch();
+
+  // Determine Stencila platform string and archive extension
+  const { platformString, extension } = getPlatformInfo(platform, arch);
+
+  // Resolve cache paths
+  const toolCachePath = getToolCachePath();
+  const stencilaCachePath = getStencilaCachePath();
+
+  // Get proxy settings from environment
+  const httpProxy = process.env.HTTP_PROXY || process.env.http_proxy || "";
+  const httpsProxy = process.env.HTTPS_PROXY || process.env.https_proxy || "";
+  const noProxy = process.env.NO_PROXY || process.env.no_proxy || "";
+
+  // Set environment on context
+  context.env = {
+    platform,
+    arch,
+    platformString,
+    extension,
+    toolCachePath,
+    stencilaCachePath,
+    httpProxy,
+    httpsProxy,
+    noProxy
+  };
+
+  return context;
+}
+
+/**
+ * Get platform-specific information for Stencila
+ * @param {string} platform - Node platform
+ * @param {string} arch - Node architecture
+ * @returns {{platformString: string, extension: string}} Platform info
+ * @throws {Error} If platform/arch combination is not supported
+ */
+function getPlatformInfo(platform, arch) {
+  let platformString;
+  let extension = "tar.gz";
+
+  switch (platform) {
+    case "linux":
+      if (arch === "x64") {
+        platformString = "x86_64-unknown-linux-gnu";
+      } else if (arch === "arm64") {
+        platformString = "aarch64-unknown-linux-gnu";
+      } else {
+        throw new Error(`Unsupported Linux architecture: ${arch}`);
+      }
+      break;
+
+    case "darwin":
+      if (arch === "x64") {
+        platformString = "x86_64-apple-darwin";
+      } else if (arch === "arm64") {
+        platformString = "aarch64-apple-darwin";
+      } else {
+        throw new Error(`Unsupported macOS architecture: ${arch}`);
+      }
+      break;
+
+    case "win32":
+      extension = "zip";
+      if (arch === "x64") {
+        platformString = "x86_64-pc-windows-msvc";
+      } else {
+        throw new Error(`Unsupported Windows architecture: ${arch}`);
+      }
+      break;
+
+    default:
+      throw new Error(`Unsupported platform: ${platform}`);
+  }
+
+  return { platformString, extension };
+}
+
+/**
+ * Get the tool cache path
+ * @returns {string} Tool cache path
+ */
+function getToolCachePath() {
+  // GitHub Actions sets RUNNER_TOOL_CACHE
+  if (process.env.RUNNER_TOOL_CACHE) {
+    return process.env.RUNNER_TOOL_CACHE;
+  }
+
+  // Fall back to temp directory for local testing
+  return path__WEBPACK_IMPORTED_MODULE_1___default().join(os__WEBPACK_IMPORTED_MODULE_0___default().tmpdir(), "tool-cache");
+}
+
+/**
+ * Get the Stencila cache path
+ * @returns {string} Stencila cache path
+ */
+function getStencilaCachePath() {
+  // Check if STENCILA_CACHE_DIR is set
+  if (process.env.STENCILA_CACHE_DIR) {
+    return process.env.STENCILA_CACHE_DIR;
+  }
+
+  // Default to .stencila in home directory
+  const homeDir = os__WEBPACK_IMPORTED_MODULE_0___default().homedir();
+  return path__WEBPACK_IMPORTED_MODULE_1___default().join(homeDir, ".stencila");
+}
+
+
+
+/***/ }),
+
+/***/ 61700:
+/***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
+
+"use strict";
+__nccwpck_require__.r(__webpack_exports__);
+/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   parseInputs: () => (/* binding */ parseInputs)
+/* harmony export */ });
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(37484);
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_0__);
+// @ts-check
+
+
+
+/**
+ * @typedef {import('./types.d.ts').Context} Context
+ * @typedef {import('./types.d.ts').ActionInputs} ActionInputs
+ */
+
+/**
+ * Parse and validate all action inputs
+ * @param {Context} context - The context object to populate
+ * @returns {Context} The context with populated inputs
+ */
+function parseInputs(context) {
+  // Get raw inputs
+  const version = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("version") || "latest";
+  const run = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("run");
+  const convert = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("convert");
+  const lint = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("lint");
+  const execute = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("execute");
+  const render = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("render");
+  const assets = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("assets");
+  const releasesInput = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("releases");
+  const releaseName = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("release-name");
+  const releaseNotes = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("release-notes");
+  const releaseFilenames = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("release-filenames");
+  const workingDirectory = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("working-directory") || ".";
+  const artifactName = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("artifact-name") || "assets";
+  const cache = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getBooleanInput("cache");
+  const installTools = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getBooleanInput("install-tools");
+  const assumeAnswer = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("assume-answer") || "yes";
+  const continueOnError = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getBooleanInput("continue-on-error");
+
+  // Parse releases input - can be boolean or string pattern
+  /** @type {boolean | string} */
+  let releases = false;
+  if (releasesInput && releasesInput !== "false") {
+    // It's either "true" or a glob pattern for release assets
+    releases = releasesInput === "true" ? true : releasesInput;
+  }
+
+  // Normalize inputs first
+  const inputs = {
+    version: version.trim(),
+    run: run ? run.trim() : "",
+    convert: convert ? convert.trim() : "",
+    lint: lint ? lint.trim() : "",
+    execute: execute ? execute.trim() : "",
+    render: render ? render.trim() : "",
+    assets: assets ? assets.trim() : "",
+    releases,
+    releaseName: releaseName ? releaseName.trim() : "",
+    releaseNotes: releaseNotes ? releaseNotes.trim() : "",
+    releaseFilenames: releaseFilenames ? releaseFilenames.trim() : "",
+    workingDirectory: workingDirectory.trim(),
+    artifactName: artifactName.trim(),
+    cache,
+    installTools,
+    assumeAnswer: assumeAnswer.trim().toLowerCase(),
+    continueOnError
+  };
+
+  // Validate normalized inputs
+  validateInputs(inputs);
+
+  // Warn about deprecated inputs
+  checkDeprecatedInputs(inputs);
+
+  // Set inputs on context
+  context.inputs = inputs;
+
+  return context;
+}
+
+/**
+ * Validate critical inputs
+ * @param {Object} inputs - Inputs to validate
+ * @throws {Error} If validation fails
+ */
+function validateInputs(inputs) {
+  // Validate version format (allow 'latest' or semver-like patterns)
+  if (inputs.version && inputs.version !== "latest") {
+    const versionPattern = /^v?\d+\.\d+\.\d+(-.*)?$/;
+    if (!versionPattern.test(inputs.version)) {
+      throw new Error(
+        `Invalid version format: ${inputs.version}. Use 'latest' or a version like 'v2.0.0'`
+      );
+    }
+  }
+
+  // Validate assume-answer value
+  const validAnswers = ["yes", "no", "cancel"];
+  if (inputs.assumeAnswer && !validAnswers.includes(inputs.assumeAnswer)) {
+    throw new Error(
+      `Invalid assume-answer value: ${inputs.assumeAnswer}. Must be one of: ${validAnswers.join(", ")}`
+    );
+  }
+
+  // Validate artifact name (no special characters that could cause issues)
+  if (inputs.artifactName) {
+    const namePattern = /^[a-zA-Z0-9._-]+$/;
+    if (!namePattern.test(inputs.artifactName)) {
+      throw new Error(
+        `Invalid artifact-name: ${inputs.artifactName}. Use only letters, numbers, dots, dashes, and underscores.`
+      );
+    }
+  }
+
+  // Validate working directory is not trying to escape
+  if (inputs.workingDirectory && inputs.workingDirectory.includes("..")) {
+    throw new Error(
+      `Invalid working-directory: ${inputs.workingDirectory}. Path traversal not allowed.`
+    );
+  }
+}
+
+/**
+ * Check for deprecated inputs and warn users
+ * @param {ActionInputs} inputs - Parsed inputs
+ */
+function checkDeprecatedInputs(inputs) {
+  // Add any deprecated input warnings here in the future
+  // Example:
+  // if (inputs.oldParam) {
+  //   core.warning("The 'old-param' input is deprecated. Please use 'new-param' instead.");
+  // }
+  
+  // Silence linter - function will use inputs parameter when deprecations are added
+  void inputs;
+}
+
+
+
+/***/ }),
+
 /***/ 42078:
 /***/ ((module) => {
 
@@ -137602,6 +137889,46 @@ module.exports = /*#__PURE__*/JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45
 /******/ 	}
 /******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/compat get default export */
+/******/ 	(() => {
+/******/ 		// getDefaultExport function for compatibility with non-harmony modules
+/******/ 		__nccwpck_require__.n = (module) => {
+/******/ 			var getter = module && module.__esModule ?
+/******/ 				() => (module['default']) :
+/******/ 				() => (module);
+/******/ 			__nccwpck_require__.d(getter, { a: getter });
+/******/ 			return getter;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__nccwpck_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__nccwpck_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/node module decorator */
 /******/ 	(() => {
 /******/ 		__nccwpck_require__.nmd = (module) => {
@@ -137626,36 +137953,49 @@ const glob = __nccwpck_require__(47206);
 const tc = __nccwpck_require__(33472);
 const fs = __nccwpck_require__(79896);
 const https = __nccwpck_require__(65692);
-const os = __nccwpck_require__(70857);
 const path = __nccwpck_require__(16928);
+
+// Import new modules (strangler pattern - gradual migration)
+const { parseInputs } = __nccwpck_require__(61700);
+const { resolveEnvironment } = __nccwpck_require__(86220);
 
 async function run() {
   try {
-    // Get inputs
-    const version = core.getInput("version") || "latest";
-    let runInput = core.getInput("run");
-    const assetsPath = core.getInput("assets");
-    const artifactName = core.getInput("artifact-name") || "assets";
-    const releasesInput = core.getInput("releases");
-    const releaseName = core.getInput("release-name");
-    const releaseNotes = core.getInput("release-notes");
-    const releaseFilenames = core.getInput("release-filenames");
-    const workingDirectory = core.getInput("working-directory") || ".";
-    const useCache = core.getBooleanInput("cache");
-    const installTools = core.getBooleanInput("install-tools");
-    const assumeAnswer = core.getInput("assume-answer") || "yes";
-    const continueOnError = core.getBooleanInput("continue-on-error");
+    // Initialize context object
+    const context = {};
+    
+    // Phase 1: Use new modules for input parsing and environment resolution
+    await core.group("Parse inputs", () => parseInputs(context));
+    await core.group("Setup environment", () => resolveEnvironment(context));
+    
+    // Extract values from context for backward compatibility with existing code
+    const { inputs, env } = context;
+    
+    // Use values from the new inputs module
+    const version = inputs.version;
+    const runInput = inputs.run;
+    const assetsPath = inputs.assets;
+    const artifactName = inputs.artifactName;
+    const releasesInput = inputs.releases;
+    const releaseName = inputs.releaseName;
+    const releaseNotes = inputs.releaseNotes;
+    const releaseFilenames = inputs.releaseFilenames;
+    const workingDirectory = inputs.workingDirectory;
+    const useCache = inputs.cache;
+    const installTools = inputs.installTools;
+    const assumeAnswer = inputs.assumeAnswer;
+    const continueOnError = inputs.continueOnError;
 
-    // Parse release input - can be boolean or string pattern
+    // Parse release input - already handled in inputs module
     let enableReleases = false;
     let releasesPath = "";
-    if (releasesInput && releasesInput !== "false" && assetsPath) {
+    if (releasesInput && releasesInput !== false && assetsPath) {
       enableReleases = true;
-      if (releasesInput === "true") {
+      if (releasesInput === true) {
         // Use assets pattern if release is true
         releasesPath = assetsPath;
       } else {
-        // Use the provided pattern
+        // Use the provided pattern (it's a string)
         releasesPath = releasesInput;
       }
     }
@@ -137675,7 +138015,7 @@ async function run() {
     // Check for simplified command syntax
     const commands = ["convert", "lint", "execute", "render"];
     for (const cmdName of commands) {
-      const cmdArgs = core.getInput(cmdName);
+      const cmdArgs = inputs[cmdName];
       if (cmdArgs) {
         // Special handling for render command to support multi-line inputs
         if (cmdName === "render") {
@@ -137697,41 +138037,8 @@ async function run() {
       }
     }
 
-    // Determine platform
-    const platform = os.platform();
-    const arch = os.arch();
-
-    let platformString;
-    let extension = "tar.gz";
-
-    switch (platform) {
-      case "linux":
-        if (arch === "x64") {
-          platformString = "x86_64-unknown-linux-gnu";
-        } else {
-          throw new Error(`Unsupported Linux architecture: ${arch}`);
-        }
-        break;
-      case "darwin":
-        if (arch === "x64") {
-          platformString = "x86_64-apple-darwin";
-        } else if (arch === "arm64") {
-          platformString = "aarch64-apple-darwin";
-        } else {
-          throw new Error(`Unsupported macOS architecture: ${arch}`);
-        }
-        break;
-      case "win32":
-        if (arch === "x64") {
-          platformString = "x86_64-pc-windows-msvc";
-          extension = "zip";
-        } else {
-          throw new Error(`Unsupported Windows architecture: ${arch}`);
-        }
-        break;
-      default:
-        throw new Error(`Unsupported platform: ${platform}`);
-    }
+    // Platform info now comes from environment module
+    const { platform, arch, platformString, extension } = env;
 
     // Resolve actual version for caching
     let actualVersion = version;

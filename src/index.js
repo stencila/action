@@ -7,36 +7,49 @@ const glob = require("@actions/glob");
 const tc = require("@actions/tool-cache");
 const fs = require("fs");
 const https = require("https");
-const os = require("os");
 const path = require("path");
+
+// Import new modules (strangler pattern - gradual migration)
+const { parseInputs } = require("./inputs");
+const { resolveEnvironment } = require("./environment");
 
 async function run() {
   try {
-    // Get inputs
-    const version = core.getInput("version") || "latest";
-    let runInput = core.getInput("run");
-    const assetsPath = core.getInput("assets");
-    const artifactName = core.getInput("artifact-name") || "assets";
-    const releasesInput = core.getInput("releases");
-    const releaseName = core.getInput("release-name");
-    const releaseNotes = core.getInput("release-notes");
-    const releaseFilenames = core.getInput("release-filenames");
-    const workingDirectory = core.getInput("working-directory") || ".";
-    const useCache = core.getBooleanInput("cache");
-    const installTools = core.getBooleanInput("install-tools");
-    const assumeAnswer = core.getInput("assume-answer") || "yes";
-    const continueOnError = core.getBooleanInput("continue-on-error");
+    // Initialize context object
+    const context = {};
+    
+    // Phase 1: Use new modules for input parsing and environment resolution
+    await core.group("Parse inputs", () => parseInputs(context));
+    await core.group("Setup environment", () => resolveEnvironment(context));
+    
+    // Extract values from context for backward compatibility with existing code
+    const { inputs, env } = context;
+    
+    // Use values from the new inputs module
+    const version = inputs.version;
+    const runInput = inputs.run;
+    const assetsPath = inputs.assets;
+    const artifactName = inputs.artifactName;
+    const releasesInput = inputs.releases;
+    const releaseName = inputs.releaseName;
+    const releaseNotes = inputs.releaseNotes;
+    const releaseFilenames = inputs.releaseFilenames;
+    const workingDirectory = inputs.workingDirectory;
+    const useCache = inputs.cache;
+    const installTools = inputs.installTools;
+    const assumeAnswer = inputs.assumeAnswer;
+    const continueOnError = inputs.continueOnError;
 
-    // Parse release input - can be boolean or string pattern
+    // Parse release input - already handled in inputs module
     let enableReleases = false;
     let releasesPath = "";
-    if (releasesInput && releasesInput !== "false" && assetsPath) {
+    if (releasesInput && releasesInput !== false && assetsPath) {
       enableReleases = true;
-      if (releasesInput === "true") {
+      if (releasesInput === true) {
         // Use assets pattern if release is true
         releasesPath = assetsPath;
       } else {
-        // Use the provided pattern
+        // Use the provided pattern (it's a string)
         releasesPath = releasesInput;
       }
     }
@@ -56,7 +69,7 @@ async function run() {
     // Check for simplified command syntax
     const commands = ["convert", "lint", "execute", "render"];
     for (const cmdName of commands) {
-      const cmdArgs = core.getInput(cmdName);
+      const cmdArgs = inputs[cmdName];
       if (cmdArgs) {
         // Special handling for render command to support multi-line inputs
         if (cmdName === "render") {
@@ -78,41 +91,8 @@ async function run() {
       }
     }
 
-    // Determine platform
-    const platform = os.platform();
-    const arch = os.arch();
-
-    let platformString;
-    let extension = "tar.gz";
-
-    switch (platform) {
-      case "linux":
-        if (arch === "x64") {
-          platformString = "x86_64-unknown-linux-gnu";
-        } else {
-          throw new Error(`Unsupported Linux architecture: ${arch}`);
-        }
-        break;
-      case "darwin":
-        if (arch === "x64") {
-          platformString = "x86_64-apple-darwin";
-        } else if (arch === "arm64") {
-          platformString = "aarch64-apple-darwin";
-        } else {
-          throw new Error(`Unsupported macOS architecture: ${arch}`);
-        }
-        break;
-      case "win32":
-        if (arch === "x64") {
-          platformString = "x86_64-pc-windows-msvc";
-          extension = "zip";
-        } else {
-          throw new Error(`Unsupported Windows architecture: ${arch}`);
-        }
-        break;
-      default:
-        throw new Error(`Unsupported platform: ${platform}`);
-    }
+    // Platform info now comes from environment module
+    const { platform, arch, platformString, extension } = env;
 
     // Resolve actual version for caching
     let actualVersion = version;

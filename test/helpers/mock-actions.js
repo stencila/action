@@ -7,9 +7,32 @@ import { vi } from 'vitest';
  * @returns {Object} Mocked core module
  */
 export function createCoreMock() {
-  return {
-    getInput: vi.fn((name) => ''),
-    getBooleanInput: vi.fn((name) => false),
+  // Store input values for both getInput and getBooleanInput to use
+  const inputValues = new Map();
+  
+  const mockGetInput = vi.fn((name) => {
+    return inputValues.get(name) || '';
+  });
+  
+  const mockGetBooleanInput = vi.fn((name) => {
+    const value = inputValues.get(name) || '';
+    // Parse YAML boolean values according to YAML 1.2 Core Schema
+    const trueValues = ['true', 'True', 'TRUE', 'yes', 'Yes', 'YES', 'y', 'Y', 'on', 'On', 'ON'];
+    const falseValues = ['false', 'False', 'FALSE', 'no', 'No', 'NO', 'n', 'N', 'off', 'Off', 'OFF'];
+    
+    if (trueValues.includes(value)) {
+      return true;
+    } else if (falseValues.includes(value) || value === '') {
+      return false; // Default to false for empty strings and explicit false values
+    } else {
+      throw new TypeError(`Input does not meet YAML 1.2 "Core Schema" specification: ${name}\nSupport boolean input list: \`true | True | TRUE | false | False | FALSE\``);
+    }
+  });
+  
+  // Create a mock object with helpers
+  const mock = {
+    getInput: mockGetInput,
+    getBooleanInput: mockGetBooleanInput,
     setOutput: vi.fn(),
     setFailed: vi.fn(),
     info: vi.fn(),
@@ -27,8 +50,18 @@ export function createCoreMock() {
       addTable: vi.fn().mockReturnThis(),
       addRaw: vi.fn().mockReturnThis(),
       write: vi.fn()
+    },
+    // Helper method to set input values
+    setInputValue: (name, value) => {
+      inputValues.set(name, value);
+    },
+    // Helper method to clear all input values
+    clearInputValues: () => {
+      inputValues.clear();
     }
   };
+  
+  return mock;
 }
 
 /**
