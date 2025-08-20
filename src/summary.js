@@ -64,36 +64,36 @@ async function publishSummary(context) {
  * @param {Context} context - The context object
  */
 async function addSetupInfo(summary, context) {
-  const setupItems = [];
+  const setupLines = [];
 
   // Stencila version info
   if (context.stencila) {
     const { resolvedVersion, wasAlreadyInstalled, installDuration } = context.stencila;
     const installStatus = wasAlreadyInstalled ? "🟢 Cached" : "🔵 Downloaded";
     const duration = installDuration ? ` (${(installDuration / 1000).toFixed(1)}s)` : "";
-    setupItems.push(`**Stencila Version:** ${resolvedVersion} ${installStatus}${duration}`);
+    setupLines.push(`**Stencila Version:** ${resolvedVersion} ${installStatus}${duration}`);
   }
 
   // Cache info
   if (context.cache) {
     const cacheStatus = context.cache.wasRestored ? "🟢 Hit" : "🟡 Miss";
-    setupItems.push(`**Cache:** ${cacheStatus}`);
+    setupLines.push(`**Cache:** ${cacheStatus}`);
   }
 
   // Tools installation
   if (context.toolsInstalled) {
     const toolsStatus = context.toolsInstalled.success ? "✅ Success" : "❌ Failed";
-    setupItems.push(`**Tools Installed:** ${toolsStatus}`);
+    setupLines.push(`**Tools Installed:** ${toolsStatus}`);
   }
 
   // Environment info
   if (context.env) {
     const { platform, arch } = context.env;
-    setupItems.push(`**Platform:** ${platform}-${arch}`);
+    setupLines.push(`**Platform:** ${platform}-${arch}`);
   }
 
-  if (setupItems.length > 0) {
-    summary.addList(setupItems, false);
+  if (setupLines.length > 0) {
+    summary.addRaw(setupLines.join("\n"));
   } else {
     summary.addRaw("No setup information available.");
   }
@@ -146,15 +146,15 @@ function addCommandsTable(summary, context) {
  * @param {Context} context - The context object
  */
 function addArtifactsInfo(summary, context) {
-  const artifactItems = [];
+  const artifactLines = [];
 
   for (const artifact of context.artifacts) {
     const fileCount = artifact.files.length;
     const sizeFormatted = formatBytes(artifact.size);
-    artifactItems.push(`**${artifact.name}:** ${fileCount} files, ${sizeFormatted}`);
+    artifactLines.push(`**\`${artifact.name}\`:** ${fileCount} files, ${sizeFormatted}`);
   }
 
-  summary.addList(artifactItems, false);
+  summary.addRaw(artifactLines.join("\n"));
 }
 
 /**
@@ -164,22 +164,22 @@ function addArtifactsInfo(summary, context) {
  */
 function addReleaseInfo(summary, context) {
   const { release } = context;
-  const releaseItems = [];
+  const releaseLines = [];
 
-  releaseItems.push(`**Tag:** ${release.tag}`);
-  releaseItems.push(`**Name:** ${release.name}`);
+  releaseLines.push(`**Tag:** ${release.tag}`);
+  releaseLines.push(`**Name:** ${release.name}`);
   
   if (release.prerelease) {
-    releaseItems.push(`**Type:** 🚧 Pre-release`);
+    releaseLines.push(`**Type:** 🚧 Pre-release`);
   } else {
-    releaseItems.push(`**Type:** 🚀 Release`);
+    releaseLines.push(`**Type:** 🚀 Release`);
   }
 
   if (release.assets && release.assets.length > 0) {
-    releaseItems.push(`**Assets:** ${release.assets.length} files uploaded`);
+    releaseLines.push(`**Assets:** ${release.assets.length} files uploaded`);
   }
 
-  summary.addList(releaseItems, false);
+  summary.addRaw(releaseLines.join("\n"));
 }
 
 /**

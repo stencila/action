@@ -76,10 +76,9 @@ describe("summary.js", () => {
 
       await publishSummary(context);
 
-      expect(mockSummary.addList).toHaveBeenCalledWith([
-        "**Stencila Version:** 1.0.0 🟢 Cached (2.5s)",
-        "**Platform:** linux-x64"
-      ], false);
+      expect(mockSummary.addRaw).toHaveBeenCalledWith(
+        "**Stencila Version:** 1.0.0 🟢 Cached (2.5s)\n**Platform:** linux-x64"
+      );
     });
 
     it("should include cache information", async () => {
@@ -91,9 +90,7 @@ describe("summary.js", () => {
 
       await publishSummary(context);
 
-      expect(mockSummary.addList).toHaveBeenCalledWith([
-        "**Cache:** 🟡 Miss"
-      ], false);
+      expect(mockSummary.addRaw).toHaveBeenCalledWith("**Cache:** 🟡 Miss");
     });
 
     it("should include tools installation status", async () => {
@@ -105,9 +102,7 @@ describe("summary.js", () => {
 
       await publishSummary(context);
 
-      expect(mockSummary.addList).toHaveBeenCalledWith([
-        "**Tools Installed:** ✅ Success"
-      ], false);
+      expect(mockSummary.addRaw).toHaveBeenCalledWith("**Tools Installed:** ✅ Success");
     });
 
     it("should create commands table when commands were executed", async () => {
@@ -183,9 +178,7 @@ describe("summary.js", () => {
       await publishSummary(context);
 
       expect(mockSummary.addHeading).toHaveBeenCalledWith("📦 Artifacts", 2);
-      expect(mockSummary.addList).toHaveBeenCalledWith([
-        "**build-artifacts:** 3 files, 1.46 MB"
-      ], false);
+      expect(mockSummary.addRaw).toHaveBeenCalledWith("**`build-artifacts`:** 3 files, 1.46 MB");
     });
 
     it("should include release information for regular release", async () => {
@@ -201,12 +194,9 @@ describe("summary.js", () => {
       await publishSummary(context);
 
       expect(mockSummary.addHeading).toHaveBeenCalledWith("🏷️ Release", 2);
-      expect(mockSummary.addList).toHaveBeenCalledWith([
-        "**Tag:** v1.0.0",
-        "**Name:** Version 1.0.0",
-        "**Type:** 🚀 Release",
-        "**Assets:** 3 files uploaded"
-      ], false);
+      expect(mockSummary.addRaw).toHaveBeenCalledWith(
+        "**Tag:** v1.0.0\n**Name:** Version 1.0.0\n**Type:** 🚀 Release\n**Assets:** 3 files uploaded"
+      );
     });
 
     it("should include release information for prerelease", async () => {
@@ -221,11 +211,9 @@ describe("summary.js", () => {
 
       await publishSummary(context);
 
-      expect(mockSummary.addList).toHaveBeenCalledWith([
-        "**Tag:** v1.0.0-beta.1",
-        "**Name:** Beta Release",
-        "**Type:** 🚧 Pre-release"
-      ], false);
+      expect(mockSummary.addRaw).toHaveBeenCalledWith(
+        "**Tag:** v1.0.0-beta.1\n**Name:** Beta Release\n**Type:** 🚧 Pre-release"
+      );
     });
 
     it("should include errors information", async () => {
