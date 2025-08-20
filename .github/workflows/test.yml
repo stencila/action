@@ -41,14 +41,11 @@ jobs:
           node-version: "20"
           cache: "npm"
 
-      - name: Install dependencies
-        run: npm ci
-
       - name: Run linting and type checking
-        run: npm run check
+        run: make lint
 
       - name: Run tests
-        run: npm test
+        run: make test
 
       - name: Test rendering a document
         uses: ./
@@ -66,11 +63,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Required for creating releases
 
-      - name: Test continue-on-error (should fail gracefully)
+      - name: Test continue-on-error
         uses: ./
         with:
           run: nonexistent-command
           lint: test-lint.smd
           continue-on-error: true
         continue-on-error: true # Don't fail the workflow when this step fails
-
