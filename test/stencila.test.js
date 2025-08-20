@@ -258,7 +258,7 @@ describe("stencila.js", () => {
 
       const checksum = await fetchChecksumFromGitHub("v2.0.0", "x86_64-unknown-linux-gnu", "tar.gz");
       expect(checksum).toBeNull();
-      expect(coreMock.warning).toHaveBeenCalledWith("⚠️ No checksum found for cli-v2.0.0-x86_64-unknown-linux-gnu.tar.gz in GitHub release v2.0.0");
+      expect(coreMock.debug).toHaveBeenCalledWith("⚠️ No checksum found for cli-v2.0.0-x86_64-unknown-linux-gnu.tar.gz in GitHub release v2.0.0");
     });
 
     it("should handle API errors", async () => {
@@ -276,7 +276,7 @@ describe("stencila.js", () => {
 
       const checksum = await fetchChecksumFromGitHub("v2.0.0", "x86_64-unknown-linux-gnu", "tar.gz");
       expect(checksum).toBeNull();
-      expect(coreMock.warning).toHaveBeenCalledWith("⚠️ Failed to fetch checksum from GitHub API: Network error");
+      expect(coreMock.debug).toHaveBeenCalledWith("⚠️ Failed to fetch checksum from GitHub API: Network error");
     });
 
     it("should handle non-200 status codes", async () => {
@@ -316,7 +316,7 @@ describe("stencila.js", () => {
 
       const checksum = await fetchChecksumFromGitHub("v2.0.0", "x86_64-unknown-linux-gnu", "tar.gz");
       expect(checksum).toBeNull();
-      expect(coreMock.warning).toHaveBeenCalledWith("⚠️ Timeout fetching checksum from GitHub API");
+      expect(coreMock.debug).toHaveBeenCalledWith("⚠️ Timeout fetching checksum from GitHub API");
     });
   });
 
@@ -534,7 +534,7 @@ describe("stencila.js", () => {
 
       expect(context.stencila.checksumVerified).toBe(false);
       expect(coreMock.warning).toHaveBeenCalledWith(
-        "⚠️ No checksum available for v2.0.0 on x86_64-unknown-linux-gnu - skipping verification"
+        "⚠️ No checksum available for v2.0.0 on x86_64-unknown-linux-gnu, skipping verification"
       );
     });
 
@@ -607,8 +607,8 @@ describe("stencila.js", () => {
       await ensureStencila(context);
 
       expect(toolCacheMock.downloadTool).toHaveBeenCalledTimes(3);
-      // Expect 2 download warnings + checksum-related warnings = 4 total warnings
-      expect(coreMock.warning).toHaveBeenCalledTimes(4);
+      // Expect 2 download warnings + checksum debug message = 3 total warnings (downloadTool warnings only)
+      expect(coreMock.warning).toHaveBeenCalledTimes(3);
       expect(coreMock.info).toHaveBeenCalledWith(expect.stringContaining("Retrying download"));
     });
 
