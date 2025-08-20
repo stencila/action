@@ -43,7 +43,7 @@ describe("stencila.js", () => {
         if (url.includes("api.github.com")) {
           // Mock GitHub API response
           const assetsData = hasChecksum 
-            ? `{"assets":[{"name":"cli-v2.0.0-x86_64-unknown-linux-gnu.tar.gz","sha256":"${checksum}"}]}`
+            ? `{"assets":[{"name":"cli-v2.0.0-x86_64-unknown-linux-gnu.tar.gz","digest":"sha256:${checksum}"}]}`
             : '{"assets":[]}';
           
           callback({
@@ -221,7 +221,7 @@ describe("stencila.js", () => {
           statusCode: 200,
           on: vi.fn((event, cb) => {
             if (event === "data") {
-              cb('{"assets":[{"name":"cli-v2.0.0-x86_64-unknown-linux-gnu.tar.gz","sha256":"abc123"}]}');
+              cb('{"assets":[{"name":"cli-v2.0.0-x86_64-unknown-linux-gnu.tar.gz","digest":"sha256:abc123"}]}');
             } else if (event === "end") {
               cb();
             }
@@ -231,7 +231,7 @@ describe("stencila.js", () => {
       });
 
       const checksum = await fetchChecksumFromGitHub("v2.0.0", "x86_64-unknown-linux-gnu", "tar.gz");
-      expect(checksum).toBe("abc123");
+      expect(checksum).toBe("sha256:abc123");
       expect(coreMock.info).toHaveBeenCalledWith("📋 Found checksum for cli-v2.0.0-x86_64-unknown-linux-gnu.tar.gz from GitHub API");
     });
 
@@ -384,7 +384,7 @@ describe("stencila.js", () => {
             statusCode: 200,
             on: vi.fn((event, cb) => {
               if (event === "data") {
-                cb('{"assets":[{"name":"cli-v2.0.0-x86_64-unknown-linux-gnu.tar.gz","sha256":"7d865e959b2466918c9863afca942d0fb89d7c9ac0c99bafc3749504ded97730"}]}');
+                cb('{"assets":[{"name":"cli-v2.0.0-x86_64-unknown-linux-gnu.tar.gz","digest":"sha256:7d865e959b2466918c9863afca942d0fb89d7c9ac0c99bafc3749504ded97730"}]}');
               } else if (event === "end") {
                 cb();
               }
@@ -552,7 +552,7 @@ describe("stencila.js", () => {
             statusCode: 200,
             on: vi.fn((event, cb) => {
               if (event === "data") {
-                cb('{"assets":[{"name":"cli-v2.0.0-x86_64-unknown-linux-gnu.tar.gz","sha256":"expectedchecksum"}]}');
+                cb('{"assets":[{"name":"cli-v2.0.0-x86_64-unknown-linux-gnu.tar.gz","digest":"sha256:expectedchecksum"}]}');
               } else if (event === "end") {
                 cb();
               }

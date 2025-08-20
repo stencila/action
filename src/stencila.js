@@ -51,11 +51,11 @@ async function fetchChecksumFromGitHub(version, platformString, extension) {
             const release = JSON.parse(data);
             
             // Find the asset that matches our filename
-            const asset = release.assets?.find(a => a.name === filename);
+            const asset = release.assets?.find(/** @param {any} a */ a => a.name === filename);
             
-            if (asset && asset.sha256) {
+            if (asset && asset.digest) {
               core.info(`📋 Found checksum for ${filename} from GitHub API`);
-              resolve(asset.sha256);
+              resolve(asset.digest);
             } else {
               core.warning(`⚠️ No checksum found for ${filename} in GitHub release ${version}`);
               resolve(null);

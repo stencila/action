@@ -58,8 +58,7 @@ describe("summary.js", () => {
       const result = await publishSummary(context);
 
       expect(result).toBe(context);
-      expect(mockSummary.addImage).toHaveBeenCalledWith('https://stencila.io/web/v2.5.1/images/favicon.png', 'Stencila logo', {width: '32', height: '32'});
-      expect(mockSummary.addRaw).toHaveBeenCalledWith(" Stencila Action Summary");
+      expect(mockSummary.addRaw).toHaveBeenCalledWith("# <img src=https://stencila.io/web/v2.5.1/images/favicon.png width=32 height=32> Stencila Action Summary");
       expect(mockSummary.addHeading).toHaveBeenCalledWith("⚙️ Setup", 2);
       expect(mockSummary.write).toHaveBeenCalled();
     });
@@ -270,8 +269,7 @@ describe("summary.js", () => {
       await publishSummary(context);
 
       // Should have all section headings
-      expect(mockSummary.addImage).toHaveBeenCalledWith('https://stencila.io/web/v2.5.1/images/favicon.png', 'Stencila logo', {width: '32', height: '32'});
-      expect(mockSummary.addRaw).toHaveBeenCalledWith(" Stencila Action Summary");
+      expect(mockSummary.addRaw).toHaveBeenCalledWith("# <img src=https://stencila.io/web/v2.5.1/images/favicon.png width=32 height=32> Stencila Action Summary");
       expect(mockSummary.addHeading).toHaveBeenCalledWith("⚙️ Setup", 2);
       expect(mockSummary.addHeading).toHaveBeenCalledWith("🚀 Commands Executed", 2);
       expect(mockSummary.addHeading).toHaveBeenCalledWith("📦 Artifacts", 2);
