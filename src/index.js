@@ -8,6 +8,7 @@ import { installTools } from "./tools.js";
 import { runCommands } from "./runner.js";
 import { uploadArtifacts } from "./artifacts.js";
 import { createRelease } from "./release.js";
+import { publishSummary } from "./summary.js";
 
 async function run() {
   try {
@@ -21,6 +22,7 @@ async function run() {
     await core.group("Save cache", () => saveCache(context));
     await core.group("Upload artifacts", () => uploadArtifacts(context));
     await core.group("Create release", () => createRelease(context));
+    await publishSummary(context);
   } catch (error) {
     core.setFailed(error.message);
   }

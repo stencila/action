@@ -25,6 +25,7 @@
     "src/release.js",
     "src/runner.js",
     "src/stencila.js",
+    "src/summary.js",
     "src/tools.js",
     "src/**/*.d.ts"
   ],
