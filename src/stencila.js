@@ -57,7 +57,7 @@ async function fetchChecksumFromGitHub(version, platformString, extension) {
               core.info(`📋 Found checksum for ${filename} from GitHub API`);
               resolve(asset.digest);
             } else {
-              core.warning(`⚠️ No checksum found for ${filename} in GitHub release ${version}`);
+              core.debug(`⚠️ No checksum found for ${filename} in GitHub release ${version}`);
               resolve(null);
             }
           } catch (error) {
@@ -69,13 +69,13 @@ async function fetchChecksumFromGitHub(version, platformString, extension) {
     );
     
     req.on("error", (error) => {
-      core.warning(`⚠️ Failed to fetch checksum from GitHub API: ${error.message}`);
+      core.debug(`⚠️ Failed to fetch checksum from GitHub API: ${error.message}`);
       resolve(null);
     });
     
     req.setTimeout(10000, () => {
       req.destroy();
-      core.warning("⚠️ Timeout fetching checksum from GitHub API");
+      core.debug("⚠️ Timeout fetching checksum from GitHub API");
       resolve(null);
     });
   });
@@ -315,7 +315,7 @@ async function ensureStencila(context) {
         }
         stencilaInfo.checksumVerified = true;
       } else {
-        core.warning(`⚠️ No checksum available for ${resolvedVersion} on ${platformString} - skipping verification`);
+        core.warning(`⚠️ No checksum available for ${resolvedVersion} on ${platformString}, skipping verification`);
         stencilaInfo.checksumVerified = false;
       }
       
