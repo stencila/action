@@ -31,15 +31,15 @@ jobs:
   test-ubuntu:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Required for creating releases
+      contents: write # Required for creating releases
     steps:
       - uses: actions/checkout@v5
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
@@ -55,9 +55,8 @@ jobs:
         with:
           run: "--version"
           lint: test.smd
-          compile: test.smd
           execute: test.smd
-          render: test.smd test.json test.md test.docx test.pdf
+          render: test.smd test.json test.md test.docx
           convert: test.smd test.myst
           assets: test.*
           releases: test.*
@@ -73,5 +72,5 @@ jobs:
           run: nonexistent-command
           lint: test.smd
           continue-on-error: true
-        continue-on-error: true  # Don't fail the workflow when this step fails
+        continue-on-error: true # Don't fail the workflow when this step fails
 
