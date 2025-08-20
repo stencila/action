@@ -226,7 +226,7 @@ async function executeCommand(commandSpec, workingDirectory, assumeAnswer) {
       env: {
         ...process.env,
         // Force TTY-like behavior
-        FORCE_COLOR: '1',
+        FORCE_COLOR: 'true',
         NO_COLOR: undefined
       },
       listeners: {
