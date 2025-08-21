@@ -1,4 +1,10 @@
-A small test document with linting warnings and errors including citing [@foo].
+A small test document with linting warnings and errors.
+
+Citing a non existent reference [@foo].
+
+Using a non-existent TeX math command $\baz{}$.
+
+Using undefined variables:
 
 ```python exec
 a + b

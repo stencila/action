@@ -137986,56 +137986,24 @@ async function installTools(context) {
 
 
 
-
-
 /**
  * @typedef {import('./types.d.ts').Context} Context
  * @typedef {import('./types.d.ts').CommandResult} CommandResult
  */
 
-/**
- * Default timeout for command execution (10 minutes)
- */
-const DEFAULT_TIMEOUT_MS = 10 * 60 * 1000;
 
-/**
- * Problem matcher patterns for Stencila lint output
- */
-const LINT_PROBLEM_MATCHER = {
-  owner: "stencila-lint",
-  pattern: [
-    {
-      // Match the severity from the first line
-      regexp: "^\\[\\d+m(Error|Warning):\\[0m",
-      severity: 1
-    },
-    {
-      // Match the file location: e.g. test-lint.smd:1:73
-      regexp: "\\s+([^\\s:]+):(\\d+):(\\d+)\\s+",
-      file: 1,
-      line: 2,
-      column: 3
-    },
-    {
-      // Match the detailed message: e.g. ╰──── Unable to resolve citation target `foo`
-      regexp: "\\s*[╰─]+\\s*(.+)$",
-      message: 1,
-      loop: true
-    }
-  ]
-};
 
 /**
  * Secrets that should be masked in output
  */
-const SECRET_PATTERNS = [
+const SECRET_PATTERNS = (/* unused pure expression or super */ null && ([
   /GITHUB_TOKEN\s*=\s*\S+/gi,
   /API_KEY\s*=\s*\S+/gi,
   /PASSWORD\s*=\s*\S+/gi,
   /\b\w*SECRET\w*\s*=\s*\S+/gi,
   /\b\w*TOKEN\w*\s*=\s*\S+/gi,
   /\b\w*KEY\w*\s*=\s*\S+/gi
-];
+]));
 
 /**
  * Run Stencila commands with proper logging, timeouts, and error handling
@@ -138063,9 +138031,6 @@ async function runCommands(context) {
     return context;
   }
 
-  // Register problem matcher for lint commands
-  registerProblemMatcher();
-
   const results = [];
   let overallSuccess = true;
 
@@ -138084,8 +138049,6 @@ async function runCommands(context) {
       const commandResult = {
         command: `stencila ${command.command} ${command.args || ""}`.trim(),
         exitCode: result.exitCode,
-        stdout: result.stdout,
-        stderr: result.stderr,
         duration
       };
 
@@ -138096,11 +138059,6 @@ async function runCommands(context) {
       } else {
         overallSuccess = false;
         core.error(`❌ Command ${i + 1} failed with exit code ${result.exitCode} (${duration}ms)`);
-        
-        // Log stderr if present
-        if (result.stderr.trim()) {
-          core.error(`stderr: ${maskSecrets(result.stderr)}`);
-        }
 
         if (!continueOnError) {
           core.setFailed(`Stencila command failed with exit code ${result.exitCode}`);
@@ -138114,8 +138072,6 @@ async function runCommands(context) {
       const commandResult = {
         command: `stencila ${command.command} ${command.args || ""}`.trim(),
         exitCode: -1,
-        stdout: "",
-        stderr: error.message,
         duration
       };
 
@@ -138190,62 +138146,30 @@ function collectCommands(inputs) {
 }
 
 /**
- * Execute a single Stencila command with timeout and proper logging
+ * Execute a single Stencila command
  * @param {{command: string, args: string}} commandSpec - Command specification
  * @param {string} workingDirectory - Working directory for execution
  * @param {string} assumeAnswer - Assume answer for prompts
- * @returns {Promise<{exitCode: number, stdout: string, stderr: string}>} Execution result
+ * @returns {Promise<{exitCode: number}>} Execution result
  */
 async function executeCommand(commandSpec, workingDirectory, assumeAnswer) {
   const { command, args } = commandSpec;
   const cmdArgs = args ? args.split(" ") : [];
   const fullArgs = [command, ...cmdArgs, `--${assumeAnswer}`];
 
-  let stdout = "";
-  let stderr = "";
-  let timeoutId;
-
-  return new Promise((resolve, reject) => {
-    // Set up timeout
-    timeoutId = setTimeout(() => {
-      core.warning(`⚠️ Command timed out after ${DEFAULT_TIMEOUT_MS / 1000}s`);
-      reject(new Error(`Command timed out after ${DEFAULT_TIMEOUT_MS / 1000} seconds`));
-    }, DEFAULT_TIMEOUT_MS);
-
-    // Execute command with environment variables to encourage human-readable output
-    exec.exec("stencila", fullArgs, {
-      cwd: workingDirectory,
-      ignoreReturnCode: true,
-      env: {
-        ...process.env,
-        // Force TTY-like behavior
-        FORCE_COLOR: 'true',
-        NO_COLOR: undefined
-      },
-      listeners: {
-        stdout: (data) => {
-          const output = data.toString();
-          stdout += output;
-        },
-        stderr: (data) => {
-          const output = data.toString();
-          stderr += output;
-        }
-      }
-    })
-    .then((exitCode) => {
-      clearTimeout(timeoutId);
-      resolve({
-        exitCode,
-        stdout: stdout.trim(),
-        stderr: stderr.trim()
-      });
-    })
-    .catch((error) => {
-      clearTimeout(timeoutId);
-      reject(error);
-    });
+  // Execute command with environment variables to encourage human-readable output
+  const exitCode = await exec.exec("stencila", fullArgs, {
+    cwd: workingDirectory,
+    ignoreReturnCode: true,
+    env: {
+      ...process.env,
+      // Force TTY-like behavior
+      FORCE_COLOR: 'true',
+      NO_COLOR: undefined
+    }
   });
+
+  return { exitCode };
 }
 
 /**
@@ -138264,30 +138188,6 @@ function maskSecrets(text) {
   return maskedText;
 }
 
-/**
- * Register problem matcher for Stencila lint output
- */
-function registerProblemMatcher() {
-  try {
-    // Use a temporary directory to avoid bundling .github directory
-    const tempDir = external_path_.join(process.env.RUNNER_TEMP || "/tmp", "stencila-action");
-    const matcherPath = external_path_.join(tempDir, "stencila-lint-matcher.json");
-    
-    // Ensure temp directory exists
-    if (!external_fs_.existsSync(tempDir)) {
-      external_fs_.mkdirSync(tempDir, { recursive: true });
-    }
-
-    // Write matcher file
-    external_fs_.writeFileSync(matcherPath, JSON.stringify(LINT_PROBLEM_MATCHER, null, 2));
-    
-    // Register the matcher
-    core.info(`🔍 Registering problem matcher: ${matcherPath}`);
-    console.log(`::add-matcher::${matcherPath}`);
-  } catch (error) {
-    core.warning(`⚠️ Failed to register problem matcher: ${error.message}`);
-  }
-}
 
 
 // EXTERNAL MODULE: ./node_modules/@actions/artifact/lib/artifact.js

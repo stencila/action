@@ -21,8 +21,7 @@ const {
   runCommands,
   collectCommands,
   executeCommand,
-  maskSecrets,
-  registerProblemMatcher,
+  maskSecrets
 } = await import("../src/runner.js");
 
 describe("runner.js", () => {
@@ -33,8 +32,6 @@ describe("runner.js", () => {
 
     // Set up default fs mocks
     vi.mocked(fs.existsSync).mockReturnValue(true);
-    vi.mocked(fs.mkdirSync).mockImplementation(() => {});
-    vi.mocked(fs.writeFileSync).mockImplementation(() => {});
 
     // Set up default exec mocks
     execMock.exec.mockResolvedValue(0);
@@ -161,142 +158,17 @@ describe("runner.js", () => {
     });
   });
 
-  describe("registerProblemMatcher", () => {
-    it("should write problem matcher file and register it", () => {
-      const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
-
-      // Mock that directory doesn't exist initially
-      vi.mocked(fs.existsSync).mockReturnValue(false);
-
-      registerProblemMatcher();
-
-      // Verify temp directory creation
-      expect(fs.mkdirSync).toHaveBeenCalledWith(
-        expect.stringContaining("stencila-action"),
-        { recursive: true }
-      );
-
-      // Verify matcher file written
-      expect(fs.writeFileSync).toHaveBeenCalledWith(
-        expect.stringContaining("stencila-lint-matcher.json"),
-        expect.stringContaining("stencila-lint")
-      );
-
-      // Verify matcher registration
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("::add-matcher::")
-      );
-
-      consoleSpy.mockRestore();
-    });
-
-    it("should handle errors gracefully", () => {
-      vi.mocked(fs.existsSync).mockImplementation(() => {
-        throw new Error("Permission denied");
-      });
-
-      registerProblemMatcher();
-
-      expect(coreMock.warning).toHaveBeenCalledWith(
-        expect.stringContaining("Failed to register problem matcher")
-      );
-    });
-
-    it("should create patterns that match actual Stencila lint output", () => {
-      let capturedMatcher;
-      
-      // Capture the matcher content when written
-      vi.mocked(fs.writeFileSync).mockImplementation((path, content) => {
-        if (typeof content === 'string') {
-          capturedMatcher = JSON.parse(content);
-        }
-      });
-
-      registerProblemMatcher();
-
-      expect(capturedMatcher).toBeDefined();
-      expect(capturedMatcher.owner).toBe("stencila-lint");
-      expect(capturedMatcher.pattern).toHaveLength(3);
-
-      // Test actual Stencila lint output patterns generated from
-      // FORCE_COLOR=true stencila lint test-lint.smd
-      const actualOutput = `[31mError:[0m Citation error 
-   [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m test-lint.smd:1:73 [38;5;246m][0m
-   [38;5;246m│[0m
- [38;5;246m1 │[0m [38;5;249mA[0m[38;5;249m [0m[38;5;249ms[0m[38;5;249mm[0m[38;5;249ma[0m[38;5;249ml[0m[38;5;249ml[0m[38;5;249m [0m[38;5;249mt[0m[38;5;249me[0m[38;5;249ms[0m[38;5;249mt[0m[38;5;249m [0m[38;5;249md[0m[38;5;249mo[0m[38;5;249mc[0m[38;5;249mu[0m[38;5;249mm[0m[38;5;249me[0m[38;5;249mn[0m[38;5;249mt[0m[38;5;249m [0m[38;5;249mw[0m[38;5;249mi[0m[38;5;249mt[0m[38;5;249mh[0m[38;5;249m [0m[38;5;249ml[0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249mt[0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249mg[0m[38;5;249m [0m[38;5;249mw[0m[38;5;249ma[0m[38;5;249mr[0m[38;5;249mn[0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249mg[0m[38;5;249ms[0m[38;5;249m [0m[38;5;249ma[0m[38;5;249mn[0m[38;5;249md[0m[38;5;249m [0m[38;5;249me[0m[38;5;249mr[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249ms[0m[38;5;249m [0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249mc[0m[38;5;249ml[0m[38;5;249mu[0m[38;5;249md[0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249mg[0m[38;5;249m [0m[38;5;249mc[0m[38;5;249mi[0m[38;5;249mt[0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249mg[0m[38;5;249m [0m[@foo][38;5;249m.[0m
- [38;5;240m  │[0m                                                                         ───┬──  
- [38;5;240m  │[0m                                                                            ╰──── Unable to resolve citation target \`foo\`
-[38;5;246m───╯[0m`;
-
-      const lines = actualOutput.split('\n');
-
-      // Test pattern 1: Should match severity line
-      const severityPattern = new RegExp(capturedMatcher.pattern[0].regexp);
-      expect(severityPattern.test(lines[0])).toBe(true);
-      const severityMatch = lines[0].match(severityPattern);
-      expect(severityMatch[1]).toBe("Error");
-
-      // Test pattern 2: Should match file location
-      const fileLocationPattern = new RegExp(capturedMatcher.pattern[1].regexp);
-      let foundFileMatch = false;
-      for (const line of lines) {
-        if (fileLocationPattern.test(line)) {
-          const match = line.match(fileLocationPattern);
-          expect(match[1]).toBe("test-lint.smd");
-          expect(match[2]).toBe("1");
-          expect(match[3]).toBe("73");
-          foundFileMatch = true;
-          break;
-        }
-      }
-      expect(foundFileMatch).toBe(true);
-
-      // Test pattern 3: Should match detailed message
-      const messagePattern = new RegExp(capturedMatcher.pattern[2].regexp);
-      expect(messagePattern.test(lines[5])).toBe(true);
-      const messageMatch = lines[5].match(messagePattern);
-      expect(messageMatch[1]).toBe("Unable to resolve citation target `foo`");
-    });
-
-    it("should match Warning severity as well", () => {
-      let capturedMatcher;
-      
-      vi.mocked(fs.writeFileSync).mockImplementation((path, content) => {
-        if (typeof content === 'string') {
-          capturedMatcher = JSON.parse(content);
-        }
-      });
-
-      registerProblemMatcher();
-
-      const warningOutput = `[33mWarning:[0m Python CodeChunk Linting warning`;
-      const severityPattern = new RegExp(capturedMatcher.pattern[0].regexp);
-      expect(severityPattern.test(warningOutput)).toBe(true);
-      const match = warningOutput.match(severityPattern);
-      expect(match[1]).toBe("Warning");
-    });
-  });
-
   describe("executeCommand", () => {
     it("should execute command successfully", async () => {
       const commandSpec = { command: "convert", args: "doc.md --to html" };
 
       // Mock successful execution
-      execMock.exec.mockImplementation((cmd, args, options) => {
-        // Simulate stdout output
-        if (options.listeners && options.listeners.stdout) {
-          options.listeners.stdout(Buffer.from("Converting document..."));
-          options.listeners.stdout(Buffer.from("Done"));
-        }
-        return Promise.resolve(0);
-      });
+      execMock.exec.mockResolvedValue(0);
 
       const result = await executeCommand(commandSpec, "/tmp", "yes");
 
       expect(result).toEqual({
         exitCode: 0,
-        stdout: "Converting document...Done",
-        stderr: "",
       });
 
       expect(execMock.exec).toHaveBeenCalledWith(
@@ -313,50 +185,24 @@ describe("runner.js", () => {
       const commandSpec = { command: "lint", args: "invalid.py" };
 
       // Mock failed execution
-      execMock.exec.mockImplementation((cmd, args, options) => {
-        // Simulate stderr output
-        if (options.listeners && options.listeners.stderr) {
-          options.listeners.stderr(Buffer.from("Error: File not found"));
-        }
-        return Promise.resolve(1);
-      });
+      execMock.exec.mockResolvedValue(1);
 
       const result = await executeCommand(commandSpec, "/tmp", "yes");
 
       expect(result).toEqual({
         exitCode: 1,
-        stdout: "",
-        stderr: "Error: File not found",
       });
     });
 
-    it("should handle execution timeout", async () => {
-      const commandSpec = { command: "execute", args: "slow.ipynb" };
+    it("should handle execution errors", async () => {
+      const commandSpec = { command: "execute", args: "invalid.ipynb" };
 
-      // Mock slow execution that never resolves
-      execMock.exec.mockImplementation(() => {
-        return new Promise(() => {}); // Never resolves
-      });
-
-      // Use short timeout for testing
-      const originalTimeout = 10 * 60 * 1000;
-      const shortTimeout = 100; // 100ms
-
-      // Temporarily replace the timeout constant by mocking setTimeout
-      const originalSetTimeout = global.setTimeout;
-      global.setTimeout = vi.fn((callback, delay) => {
-        if (delay === originalTimeout) {
-          // Replace with short timeout for testing
-          return originalSetTimeout(callback, shortTimeout);
-        }
-        return originalSetTimeout(callback, delay);
-      });
+      // Mock execution that throws error
+      execMock.exec.mockRejectedValue(new Error("Command not found"));
 
       await expect(executeCommand(commandSpec, "/tmp", "yes")).rejects.toThrow(
-        "Command timed out after 600 seconds"
+        "Command not found"
       );
-
-      global.setTimeout = originalSetTimeout;
     });
 
     it("should handle no args", async () => {
@@ -476,7 +322,6 @@ describe("runner.js", () => {
       expect(context.results[0]).toMatchObject({
         command: "stencila convert doc.md",
         exitCode: -1,
-        stderr: "Command not found",
       });
     });
 
@@ -498,16 +343,6 @@ describe("runner.js", () => {
 
       await expect(runCommands({ inputs: {} })).rejects.toThrow(
         "Context must have stencila info populated"
-      );
-    });
-
-    it("should register problem matcher", async () => {
-      execMock.exec.mockResolvedValue(0);
-
-      await runCommands(context);
-
-      expect(coreMock.info).toHaveBeenCalledWith(
-        expect.stringContaining("🔍 Registering problem matcher")
       );
     });
 
