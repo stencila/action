@@ -73,4 +73,4 @@ jobs:
           run: nonexistent-command
           lint: test-lint.smd
           continue-on-error: true
-        continue-on-error: true # Don't fail the workflow when this step fails
+        #continue-on-error: true # Don't fail the workflow when this step fails
