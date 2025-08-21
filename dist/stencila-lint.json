@@ -2,12 +2,8 @@
   "problemMatcher": [
     {
       "owner": "stencila-lint",
+      "severity": "error",
       "pattern": [
-        {
-          "regexp": "^.*?(Error|Warning|Advice):(.*)$",
-          "severity": 1,
-          "message": 2
-        },
         {
           "regexp": "^.*?\\[[^\\w]*([^:]+):(\\d+):(\\d+)(.*)$",
           "file": 1,

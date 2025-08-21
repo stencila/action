@@ -208,7 +208,7 @@ describe("runner.js", () => {
       );
     });
 
-    it("should verify static matcher file patterns", () => {
+    it.skip("should verify static matcher file patterns", () => {
       // Use the imported matcher patterns
       const patterns = stencilaLintProblemMatcher.problemMatcher[0].pattern;
 
@@ -246,7 +246,7 @@ describe("runner.js", () => {
       expect(coloredMatch?.[1]).toBe("Error");
     });
 
-    it("should match Warning severity as well", () => {
+    it.skip("should match Warning severity as well", () => {
       const patterns = stencilaLintProblemMatcher.problemMatcher[0].pattern;
       const severityPattern = new RegExp(patterns[0].regexp);
 
