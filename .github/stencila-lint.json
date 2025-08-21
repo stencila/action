@@ -4,17 +4,17 @@
       "owner": "stencila-lint",
       "pattern": [
         {
-          "regexp": "^\\[\\d+m(Error|Warning):\\[0m",
+          "regexp": "^.*?(Error|Warning|Advice):.*$",
           "severity": 1
         },
         {
-          "regexp": "\\s+\\[\\d+;\\d+;\\d+m╭\\[0m.*\\[\\[0m\\s+([^:]+):(\\d+):(\\d+)",
+          "regexp": "^.*?\\[[^\\w]*([^:]+):(\\d+):(\\d+).*$",
           "file": 1,
           "line": 2,
           "column": 3
         },
         {
-          "regexp": "\\s*╰────\\s+(.+)$",
+          "regexp": "^.*?╰─+\\s+(.+)$",
           "message": 1,
           "loop": true
         }

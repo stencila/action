@@ -5,6 +5,8 @@ import fs from "fs";
 
 import { createCoreMock, createExecMock } from "./helpers/mock-actions.js";
 
+import stencilaLintProblemMatcher from "../.github/stencila-lint.json";
+
 // Create the mocks at the top level
 const coreMock = createCoreMock();
 const execMock = createExecMock();
@@ -33,8 +35,6 @@ describe("runner.js", () => {
 
     // Set up default fs mocks
     vi.mocked(fs.existsSync).mockReturnValue(true);
-    vi.mocked(fs.mkdirSync).mockImplementation(() => {});
-    vi.mocked(fs.writeFileSync).mockImplementation(() => {});
 
     // Set up default exec mocks
     execMock.exec.mockResolvedValue(0);
@@ -209,55 +209,65 @@ describe("runner.js", () => {
     });
 
     it("should verify static matcher file patterns", () => {
-      // Define the expected pattern structure for the static file
-      const expectedPatterns = [
-        {
-          regexp: "^\\[\\d+m(Error|Warning):\\[0m",
-          severity: 1
-        },
-        {
-          regexp: "\\s+\\[\\d+;\\d+;\\d+m╭\\[0m.*\\[\\[0m\\s+([^:]+):(\\d+):(\\d+)",
-          file: 1,
-          line: 2,
-          column: 3
-        },
-        {
-          regexp: "\\s*╰────\\s+(.+)$",
-          message: 1,
-          loop: true
-        }
-      ];
+      // Use the imported matcher patterns
+      const patterns = stencilaLintProblemMatcher.problemMatcher[0].pattern;
 
-      // Test actual Stencila lint output patterns
-      const actualOutput = `[31mError:[0m Citation error`;
-      const severityPattern = new RegExp(expectedPatterns[0].regexp);
-      expect(severityPattern.test(actualOutput)).toBe(true);
-      const severityMatch = actualOutput.match(severityPattern);
+      // Test actual Stencila lint output - plain (GitHub Actions)
+      const plainOutput = `Error: Citation error 
+   ╭─[ test-lint.smd:3:33 ]
+   │
+ 3 │ Citing a non existent reference [@foo].
+   │                                 ───┬──  
+   │                                    ╰──── Unable to resolve citation target \`foo\`
+───╯`;
+
+      const plainLines = plainOutput.split("\n");
+
+      // Test severity pattern
+      const severityPattern = new RegExp(patterns[0].regexp);
+      const severityLine = plainLines[0];
+      expect(severityPattern.test(severityLine)).toBe(true);
+      const severityMatch = severityLine.match(severityPattern);
       expect(severityMatch?.[1]).toBe("Error");
 
       // Test file location pattern
-      const fileLocationLine = `   [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m test-lint.smd:3:33`;
-      const fileLocationPattern = new RegExp(expectedPatterns[1].regexp);
-      expect(fileLocationPattern.test(fileLocationLine)).toBe(true);
-      const fileMatch = fileLocationLine.match(fileLocationPattern);
+      const filePattern = new RegExp(patterns[1].regexp);
+      const fileLine = plainLines[1];
+      expect(filePattern.test(fileLine)).toBe(true);
+      const fileMatch = fileLine.match(filePattern);
       expect(fileMatch?.[1]).toBe("test-lint.smd");
       expect(fileMatch?.[2]).toBe("3");
       expect(fileMatch?.[3]).toBe("33");
 
       // Test message pattern
-      const messageLine = `                                    ╰──── Unable to resolve citation target \`foo\``;
-      const messagePattern = new RegExp(expectedPatterns[2].regexp);
+      const messagePattern = new RegExp(patterns[2].regexp);
+      const messageLine = plainLines[5];
       expect(messagePattern.test(messageLine)).toBe(true);
       const messageMatch = messageLine.match(messagePattern);
       expect(messageMatch?.[1]).toBe("Unable to resolve citation target `foo`");
+
+      // Also test with ANSI color codes (local dev)
+      const coloredOutput = `[31mError:[0m Citation error`;
+      expect(severityPattern.test(coloredOutput)).toBe(true);
+      const coloredMatch = coloredOutput.match(severityPattern);
+      expect(coloredMatch?.[1]).toBe("Error");
     });
 
     it("should match Warning severity as well", () => {
-      const warningOutput = `[33mWarning:[0m Python CodeChunk Linting warning`;
-      const severityPattern = /^\[\d+m(Error|Warning):\[0m/;
-      expect(severityPattern.test(warningOutput)).toBe(true);
-      const match = warningOutput.match(severityPattern);
-      expect(match?.[1]).toBe("Warning");
+      const patterns = stencilaLintProblemMatcher.problemMatcher[0].pattern;
+      const severityPattern = new RegExp(patterns[0].regexp);
+
+      // Test plain warning
+      const plainWarning = `Warning: Python CodeChunk Linting warning`;
+      expect(severityPattern.test(plainWarning)).toBe(true);
+      const plainMatch = plainWarning.match(severityPattern);
+      expect(plainMatch?.[1]).toBe("Warning");
+
+      // Test colored warning
+      const coloredWarning = `[33mWarning:[0m Python CodeChunk Linting warning`;
+      expect(severityPattern.test(coloredWarning)).toBe(true);
+      const coloredMatch = coloredWarning.match(severityPattern);
+      expect(coloredMatch?.[1]).toBe("Warning");
     });
   });
 
