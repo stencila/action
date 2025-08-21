@@ -4,19 +4,15 @@
       "owner": "stencila-lint",
       "pattern": [
         {
-          "regexp": "^.*?(Error|Warning|Advice):.*$",
-          "severity": 1
+          "regexp": "^.*?(Error|Warning|Advice):(.*)$",
+          "severity": 1,
+          "message": 2
         },
         {
           "regexp": "^.*?\\[[^\\w]*([^:]+):(\\d+):(\\d+).*$",
           "file": 1,
           "line": 2,
           "column": 3
-        },
-        {
-          "regexp": "^.*?╰─+\\s+(.+)$",
-          "message": 1,
-          "loop": true
         }
       ]
     }
