@@ -137986,8 +137986,6 @@ async function installTools(context) {
 
 
 
-
-
 /**
  * @typedef {import('./types.d.ts').Context} Context
  * @typedef {import('./types.d.ts').CommandResult} CommandResult
@@ -138032,9 +138030,6 @@ async function runCommands(context) {
     context.results = [];
     return context;
   }
-
-  // Register problem matcher for lint commands
-  registerProblemMatcher();
 
   const results = [];
   let overallSuccess = true;
@@ -138191,33 +138186,6 @@ function maskSecrets(text) {
   }
 
   return maskedText;
-}
-
-/**
- * Register problem matcher for Stencila lint output
- */
-function registerProblemMatcher() {
-  try {
-    // Use static problem matcher file from .github directory
-    const matcherPath = __nccwpck_require__.ab + "stencila-lint.json";
-    
-    // Verify the matcher file exists
-    if (!external_fs_.existsSync(__nccwpck_require__.ab + "stencila-lint.json")) {
-      core.warning(`⚠️ Problem matcher file not found at ${matcherPath}`);
-      return;
-    }
-    
-    // Register the matcher using the proper GitHub Actions syntax
-    core.info(`🔍 Registering problem matcher: ${matcherPath}`);
-  
-    // Use the same approach used by other actions to register matcher e.g.
-    //   https://github.com/actions/setup-node/blob/5e2628c959b9ade56971c0afcebbe5332d44b398/src/main.ts#L72
-    //   https://github.com/actions/setup-python/blob/9322b3ca74000aeb2c01eb777b646334015ddd72/src/setup-python.ts#L203
-    // (although note newer syntax mentioned at https://github.com/actions/toolkit/blob/main/docs/commands.md#problem-matchers)
-    core.info(`##[add-matcher]${matcherPath}`);
-  } catch (error) {
-    core.warning(`⚠️ Failed to register problem matcher: ${error.message}`);
-  }
 }
 
 

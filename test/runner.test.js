@@ -5,8 +5,6 @@ import fs from "fs";
 
 import { createCoreMock, createExecMock } from "./helpers/mock-actions.js";
 
-import stencilaLintProblemMatcher from "../.github/stencila-lint.json";
-
 // Create the mocks at the top level
 const coreMock = createCoreMock();
 const execMock = createExecMock();
@@ -23,8 +21,7 @@ const {
   runCommands,
   collectCommands,
   executeCommand,
-  maskSecrets,
-  registerProblemMatcher,
+  maskSecrets
 } = await import("../src/runner.js");
 
 describe("runner.js", () => {
@@ -158,109 +155,6 @@ describe("runner.js", () => {
       const masked = maskSecrets(text);
 
       expect(masked).toBe("*** *** ***");
-    });
-  });
-
-  describe("registerProblemMatcher", () => {
-    it("should register static problem matcher file", () => {
-      // Mock that the static matcher file exists
-      vi.mocked(fs.existsSync).mockReturnValue(true);
-
-      registerProblemMatcher();
-
-      // Verify it checks for the static file
-      expect(fs.existsSync).toHaveBeenCalledWith(
-        expect.stringContaining(".github/stencila-lint.json")
-      );
-
-      // Verify matcher registration
-      expect(coreMock.info).toHaveBeenCalledWith(
-        expect.stringContaining("#[add-matcher]")
-      );
-    });
-
-    it("should handle errors gracefully", () => {
-      vi.mocked(fs.existsSync).mockImplementation(() => {
-        throw new Error("Permission denied");
-      });
-
-      registerProblemMatcher();
-
-      expect(coreMock.warning).toHaveBeenCalledWith(
-        expect.stringContaining("Failed to register problem matcher")
-      );
-    });
-
-    it("should handle missing static matcher file", () => {
-      // Mock that the static matcher file doesn't exist
-      vi.mocked(fs.existsSync).mockReturnValue(false);
-
-      registerProblemMatcher();
-
-      // Verify warning is logged
-      expect(coreMock.warning).toHaveBeenCalledWith(
-        expect.stringContaining("Problem matcher file not found")
-      );
-
-      // Verify no registration attempt
-      expect(coreMock.info).not.toHaveBeenCalledWith(
-        expect.stringContaining("##[add-matcher]")
-      );
-    });
-
-    it.skip("should verify static matcher file patterns", () => {
-      // Use the imported matcher patterns
-      const patterns = stencilaLintProblemMatcher.problemMatcher[0].pattern;
-
-      // Test actual Stencila lint output - plain (GitHub Actions)
-      const plainOutput = `Error: Citation error 
-   ╭─[ test-lint.smd:3:33 ]
-   │
- 3 │ Citing a non existent reference [@foo].
-   │                                 ───┬──  
-   │                                    ╰──── Unable to resolve citation target \`foo\`
-───╯`;
-
-      const plainLines = plainOutput.split("\n");
-
-      // Test severity pattern
-      const severityPattern = new RegExp(patterns[0].regexp);
-      const severityLine = plainLines[0];
-      expect(severityPattern.test(severityLine)).toBe(true);
-      const severityMatch = severityLine.match(severityPattern);
-      expect(severityMatch?.[1]).toBe("Error");
-
-      // Test file location pattern
-      const filePattern = new RegExp(patterns[1].regexp);
-      const fileLine = plainLines[1];
-      expect(filePattern.test(fileLine)).toBe(true);
-      const fileMatch = fileLine.match(filePattern);
-      expect(fileMatch?.[1]).toBe("test-lint.smd");
-      expect(fileMatch?.[2]).toBe("3");
-      expect(fileMatch?.[3]).toBe("33");
-
-      // Also test with ANSI color codes (local dev)
-      const coloredOutput = `[31mError:[0m Citation error`;
-      expect(severityPattern.test(coloredOutput)).toBe(true);
-      const coloredMatch = coloredOutput.match(severityPattern);
-      expect(coloredMatch?.[1]).toBe("Error");
-    });
-
-    it.skip("should match Warning severity as well", () => {
-      const patterns = stencilaLintProblemMatcher.problemMatcher[0].pattern;
-      const severityPattern = new RegExp(patterns[0].regexp);
-
-      // Test plain warning
-      const plainWarning = `Warning: Python CodeChunk Linting warning`;
-      expect(severityPattern.test(plainWarning)).toBe(true);
-      const plainMatch = plainWarning.match(severityPattern);
-      expect(plainMatch?.[1]).toBe("Warning");
-
-      // Test colored warning
-      const coloredWarning = `[33mWarning:[0m Python CodeChunk Linting warning`;
-      expect(severityPattern.test(coloredWarning)).toBe(true);
-      const coloredMatch = coloredWarning.match(severityPattern);
-      expect(coloredMatch?.[1]).toBe("Warning");
     });
   });
 
@@ -449,16 +343,6 @@ describe("runner.js", () => {
 
       await expect(runCommands({ inputs: {} })).rejects.toThrow(
         "Context must have stencila info populated"
-      );
-    });
-
-    it("should register problem matcher", async () => {
-      execMock.exec.mockResolvedValue(0);
-
-      await runCommands(context);
-
-      expect(coreMock.info).toHaveBeenCalledWith(
-        expect.stringContaining("🔍 Registering problem matcher")
       );
     });
 
