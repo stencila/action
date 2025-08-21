@@ -1,0 +1,24 @@
+{
+  "problemMatcher": [
+    {
+      "owner": "stencila-lint",
+      "pattern": [
+        {
+          "regexp": "^\\[\\d+m(Error|Warning):\\[0m",
+          "severity": 1
+        },
+        {
+          "regexp": "\\s+\\[\\d+;\\d+;\\d+m╭\\[0m.*\\[\\[0m\\s+([^:]+):(\\d+):(\\d+)",
+          "file": 1,
+          "line": 2,
+          "column": 3
+        },
+        {
+          "regexp": "\\s*╰────\\s+(.+)$",
+          "message": 1,
+          "loop": true
+        }
+      ]
+    }
+  ]
+}

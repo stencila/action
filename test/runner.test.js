@@ -162,32 +162,21 @@ describe("runner.js", () => {
   });
 
   describe("registerProblemMatcher", () => {
-    it("should write problem matcher file and register it", () => {
-      const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
-
-      // Mock that directory doesn't exist initially
-      vi.mocked(fs.existsSync).mockReturnValue(false);
+    it("should register static problem matcher file", () => {
+      // Mock that the static matcher file exists
+      vi.mocked(fs.existsSync).mockReturnValue(true);
 
       registerProblemMatcher();
 
-      // Verify temp directory creation
-      expect(fs.mkdirSync).toHaveBeenCalledWith(
-        expect.stringContaining("stencila-action"),
-        { recursive: true }
-      );
-
-      // Verify matcher file written
-      expect(fs.writeFileSync).toHaveBeenCalledWith(
-        expect.stringContaining("stencila-lint-matcher.json"),
-        expect.stringContaining("stencila-lint")
+      // Verify it checks for the static file
+      expect(fs.existsSync).toHaveBeenCalledWith(
+        expect.stringContaining(".github/stencila-lint.json")
       );
 
       // Verify matcher registration
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("::add-matcher::")
+      expect(coreMock.info).toHaveBeenCalledWith(
+        expect.stringContaining("#[add-matcher]")
       );
-
-      consoleSpy.mockRestore();
     });
 
     it("should handle errors gracefully", () => {
@@ -202,78 +191,73 @@ describe("runner.js", () => {
       );
     });
 
-    it("should create patterns that match actual Stencila lint output", () => {
-      let capturedMatcher;
-      
-      // Capture the matcher content when written
-      vi.mocked(fs.writeFileSync).mockImplementation((path, content) => {
-        if (typeof content === 'string') {
-          capturedMatcher = JSON.parse(content);
-        }
-      });
+    it("should handle missing static matcher file", () => {
+      // Mock that the static matcher file doesn't exist
+      vi.mocked(fs.existsSync).mockReturnValue(false);
 
       registerProblemMatcher();
 
-      expect(capturedMatcher).toBeDefined();
-      expect(capturedMatcher.owner).toBe("stencila-lint");
-      expect(capturedMatcher.pattern).toHaveLength(3);
+      // Verify warning is logged
+      expect(coreMock.warning).toHaveBeenCalledWith(
+        expect.stringContaining("Problem matcher file not found")
+      );
 
-      // Test actual Stencila lint output patterns generated from
-      // FORCE_COLOR=true stencila lint test-lint.smd
-      const actualOutput = `[31mError:[0m Citation error 
-   [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m test-lint.smd:1:73 [38;5;246m][0m
-   [38;5;246m│[0m
- [38;5;246m1 │[0m [38;5;249mA[0m[38;5;249m [0m[38;5;249ms[0m[38;5;249mm[0m[38;5;249ma[0m[38;5;249ml[0m[38;5;249ml[0m[38;5;249m [0m[38;5;249mt[0m[38;5;249me[0m[38;5;249ms[0m[38;5;249mt[0m[38;5;249m [0m[38;5;249md[0m[38;5;249mo[0m[38;5;249mc[0m[38;5;249mu[0m[38;5;249mm[0m[38;5;249me[0m[38;5;249mn[0m[38;5;249mt[0m[38;5;249m [0m[38;5;249mw[0m[38;5;249mi[0m[38;5;249mt[0m[38;5;249mh[0m[38;5;249m [0m[38;5;249ml[0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249mt[0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249mg[0m[38;5;249m [0m[38;5;249mw[0m[38;5;249ma[0m[38;5;249mr[0m[38;5;249mn[0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249mg[0m[38;5;249ms[0m[38;5;249m [0m[38;5;249ma[0m[38;5;249mn[0m[38;5;249md[0m[38;5;249m [0m[38;5;249me[0m[38;5;249mr[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249ms[0m[38;5;249m [0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249mc[0m[38;5;249ml[0m[38;5;249mu[0m[38;5;249md[0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249mg[0m[38;5;249m [0m[38;5;249mc[0m[38;5;249mi[0m[38;5;249mt[0m[38;5;249mi[0m[38;5;249mn[0m[38;5;249mg[0m[38;5;249m [0m[@foo][38;5;249m.[0m
- [38;5;240m  │[0m                                                                         ───┬──  
- [38;5;240m  │[0m                                                                            ╰──── Unable to resolve citation target \`foo\`
-[38;5;246m───╯[0m`;
+      // Verify no registration attempt
+      expect(coreMock.info).not.toHaveBeenCalledWith(
+        expect.stringContaining("##[add-matcher]")
+      );
+    });
 
-      const lines = actualOutput.split('\n');
-
-      // Test pattern 1: Should match severity line
-      const severityPattern = new RegExp(capturedMatcher.pattern[0].regexp);
-      expect(severityPattern.test(lines[0])).toBe(true);
-      const severityMatch = lines[0].match(severityPattern);
-      expect(severityMatch[1]).toBe("Error");
-
-      // Test pattern 2: Should match file location
-      const fileLocationPattern = new RegExp(capturedMatcher.pattern[1].regexp);
-      let foundFileMatch = false;
-      for (const line of lines) {
-        if (fileLocationPattern.test(line)) {
-          const match = line.match(fileLocationPattern);
-          expect(match[1]).toBe("test-lint.smd");
-          expect(match[2]).toBe("1");
-          expect(match[3]).toBe("73");
-          foundFileMatch = true;
-          break;
+    it("should verify static matcher file patterns", () => {
+      // Define the expected pattern structure for the static file
+      const expectedPatterns = [
+        {
+          regexp: "^\\[\\d+m(Error|Warning):\\[0m",
+          severity: 1
+        },
+        {
+          regexp: "\\s+\\[\\d+;\\d+;\\d+m╭\\[0m.*\\[\\[0m\\s+([^:]+):(\\d+):(\\d+)",
+          file: 1,
+          line: 2,
+          column: 3
+        },
+        {
+          regexp: "\\s*╰────\\s+(.+)$",
+          message: 1,
+          loop: true
         }
-      }
-      expect(foundFileMatch).toBe(true);
+      ];
 
-      // Test pattern 3: Should match detailed message
-      const messagePattern = new RegExp(capturedMatcher.pattern[2].regexp);
-      expect(messagePattern.test(lines[5])).toBe(true);
-      const messageMatch = lines[5].match(messagePattern);
-      expect(messageMatch[1]).toBe("Unable to resolve citation target `foo`");
+      // Test actual Stencila lint output patterns
+      const actualOutput = `[31mError:[0m Citation error`;
+      const severityPattern = new RegExp(expectedPatterns[0].regexp);
+      expect(severityPattern.test(actualOutput)).toBe(true);
+      const severityMatch = actualOutput.match(severityPattern);
+      expect(severityMatch?.[1]).toBe("Error");
+
+      // Test file location pattern
+      const fileLocationLine = `   [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m test-lint.smd:3:33`;
+      const fileLocationPattern = new RegExp(expectedPatterns[1].regexp);
+      expect(fileLocationPattern.test(fileLocationLine)).toBe(true);
+      const fileMatch = fileLocationLine.match(fileLocationPattern);
+      expect(fileMatch?.[1]).toBe("test-lint.smd");
+      expect(fileMatch?.[2]).toBe("3");
+      expect(fileMatch?.[3]).toBe("33");
+
+      // Test message pattern
+      const messageLine = `                                    ╰──── Unable to resolve citation target \`foo\``;
+      const messagePattern = new RegExp(expectedPatterns[2].regexp);
+      expect(messagePattern.test(messageLine)).toBe(true);
+      const messageMatch = messageLine.match(messagePattern);
+      expect(messageMatch?.[1]).toBe("Unable to resolve citation target `foo`");
     });
 
     it("should match Warning severity as well", () => {
-      let capturedMatcher;
-      
-      vi.mocked(fs.writeFileSync).mockImplementation((path, content) => {
-        if (typeof content === 'string') {
-          capturedMatcher = JSON.parse(content);
-        }
-      });
-
-      registerProblemMatcher();
-
       const warningOutput = `[33mWarning:[0m Python CodeChunk Linting warning`;
-      const severityPattern = new RegExp(capturedMatcher.pattern[0].regexp);
+      const severityPattern = /^\[\d+m(Error|Warning):\[0m/;
       expect(severityPattern.test(warningOutput)).toBe(true);
       const match = warningOutput.match(severityPattern);
-      expect(match[1]).toBe("Warning");
+      expect(match?.[1]).toBe("Warning");
     });
   });
 

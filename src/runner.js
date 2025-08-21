@@ -11,32 +11,6 @@ import path from "path";
  */
 
 
-/**
- * Problem matcher patterns for Stencila lint output
- */
-const LINT_PROBLEM_MATCHER = {
-  owner: "stencila-lint",
-  pattern: [
-    {
-      // Match the severity from the first line
-      regexp: "^\\[\\d+m(Error|Warning):\\[0m",
-      severity: 1
-    },
-    {
-      // Match the file location: e.g. test-lint.smd:1:73
-      regexp: "\\s+([^\\s:]+):(\\d+):(\\d+)\\s+",
-      file: 1,
-      line: 2,
-      column: 3
-    },
-    {
-      // Match the detailed message: e.g. ╰──── Unable to resolve citation target `foo`
-      regexp: "\\s*[╰─]+\\s*(.+)$",
-      message: 1,
-      loop: true
-    }
-  ]
-};
 
 /**
  * Secrets that should be masked in output
@@ -241,21 +215,23 @@ function maskSecrets(text) {
  */
 function registerProblemMatcher() {
   try {
-    // Use a temporary directory to avoid bundling .github directory
-    const tempDir = path.join(process.env.RUNNER_TEMP || "/tmp", "stencila-action");
-    const matcherPath = path.join(tempDir, "stencila-lint-matcher.json");
+    // Use static problem matcher file from .github directory
+    const matcherPath = path.join(__dirname, '..', '.github', 'stencila-lint.json');
     
-    // Ensure temp directory exists
-    if (!fs.existsSync(tempDir)) {
-      fs.mkdirSync(tempDir, { recursive: true });
+    // Verify the matcher file exists
+    if (!fs.existsSync(matcherPath)) {
+      core.warning(`⚠️ Problem matcher file not found at ${matcherPath}`);
+      return;
     }
-
-    // Write matcher file
-    fs.writeFileSync(matcherPath, JSON.stringify(LINT_PROBLEM_MATCHER, null, 2));
     
-    // Register the matcher
+    // Register the matcher using the proper GitHub Actions syntax
     core.info(`🔍 Registering problem matcher: ${matcherPath}`);
-    console.log(`::add-matcher::${matcherPath}`);
+  
+    // Use the same approach used by other actions to register matcher e.g.
+    //   https://github.com/actions/setup-node/blob/5e2628c959b9ade56971c0afcebbe5332d44b398/src/main.ts#L72
+    //   https://github.com/actions/setup-python/blob/9322b3ca74000aeb2c01eb777b646334015ddd72/src/setup-python.ts#L203
+    // (although note newer syntax mentioned at https://github.com/actions/toolkit/blob/main/docs/commands.md#problem-matchers)
+    core.info(`##[add-matcher]${matcherPath}`);
   } catch (error) {
     core.warning(`⚠️ Failed to register problem matcher: ${error.message}`);
   }
