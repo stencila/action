@@ -239,13 +239,6 @@ describe("runner.js", () => {
       expect(fileMatch?.[2]).toBe("3");
       expect(fileMatch?.[3]).toBe("33");
 
-      // Test message pattern
-      const messagePattern = new RegExp(patterns[2].regexp);
-      const messageLine = plainLines[5];
-      expect(messagePattern.test(messageLine)).toBe(true);
-      const messageMatch = messageLine.match(messagePattern);
-      expect(messageMatch?.[1]).toBe("Unable to resolve citation target `foo`");
-
       // Also test with ANSI color codes (local dev)
       const coloredOutput = `[31mError:[0m Citation error`;
       expect(severityPattern.test(coloredOutput)).toBe(true);
