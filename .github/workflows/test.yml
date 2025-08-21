@@ -74,3 +74,6 @@ jobs:
           lint: test-lint.smd
           continue-on-error: true
         continue-on-error: true # Don't fail the workflow when this step fails
+
+      - name: Test annotation
+        run: echo "::error file=test-lint.smd,line=1::This is an error"
