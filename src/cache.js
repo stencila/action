@@ -1,9 +1,9 @@
 // @ts-check
 
-import * as cache from "@actions/cache";
-import * as core from "@actions/core";
-import fs from "fs";
-import path from "path";
+import * as cache from '@actions/cache';
+import * as core from '@actions/core';
+import fs from 'fs';
+import path from 'path';
 
 /**
  * @typedef {import('./types.d.ts').Context} Context
@@ -16,22 +16,22 @@ import path from "path";
  */
 async function restoreCache(context) {
   if (!context.inputs) {
-    throw new Error("Context must have inputs populated before restoring cache");
+    throw new Error('Context must have inputs populated before restoring cache');
   }
 
   if (!context.env) {
-    throw new Error("Context must have environment populated before restoring cache");
+    throw new Error('Context must have environment populated before restoring cache');
   }
 
   if (!context.stencila) {
-    throw new Error("Context must have Stencila info populated before restoring cache");
+    throw new Error('Context must have Stencila info populated before restoring cache');
   }
 
   const { inputs, env, stencila } = context;
   const { workingDirectory, cache: useCache } = inputs;
-  
+
   if (!useCache) {
-    core.debug("📦 Cache disabled, skipping cache operations");
+    core.debug('📦 Cache disabled, skipping cache operations');
     return context;
   }
 
@@ -40,14 +40,14 @@ async function restoreCache(context) {
     const { platform, arch } = env;
     const { resolvedVersion } = stencila;
     const cacheKey = `stencila-cache-${platform}-${arch}-${resolvedVersion}-${
-      process.env.GITHUB_SHA || "default"
+      process.env.GITHUB_SHA || 'default'
     }`;
     const restoreKeys = [
       `stencila-cache-${platform}-${arch}-${resolvedVersion}-`,
       `stencila-cache-${platform}-${arch}-`,
     ];
 
-    const stencilaCachePath = path.join(workingDirectory, ".stencila");
+    const stencilaCachePath = path.join(workingDirectory, '.stencila');
 
     core.info(`🔄 Restoring .stencila cache with key: ${cacheKey}`);
     const cacheHit = await cache.restoreCache(
@@ -59,7 +59,7 @@ async function restoreCache(context) {
     if (cacheHit) {
       core.info(`✅ Cache restored from key: ${cacheHit}`);
     } else {
-      core.info("ℹ️ No cache found, starting fresh");
+      core.info('ℹ️ No cache found, starting fresh');
     }
 
     // Store cache info in context for later save operation
@@ -84,24 +84,24 @@ async function restoreCache(context) {
  */
 async function saveCache(context) {
   if (!context.inputs) {
-    throw new Error("Context must have inputs populated before saving cache");
+    throw new Error('Context must have inputs populated before saving cache');
   }
 
   const { inputs } = context;
   const { cache: useCache } = inputs;
-  
+
   if (!useCache) {
-    core.debug("📦 Cache disabled, skipping save");
+    core.debug('📦 Cache disabled, skipping save');
     return context;
   }
 
   if (!context.cache) {
-    core.debug("📦 No cache info available, skipping save");
+    core.debug('📦 No cache info available, skipping save');
     return context;
   }
 
   if (!context.results || context.results.length === 0) {
-    core.debug("📦 No commands executed, skipping cache save");
+    core.debug('📦 No commands executed, skipping cache save');
     return context;
   }
 
@@ -115,13 +115,13 @@ async function saveCache(context) {
   try {
     core.info(`💾 Saving .stencila cache with key: ${cacheKey}`);
     await cache.saveCache([stencilaCachePath], cacheKey);
-    core.info("✅ Cache saved successfully");
+    core.info('✅ Cache saved successfully');
   } catch (error) {
     if (
-      error.name === "ValidationError" &&
-      error.message.includes("already exists")
+      error.name === 'ValidationError' &&
+      error.message.includes('already exists')
     ) {
-      core.info("ℹ️ Cache already exists, skipping save");
+      core.info('ℹ️ Cache already exists, skipping save');
     } else {
       core.warning(`⚠️ Failed to save cache: ${error.message}`);
     }

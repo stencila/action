@@ -1,7 +1,7 @@
 // @ts-check
 
-import os from "os";
-import path from "path";
+import os from 'os';
+import path from 'path';
 
 /**
  * @typedef {import('./types.d.ts').Context} Context
@@ -25,9 +25,9 @@ function resolveEnvironment(context) {
   const stencilaCachePath = getStencilaCachePath();
 
   // Get proxy settings from environment
-  const httpProxy = process.env.HTTP_PROXY || process.env.http_proxy || "";
-  const httpsProxy = process.env.HTTPS_PROXY || process.env.https_proxy || "";
-  const noProxy = process.env.NO_PROXY || process.env.no_proxy || "";
+  const httpProxy = process.env.HTTP_PROXY || process.env.http_proxy || '';
+  const httpsProxy = process.env.HTTPS_PROXY || process.env.https_proxy || '';
+  const noProxy = process.env.NO_PROXY || process.env.no_proxy || '';
 
   // Set environment on context
   context.env = {
@@ -54,33 +54,33 @@ function resolveEnvironment(context) {
  */
 function getPlatformInfo(platform, arch) {
   let platformString;
-  let extension = "tar.gz";
+  let extension = 'tar.gz';
 
   switch (platform) {
-    case "linux":
-      if (arch === "x64") {
-        platformString = "x86_64-unknown-linux-gnu";
-      } else if (arch === "arm64") {
-        platformString = "aarch64-unknown-linux-gnu";
+    case 'linux':
+      if (arch === 'x64') {
+        platformString = 'x86_64-unknown-linux-gnu';
+      } else if (arch === 'arm64') {
+        platformString = 'aarch64-unknown-linux-gnu';
       } else {
         throw new Error(`Unsupported Linux architecture: ${arch}`);
       }
       break;
 
-    case "darwin":
-      if (arch === "x64") {
-        platformString = "x86_64-apple-darwin";
-      } else if (arch === "arm64") {
-        platformString = "aarch64-apple-darwin";
+    case 'darwin':
+      if (arch === 'x64') {
+        platformString = 'x86_64-apple-darwin';
+      } else if (arch === 'arm64') {
+        platformString = 'aarch64-apple-darwin';
       } else {
         throw new Error(`Unsupported macOS architecture: ${arch}`);
       }
       break;
 
-    case "win32":
-      extension = "zip";
-      if (arch === "x64") {
-        platformString = "x86_64-pc-windows-msvc";
+    case 'win32':
+      extension = 'zip';
+      if (arch === 'x64') {
+        platformString = 'x86_64-pc-windows-msvc';
       } else {
         throw new Error(`Unsupported Windows architecture: ${arch}`);
       }
@@ -104,7 +104,7 @@ function getToolCachePath() {
   }
 
   // Fall back to temp directory for local testing
-  return path.join(os.tmpdir(), "tool-cache");
+  return path.join(os.tmpdir(), 'tool-cache');
 }
 
 /**
@@ -119,7 +119,7 @@ function getStencilaCachePath() {
 
   // Default to .stencila in home directory
   const homeDir = os.homedir();
-  return path.join(homeDir, ".stencila");
+  return path.join(homeDir, '.stencila');
 }
 
 export { resolveEnvironment, getPlatformInfo };

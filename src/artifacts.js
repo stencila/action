@@ -1,10 +1,10 @@
 // @ts-check
 
-import { DefaultArtifactClient } from "@actions/artifact";
-import * as core from "@actions/core";
-import * as glob from "@actions/glob";
-import fs from "fs";
-import path from "path";
+import { DefaultArtifactClient } from '@actions/artifact';
+import * as core from '@actions/core';
+import * as glob from '@actions/glob';
+import fs from 'fs';
+import path from 'path';
 
 /**
  * @typedef {import('./types.d.ts').Context} Context
@@ -28,11 +28,11 @@ const MAX_PATH_LENGTH = 260;
  */
 async function uploadArtifacts(context) {
   if (!context.inputs) {
-    throw new Error("Context must have inputs populated before uploading artifacts");
+    throw new Error('Context must have inputs populated before uploading artifacts');
   }
 
   if (!context.results) {
-    throw new Error("Context must have command results before uploading artifacts");
+    throw new Error('Context must have command results before uploading artifacts');
   }
 
   const { inputs } = context;
@@ -40,14 +40,14 @@ async function uploadArtifacts(context) {
 
   // Only upload artifacts if assetsPath is specified and commands succeeded
   if (!assetsPath) {
-    core.info("ℹ️ No assets path specified, skipping artifact upload");
+    core.info('ℹ️ No assets path specified, skipping artifact upload');
     context.artifacts = [];
     return context;
   }
 
   const overallSuccess = context.results.every(r => r.exitCode === 0);
   if (!overallSuccess) {
-    core.warning("⚠️ Skipping artifact upload due to command failures");
+    core.warning('⚠️ Skipping artifact upload due to command failures');
     context.artifacts = [];
     return context;
   }
@@ -64,7 +64,7 @@ async function uploadArtifacts(context) {
         omitBrokenSymbolicLinks: true
       }
     );
-    
+
     const files = await globber.glob();
     const validatedFiles = await validateFiles(files, workingDirectory);
 
@@ -132,7 +132,7 @@ async function validateFiles(files, workingDirectory) {
 
       // Check if file exists and get stats
       const stats = fs.statSync(filePath);
-      
+
       // Skip directories
       if (stats.isDirectory()) {
         core.debug(`Skipping directory: ${relativePath}`);
@@ -154,7 +154,7 @@ async function validateFiles(files, workingDirectory) {
       // Check for reasonable total size (1GB limit for all files combined)
       totalSize += stats.size;
       if (totalSize > 1024 * 1024 * 1024) {
-        core.warning(`⚠️ Skipping remaining files - total size limit reached (1GB)`);
+        core.warning('⚠️ Skipping remaining files - total size limit reached (1GB)');
         break;
       }
 

@@ -1,6 +1,6 @@
 // @ts-check
 
-import * as core from "@actions/core";
+import * as core from '@actions/core';
 
 /**
  * @typedef {import('./types.d.ts').Context} Context
@@ -14,45 +14,45 @@ import * as core from "@actions/core";
  */
 function parseInputs(context) {
   // Get raw inputs
-  const version = core.getInput("version") || "latest";
-  const run = core.getInput("run");
-  const convert = core.getInput("convert");
-  const lint = core.getInput("lint");
-  const execute = core.getInput("execute");
-  const render = core.getInput("render");
-  const assets = core.getInput("assets");
-  const releasesInput = core.getInput("releases");
-  const releaseName = core.getInput("release-name");
-  const releaseNotes = core.getInput("release-notes");
-  const releaseFilenames = core.getInput("release-filenames");
-  const workingDirectory = core.getInput("working-directory") || ".";
-  const artifactName = core.getInput("artifact-name") || "assets";
-  const cache = core.getBooleanInput("cache");
-  const installTools = core.getBooleanInput("install-tools");
-  const assumeAnswer = core.getInput("assume-answer") || "yes";
-  const continueOnError = core.getBooleanInput("continue-on-error");
+  const version = core.getInput('version') || 'latest';
+  const run = core.getInput('run');
+  const convert = core.getInput('convert');
+  const lint = core.getInput('lint');
+  const execute = core.getInput('execute');
+  const render = core.getInput('render');
+  const assets = core.getInput('assets');
+  const releasesInput = core.getInput('releases');
+  const releaseName = core.getInput('release-name');
+  const releaseNotes = core.getInput('release-notes');
+  const releaseFilenames = core.getInput('release-filenames');
+  const workingDirectory = core.getInput('working-directory') || '.';
+  const artifactName = core.getInput('artifact-name') || 'assets';
+  const cache = core.getBooleanInput('cache');
+  const installTools = core.getBooleanInput('install-tools');
+  const assumeAnswer = core.getInput('assume-answer') || 'yes';
+  const continueOnError = core.getBooleanInput('continue-on-error');
 
   // Parse releases input - can be boolean or string pattern
   /** @type {boolean | string} */
   let releases = false;
-  if (releasesInput && releasesInput !== "false") {
+  if (releasesInput && releasesInput !== 'false') {
     // It's either "true" or a glob pattern for release assets
-    releases = releasesInput === "true" ? true : releasesInput;
+    releases = releasesInput === 'true' ? true : releasesInput;
   }
 
   // Normalize inputs first
   const inputs = {
     version: version.trim(),
-    run: run ? run.trim() : "",
-    convert: convert ? convert.trim() : "",
-    lint: lint ? lint.trim() : "",
-    execute: execute ? execute.trim() : "",
-    render: render ? render.trim() : "",
-    assets: assets ? assets.trim() : "",
+    run: run ? run.trim() : '',
+    convert: convert ? convert.trim() : '',
+    lint: lint ? lint.trim() : '',
+    execute: execute ? execute.trim() : '',
+    render: render ? render.trim() : '',
+    assets: assets ? assets.trim() : '',
     releases,
-    releaseName: releaseName ? releaseName.trim() : "",
-    releaseNotes: releaseNotes ? releaseNotes.trim() : "",
-    releaseFilenames: releaseFilenames ? releaseFilenames.trim() : "",
+    releaseName: releaseName ? releaseName.trim() : '',
+    releaseNotes: releaseNotes ? releaseNotes.trim() : '',
+    releaseFilenames: releaseFilenames ? releaseFilenames.trim() : '',
     workingDirectory: workingDirectory.trim(),
     artifactName: artifactName.trim(),
     cache,
@@ -80,7 +80,7 @@ function parseInputs(context) {
  */
 function validateInputs(inputs) {
   // Validate version format (allow 'latest' or semver-like patterns)
-  if (inputs.version && inputs.version !== "latest") {
+  if (inputs.version && inputs.version !== 'latest') {
     const versionPattern = /^v?\d+\.\d+\.\d+(-.*)?$/;
     if (!versionPattern.test(inputs.version)) {
       throw new Error(
@@ -90,10 +90,10 @@ function validateInputs(inputs) {
   }
 
   // Validate assume-answer value
-  const validAnswers = ["yes", "no", "cancel"];
+  const validAnswers = ['yes', 'no', 'cancel'];
   if (inputs.assumeAnswer && !validAnswers.includes(inputs.assumeAnswer)) {
     throw new Error(
-      `Invalid assume-answer value: ${inputs.assumeAnswer}. Must be one of: ${validAnswers.join(", ")}`
+      `Invalid assume-answer value: ${inputs.assumeAnswer}. Must be one of: ${validAnswers.join(', ')}`
     );
   }
 
@@ -108,7 +108,7 @@ function validateInputs(inputs) {
   }
 
   // Validate working directory is not trying to escape
-  if (inputs.workingDirectory && inputs.workingDirectory.includes("..")) {
+  if (inputs.workingDirectory && inputs.workingDirectory.includes('..')) {
     throw new Error(
       `Invalid working-directory: ${inputs.workingDirectory}. Path traversal not allowed.`
     );
@@ -125,7 +125,7 @@ function checkDeprecatedInputs(inputs) {
   // if (inputs.oldParam) {
   //   core.warning("The 'old-param' input is deprecated. Please use 'new-param' instead.");
   // }
-  
+
   // Silence linter - function will use inputs parameter when deprecations are added
   void inputs;
 }

@@ -1,11 +1,11 @@
 // @ts-check
 
-import * as core from "@actions/core";
-import * as exec from "@actions/exec";
-import * as github from "@actions/github";
-import * as glob from "@actions/glob";
-import fs from "fs";
-import path from "path";
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
+import * as github from '@actions/github';
+import * as glob from '@actions/glob';
+import fs from 'fs';
+import path from 'path';
 
 /**
  * @typedef {import('./types.d.ts').Context} Context
@@ -24,7 +24,7 @@ const MAX_FILENAME_LENGTH = 100;
  */
 async function createRelease(context) {
   if (!context.inputs) {
-    throw new Error("Context must have inputs populated before creating release");
+    throw new Error('Context must have inputs populated before creating release');
   }
 
   const { inputs } = context;
@@ -32,16 +32,16 @@ async function createRelease(context) {
 
   // Check if releases are enabled and we're on a tag
   if (!releasesInput) {
-    core.info("ℹ️ Release creation disabled");
+    core.info('ℹ️ Release creation disabled');
     return context;
   }
 
-  if (!process.env.GITHUB_REF || !process.env.GITHUB_REF.startsWith("refs/tags/")) {
-    core.info("ℹ️ Release creation enabled but not on a tag. Skipping release.");
+  if (!process.env.GITHUB_REF || !process.env.GITHUB_REF.startsWith('refs/tags/')) {
+    core.info('ℹ️ Release creation enabled but not on a tag. Skipping release.');
     return context;
   }
 
-  const tagName = process.env.GITHUB_REF.replace("refs/tags/", "");
+  const tagName = process.env.GITHUB_REF.replace('refs/tags/', '');
   const token = process.env.GITHUB_TOKEN;
 
   if (!token) {
@@ -57,19 +57,19 @@ async function createRelease(context) {
     const githubContext = github.context;
 
     // Determine release assets path
-    let releasesPath = "";
+    let releasesPath = '';
     if (releasesInput === true) {
       // Use assets pattern if release is true
-      releasesPath = assetsPath || "";
-    } else if (typeof releasesInput === "string") {
+      releasesPath = assetsPath || '';
+    } else if (typeof releasesInput === 'string') {
       // Use the provided pattern
       releasesPath = releasesInput;
     }
 
     // Auto-detect release files if not specified
-    const detectedReleaseNotes = await autoDetectFile("release-notes", releaseNotes, workingDirectory);
-    const detectedReleaseName = await autoDetectFile("release-name", releaseName, workingDirectory);
-    const detectedReleaseFilenames = await autoDetectFile("release-filenames", releaseFilenames, workingDirectory);
+    const detectedReleaseNotes = await autoDetectFile('release-notes', releaseNotes, workingDirectory);
+    const detectedReleaseName = await autoDetectFile('release-name', releaseName, workingDirectory);
+    const detectedReleaseFilenames = await autoDetectFile('release-filenames', releaseFilenames, workingDirectory);
 
     // Prepare template variables for Stencila
     const templateVars = await prepareTemplateVariables(tagName, githubContext);
@@ -82,10 +82,10 @@ async function createRelease(context) {
       workingDirectory,
       assumeAnswer
     );
-    
+
     const finalReleaseNotes = await renderTemplate(
       detectedReleaseNotes,
-      "",
+      '',
       templateVars,
       workingDirectory,
       assumeAnswer
@@ -152,8 +152,8 @@ async function autoDetectFile(baseName, userSpecified, workingDirectory) {
   const patterns = [
     baseName.toLowerCase(),
     baseName.toUpperCase(),
-    baseName.toLowerCase().replace("-", "_"),
-    baseName.toUpperCase().replace("-", "_")
+    baseName.toLowerCase().replace('-', '_'),
+    baseName.toUpperCase().replace('-', '_')
   ];
 
   try {
@@ -183,14 +183,14 @@ async function prepareTemplateVariables(tagName, githubContext) {
     `tag=${tagName}`,
     `datetime=${now
       .toISOString()
-      .replace("T", "-")
-      .replace(".", "-")
+      .replace('T', '-')
+      .replace('.', '-')
       .substring(0, 19)}`,
     `date=${now.toISOString().substring(0, 10)}`,
     `year=${now.getFullYear()}`,
-    `month=${(now.getMonth() + 1).toString().padStart(2, "0")}`,
-    `monthname=${now.toLocaleString("en-US", { month: "long" })}`,
-    `day=${now.getDate().toString().padStart(2, "0")}`,
+    `month=${(now.getMonth() + 1).toString().padStart(2, '0')}`,
+    `monthname=${now.toLocaleString('en-US', { month: 'long' })}`,
+    `day=${now.getDate().toString().padStart(2, '0')}`,
     `commit=${githubContext.sha.substring(0, 7)}`,
     `repo=${githubContext.repo.repo}`,
     `owner=${githubContext.repo.owner}`,
@@ -213,18 +213,18 @@ async function renderTemplate(template, defaultValue, templateVars, workingDirec
 
   try {
     const isFile = fs.existsSync(path.resolve(workingDirectory, template));
-    let result = "";
+    let result = '';
 
     if (isFile) {
       // Render file
       const exitCode = await exec.exec(
-        "stencila",
+        'stencila',
         [
-          "render",
+          'render',
           path.resolve(workingDirectory, template),
-          "--to=md",
+          '--to=md',
           `--${assumeAnswer}`,
-          "--",
+          '--',
           ...templateVars
         ],
         {
@@ -245,13 +245,13 @@ async function renderTemplate(template, defaultValue, templateVars, workingDirec
     } else {
       // Render string via stdin
       const exitCode = await exec.exec(
-        "stencila",
+        'stencila',
         [
-          "render",
-          "-",
-          "--to=md",
+          'render',
+          '-',
+          '--to=md',
           `--${assumeAnswer}`,
-          "--",
+          '--',
           ...templateVars
         ],
         {
@@ -306,10 +306,10 @@ function detectPrerelease(tagName) {
 function sanitizeFilename(filename) {
   // Remove or replace problematic characters
   let sanitized = filename
-    .replace(/[<>:"/\\|?*]/g, "_")  // Replace invalid characters
-    .replace(/\s+/g, "_")          // Replace spaces with underscores
-    .replace(/_{2,}/g, "_")        // Replace multiple underscores with single
-    .replace(/^_+|_+$/g, "");      // Trim underscores from start/end
+    .replace(/[<>:"/\\|?*]/g, '_')  // Replace invalid characters
+    .replace(/\s+/g, '_')          // Replace spaces with underscores
+    .replace(/_{2,}/g, '_')        // Replace multiple underscores with single
+    .replace(/^_+|_+$/g, '');      // Trim underscores from start/end
 
   // Ensure filename isn't too long
   if (sanitized.length > MAX_FILENAME_LENGTH) {
@@ -320,8 +320,8 @@ function sanitizeFilename(filename) {
   }
 
   // Ensure we have a valid filename
-  if (!sanitized || sanitized === ".") {
-    sanitized = "asset";
+  if (!sanitized || sanitized === '.') {
+    sanitized = 'asset';
   }
 
   return sanitized;
@@ -350,7 +350,7 @@ async function uploadReleaseAssets(octokit, githubContext, releaseId, releasesPa
       omitBrokenSymbolicLinks: true
     }
   );
-  
+
   const files = await globber.glob();
 
   if (files.length === 0) {
@@ -365,7 +365,7 @@ async function uploadReleaseAssets(octokit, githubContext, releaseId, releasesPa
   for (let i = 0; i < files.length; i++) {
     const filePath = files[i];
     const originalFileName = path.basename(filePath);
-    
+
     try {
       // Render filename using template if provided
       const finalFileName = await renderAssetFilename(
@@ -375,7 +375,7 @@ async function uploadReleaseAssets(octokit, githubContext, releaseId, releasesPa
         workingDirectory,
         assumeAnswer
       );
-      
+
       const sanitizedFileName = sanitizeFilename(finalFileName);
       const fileContent = fs.readFileSync(filePath);
 
@@ -432,7 +432,7 @@ async function renderAssetFilename(filePath, releaseFilenames, templateVars, wor
       workingDirectory,
       assumeAnswer
     );
-    
+
     return newName || parsedPath.base;
   } catch (error) {
     core.warning(`⚠️ Error rendering filename for ${filePath}: ${error.message}`);
@@ -440,12 +440,12 @@ async function renderAssetFilename(filePath, releaseFilenames, templateVars, wor
   }
 }
 
-export { 
-  createRelease, 
-  autoDetectFile, 
-  prepareTemplateVariables, 
-  renderTemplate, 
-  detectPrerelease, 
+export {
+  createRelease,
+  autoDetectFile,
+  prepareTemplateVariables,
+  renderTemplate,
+  detectPrerelease,
   sanitizeFilename,
   uploadReleaseAssets,
   renderAssetFilename

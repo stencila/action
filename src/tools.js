@@ -1,7 +1,7 @@
 // @ts-check
 
-import * as core from "@actions/core";
-import * as exec from "@actions/exec";
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
 
 /**
  * @typedef {import('./types.d.ts').Context} Context
@@ -14,23 +14,23 @@ import * as exec from "@actions/exec";
  */
 async function installTools(context) {
   if (!context.inputs) {
-    throw new Error("Context must have inputs populated before installing tools");
+    throw new Error('Context must have inputs populated before installing tools');
   }
 
   const { inputs } = context;
   const { workingDirectory, installTools: shouldInstallTools, assumeAnswer } = inputs;
 
   if (!shouldInstallTools) {
-    core.debug("🔧 Tool installation disabled, skipping");
+    core.debug('🔧 Tool installation disabled, skipping');
     return context;
   }
 
   try {
-    core.info("🔧 Installing Stencila tools...");
-    
+    core.info('🔧 Installing Stencila tools...');
+
     const installExitCode = await exec.exec(
-      "stencila",
-      ["tools", "install", `--${assumeAnswer}`],
+      'stencila',
+      ['tools', 'install', `--${assumeAnswer}`],
       {
         cwd: workingDirectory,
         ignoreReturnCode: true,
@@ -41,15 +41,15 @@ async function installTools(context) {
       core.warning(
         `⚠️ Failed to install tools with exit code ${installExitCode}`
       );
-      
+
       // Store tool installation result in context
       context.toolsInstalled = {
         success: false,
         exitCode: installExitCode
       };
     } else {
-      core.info("✅ Tools installed successfully");
-      
+      core.info('✅ Tools installed successfully');
+
       // Store tool installation result in context
       context.toolsInstalled = {
         success: true,
@@ -61,13 +61,13 @@ async function installTools(context) {
 
   } catch (error) {
     core.warning(`⚠️ Error installing tools: ${error.message}`);
-    
+
     // Store tool installation error in context
     context.toolsInstalled = {
       success: false,
       error: error.message
     };
-    
+
     return context;
   }
 }

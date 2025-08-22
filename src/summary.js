@@ -1,6 +1,6 @@
 // @ts-check
 
-import * as core from "@actions/core";
+import * as core from '@actions/core';
 
 /**
  * @typedef {import('./types.d.ts').Context} Context
@@ -14,41 +14,41 @@ import * as core from "@actions/core";
 async function publishSummary(context) {
   try {
     const summary = core.summary;
-    
+
     // Start with heading and Stencila icon
-    summary.addRaw("# <img src=https://stencila.io/web/v2.5.1/images/favicon.png width=32 height=32> Stencila Action Summary");
+    summary.addRaw('# <img src=https://stencila.io/web/v2.5.1/images/favicon.png width=32 height=32> Stencila Action Summary');
 
     // Add setup section
-    summary.addHeading("⚙️ Setup", 2);
+    summary.addHeading('⚙️ Setup', 2);
     await addSetupInfo(summary, context);
 
     // Add commands section if any were executed
     if (context.results && context.results.length > 0) {
-      summary.addHeading("🚀 Commands Executed", 2);
+      summary.addHeading('🚀 Commands Executed', 2);
       addCommandsTable(summary, context);
     }
 
     // Add artifacts section if any were uploaded
     if (context.artifacts && context.artifacts.length > 0) {
-      summary.addHeading("📦 Artifacts", 2);
+      summary.addHeading('📦 Artifacts', 2);
       addArtifactsInfo(summary, context);
     }
 
     // Add release section if one was created
     if (context.release) {
-      summary.addHeading("🏷️ Release", 2);
+      summary.addHeading('🏷️ Release', 2);
       addReleaseInfo(summary, context);
     }
 
     // Add any warnings or errors
     if (context.errors && context.errors.length > 0) {
-      summary.addHeading("⚠️ Issues", 2);
+      summary.addHeading('⚠️ Issues', 2);
       addErrorsInfo(summary, context);
     }
 
     // Write the summary
     await summary.write();
-    
+
     return context;
 
   } catch (error) {
@@ -69,20 +69,20 @@ async function addSetupInfo(summary, context) {
   // Stencila version info
   if (context.stencila) {
     const { resolvedVersion, wasAlreadyInstalled, installDuration } = context.stencila;
-    const installStatus = wasAlreadyInstalled ? "🟢 Cached" : "🔵 Downloaded";
-    const duration = installDuration ? ` (${(installDuration / 1000).toFixed(1)}s)` : "";
+    const installStatus = wasAlreadyInstalled ? '🟢 Cached' : '🔵 Downloaded';
+    const duration = installDuration ? ` (${(installDuration / 1000).toFixed(1)}s)` : '';
     setupLines.push(`**Stencila Version:** ${resolvedVersion} ${installStatus}${duration}`);
   }
 
   // Cache info
   if (context.cache) {
-    const cacheStatus = context.cache.wasRestored ? "🟢 Hit" : "🟡 Miss";
+    const cacheStatus = context.cache.wasRestored ? '🟢 Hit' : '🟡 Miss';
     setupLines.push(`**Cache:** ${cacheStatus}`);
   }
 
   // Tools installation
   if (context.toolsInstalled) {
-    const toolsStatus = context.toolsInstalled.success ? "✅ Success" : "❌ Failed";
+    const toolsStatus = context.toolsInstalled.success ? '✅ Success' : '❌ Failed';
     setupLines.push(`**Tools Installed:** ${toolsStatus}`);
   }
 
@@ -93,9 +93,9 @@ async function addSetupInfo(summary, context) {
   }
 
   if (setupLines.length > 0) {
-    summary.addRaw(setupLines.join("\n"));
+    summary.addRaw(setupLines.join('\n'));
   } else {
-    summary.addRaw("No setup information available.");
+    summary.addRaw('No setup information available.');
   }
 }
 
@@ -106,18 +106,18 @@ async function addSetupInfo(summary, context) {
  */
 function addCommandsTable(summary, context) {
   const tableHeaders = [
-    { data: "Command", header: true },
-    { data: "Status", header: true },
-    { data: "Duration", header: true },
-    { data: "Exit Code", header: true }
+    { data: 'Command', header: true },
+    { data: 'Status', header: true },
+    { data: 'Duration', header: true },
+    { data: 'Exit Code', header: true }
   ];
 
   const tableRows = [tableHeaders];
 
   for (const result of context.results) {
-    const status = result.exitCode === 0 ? "✅ Success" : "❌ Failed";
-    const duration = result.duration ? `${(result.duration / 1000).toFixed(1)}s` : "N/A";
-    
+    const status = result.exitCode === 0 ? '✅ Success' : '❌ Failed';
+    const duration = result.duration ? `${(result.duration / 1000).toFixed(1)}s` : 'N/A';
+
     tableRows.push([
       { data: result.command, header: false },
       { data: status, header: false },
@@ -132,7 +132,7 @@ function addCommandsTable(summary, context) {
   const totalCommands = context.results.length;
   const successCount = context.results.filter(r => r.exitCode === 0).length;
   const failedCount = totalCommands - successCount;
-  
+
   if (failedCount > 0) {
     summary.addRaw(`\n**Summary:** ${successCount}/${totalCommands} commands succeeded, ${failedCount} failed.`);
   } else {
@@ -154,7 +154,7 @@ function addArtifactsInfo(summary, context) {
     artifactLines.push(`**\`${artifact.name}\`:** ${fileCount} files, ${sizeFormatted}`);
   }
 
-  summary.addRaw(artifactLines.join("\n"));
+  summary.addRaw(artifactLines.join('\n'));
 }
 
 /**
@@ -168,18 +168,18 @@ function addReleaseInfo(summary, context) {
 
   releaseLines.push(`**Tag:** ${release.tag}`);
   releaseLines.push(`**Name:** ${release.name}`);
-  
+
   if (release.prerelease) {
-    releaseLines.push(`**Type:** 🚧 Pre-release`);
+    releaseLines.push('**Type:** 🚧 Pre-release');
   } else {
-    releaseLines.push(`**Type:** 🚀 Release`);
+    releaseLines.push('**Type:** 🚀 Release');
   }
 
   if (release.assets && release.assets.length > 0) {
     releaseLines.push(`**Assets:** ${release.assets.length} files uploaded`);
   }
 
-  summary.addRaw(releaseLines.join("\n"));
+  summary.addRaw(releaseLines.join('\n'));
 }
 
 /**

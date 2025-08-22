@@ -1,7 +1,7 @@
 // @ts-check
 
-import * as core from "@actions/core";
-import * as exec from "@actions/exec";
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
 
 /**
  * @typedef {import('./types.d.ts').Context} Context
@@ -29,11 +29,11 @@ const SECRET_PATTERNS = [
  */
 async function runCommands(context) {
   if (!context.inputs) {
-    throw new Error("Context must have inputs populated before running commands");
+    throw new Error('Context must have inputs populated before running commands');
   }
 
   if (!context.stencila) {
-    throw new Error("Context must have stencila info populated before running commands");
+    throw new Error('Context must have stencila info populated before running commands');
   }
 
   const { inputs } = context;
@@ -43,7 +43,7 @@ async function runCommands(context) {
   const commandsToRun = collectCommands(inputs);
 
   if (commandsToRun.length === 0) {
-    core.info("ℹ️ No commands to run");
+    core.info('ℹ️ No commands to run');
     context.results = [];
     return context;
   }
@@ -56,15 +56,15 @@ async function runCommands(context) {
   for (let i = 0; i < commandsToRun.length; i++) {
     const command = commandsToRun[i];
     const startTime = Date.now();
-    
-    core.info(`⚡ Running command ${i + 1}/${commandsToRun.length}: stencila ${command.command} ${command.args || ""}`);
+
+    core.info(`⚡ Running command ${i + 1}/${commandsToRun.length}: stencila ${command.command} ${command.args || ''}`);
 
     try {
       const result = await executeCommand(command, workingDirectory, assumeAnswer);
       const duration = Date.now() - startTime;
-      
+
       const commandResult = {
-        command: `stencila ${command.command} ${command.args || ""}`.trim(),
+        command: `stencila ${command.command} ${command.args || ''}`.trim(),
         exitCode: result.exitCode,
         duration
       };
@@ -85,15 +85,15 @@ async function runCommands(context) {
     } catch (error) {
       const duration = Date.now() - startTime;
       overallSuccess = false;
-      
+
       const commandResult = {
-        command: `stencila ${command.command} ${command.args || ""}`.trim(),
+        command: `stencila ${command.command} ${command.args || ''}`.trim(),
         exitCode: -1,
         duration
       };
 
       results.push(commandResult);
-      
+
       core.error(`❌ Command ${i + 1} failed with error: ${error.message} (${duration}ms)`);
 
       if (!continueOnError) {
@@ -105,12 +105,12 @@ async function runCommands(context) {
   // Set final exit code to the last command's exit code
   const lastResult = results[results.length - 1];
   if (lastResult) {
-    core.setOutput("exit-code", lastResult.exitCode.toString());
+    core.setOutput('exit-code', lastResult.exitCode.toString());
   }
 
   // If continue-on-error is true and any command failed, still fail the action at the end
   if (!overallSuccess && continueOnError) {
-    core.setFailed("One or more Stencila commands failed");
+    core.setFailed('One or more Stencila commands failed');
   }
 
   context.results = results;
@@ -130,19 +130,19 @@ function collectCommands(inputs) {
     const cmdParts = inputs.run.trim().split(/\s+/);
     commandsToRun.push({
       command: cmdParts[0],
-      args: cmdParts.slice(1).join(" ")
+      args: cmdParts.slice(1).join(' ')
     });
   }
 
   // Check for simplified command syntax
-  const commands = ["convert", "lint", "execute", "render"];
+  const commands = ['convert', 'lint', 'execute', 'render'];
   for (const cmdName of commands) {
     const cmdArgs = inputs[cmdName];
     if (cmdArgs) {
       // Special handling for render command to support multi-line inputs
-      if (cmdName === "render") {
+      if (cmdName === 'render') {
         const renderCommands = cmdArgs
-          .split("\\n")
+          .split('\\n')
           .filter(/** @param {string} line */ (line) => line.trim())
           .map(/** @param {string} args */ (args) => ({
             command: cmdName,
@@ -171,11 +171,11 @@ function collectCommands(inputs) {
  */
 async function executeCommand(commandSpec, workingDirectory, assumeAnswer) {
   const { command, args } = commandSpec;
-  const cmdArgs = args ? args.split(" ") : [];
+  const cmdArgs = args ? args.split(' ') : [];
   const fullArgs = [command, ...cmdArgs, `--${assumeAnswer}`];
 
   // Execute command with environment variables to encourage human-readable output
-  const exitCode = await exec.exec("stencila", fullArgs, {
+  const exitCode = await exec.exec('stencila', fullArgs, {
     cwd: workingDirectory,
     ignoreReturnCode: true,
     env: {
@@ -196,10 +196,10 @@ async function executeCommand(commandSpec, workingDirectory, assumeAnswer) {
  */
 function maskSecrets(text) {
   let maskedText = text;
-  
+
   // Mask known secret patterns
   for (const pattern of SECRET_PATTERNS) {
-    maskedText = maskedText.replace(pattern, "***");
+    maskedText = maskedText.replace(pattern, '***');
   }
 
   return maskedText;
