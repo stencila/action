@@ -137116,45 +137116,45 @@ var core = __nccwpck_require__(37484);
  */
 function parseInputs(context) {
   // Get raw inputs
-  const version = core.getInput("version") || "latest";
-  const run = core.getInput("run");
-  const convert = core.getInput("convert");
-  const lint = core.getInput("lint");
-  const execute = core.getInput("execute");
-  const render = core.getInput("render");
-  const assets = core.getInput("assets");
-  const releasesInput = core.getInput("releases");
-  const releaseName = core.getInput("release-name");
-  const releaseNotes = core.getInput("release-notes");
-  const releaseFilenames = core.getInput("release-filenames");
-  const workingDirectory = core.getInput("working-directory") || ".";
-  const artifactName = core.getInput("artifact-name") || "assets";
-  const cache = core.getBooleanInput("cache");
-  const installTools = core.getBooleanInput("install-tools");
-  const assumeAnswer = core.getInput("assume-answer") || "yes";
-  const continueOnError = core.getBooleanInput("continue-on-error");
+  const version = core.getInput('version') || 'latest';
+  const run = core.getInput('run');
+  const convert = core.getInput('convert');
+  const lint = core.getInput('lint');
+  const execute = core.getInput('execute');
+  const render = core.getInput('render');
+  const assets = core.getInput('assets');
+  const releasesInput = core.getInput('releases');
+  const releaseName = core.getInput('release-name');
+  const releaseNotes = core.getInput('release-notes');
+  const releaseFilenames = core.getInput('release-filenames');
+  const workingDirectory = core.getInput('working-directory') || '.';
+  const artifactName = core.getInput('artifact-name') || 'assets';
+  const cache = core.getBooleanInput('cache');
+  const installTools = core.getBooleanInput('install-tools');
+  const assumeAnswer = core.getInput('assume-answer') || 'yes';
+  const continueOnError = core.getBooleanInput('continue-on-error');
 
   // Parse releases input - can be boolean or string pattern
   /** @type {boolean | string} */
   let releases = false;
-  if (releasesInput && releasesInput !== "false") {
+  if (releasesInput && releasesInput !== 'false') {
     // It's either "true" or a glob pattern for release assets
-    releases = releasesInput === "true" ? true : releasesInput;
+    releases = releasesInput === 'true' ? true : releasesInput;
   }
 
   // Normalize inputs first
   const inputs = {
     version: version.trim(),
-    run: run ? run.trim() : "",
-    convert: convert ? convert.trim() : "",
-    lint: lint ? lint.trim() : "",
-    execute: execute ? execute.trim() : "",
-    render: render ? render.trim() : "",
-    assets: assets ? assets.trim() : "",
+    run: run ? run.trim() : '',
+    convert: convert ? convert.trim() : '',
+    lint: lint ? lint.trim() : '',
+    execute: execute ? execute.trim() : '',
+    render: render ? render.trim() : '',
+    assets: assets ? assets.trim() : '',
     releases,
-    releaseName: releaseName ? releaseName.trim() : "",
-    releaseNotes: releaseNotes ? releaseNotes.trim() : "",
-    releaseFilenames: releaseFilenames ? releaseFilenames.trim() : "",
+    releaseName: releaseName ? releaseName.trim() : '',
+    releaseNotes: releaseNotes ? releaseNotes.trim() : '',
+    releaseFilenames: releaseFilenames ? releaseFilenames.trim() : '',
     workingDirectory: workingDirectory.trim(),
     artifactName: artifactName.trim(),
     cache,
@@ -137182,7 +137182,7 @@ function parseInputs(context) {
  */
 function validateInputs(inputs) {
   // Validate version format (allow 'latest' or semver-like patterns)
-  if (inputs.version && inputs.version !== "latest") {
+  if (inputs.version && inputs.version !== 'latest') {
     const versionPattern = /^v?\d+\.\d+\.\d+(-.*)?$/;
     if (!versionPattern.test(inputs.version)) {
       throw new Error(
@@ -137192,10 +137192,10 @@ function validateInputs(inputs) {
   }
 
   // Validate assume-answer value
-  const validAnswers = ["yes", "no", "cancel"];
+  const validAnswers = ['yes', 'no', 'cancel'];
   if (inputs.assumeAnswer && !validAnswers.includes(inputs.assumeAnswer)) {
     throw new Error(
-      `Invalid assume-answer value: ${inputs.assumeAnswer}. Must be one of: ${validAnswers.join(", ")}`
+      `Invalid assume-answer value: ${inputs.assumeAnswer}. Must be one of: ${validAnswers.join(', ')}`
     );
   }
 
@@ -137210,7 +137210,7 @@ function validateInputs(inputs) {
   }
 
   // Validate working directory is not trying to escape
-  if (inputs.workingDirectory && inputs.workingDirectory.includes("..")) {
+  if (inputs.workingDirectory && inputs.workingDirectory.includes('..')) {
     throw new Error(
       `Invalid working-directory: ${inputs.workingDirectory}. Path traversal not allowed.`
     );
@@ -137227,7 +137227,7 @@ function checkDeprecatedInputs(inputs) {
   // if (inputs.oldParam) {
   //   core.warning("The 'old-param' input is deprecated. Please use 'new-param' instead.");
   // }
-  
+
   // Silence linter - function will use inputs parameter when deprecations are added
   void inputs;
 }
@@ -137265,9 +137265,9 @@ function resolveEnvironment(context) {
   const stencilaCachePath = getStencilaCachePath();
 
   // Get proxy settings from environment
-  const httpProxy = process.env.HTTP_PROXY || process.env.http_proxy || "";
-  const httpsProxy = process.env.HTTPS_PROXY || process.env.https_proxy || "";
-  const noProxy = process.env.NO_PROXY || process.env.no_proxy || "";
+  const httpProxy = process.env.HTTP_PROXY || process.env.http_proxy || '';
+  const httpsProxy = process.env.HTTPS_PROXY || process.env.https_proxy || '';
+  const noProxy = process.env.NO_PROXY || process.env.no_proxy || '';
 
   // Set environment on context
   context.env = {
@@ -137294,33 +137294,33 @@ function resolveEnvironment(context) {
  */
 function getPlatformInfo(platform, arch) {
   let platformString;
-  let extension = "tar.gz";
+  let extension = 'tar.gz';
 
   switch (platform) {
-    case "linux":
-      if (arch === "x64") {
-        platformString = "x86_64-unknown-linux-gnu";
-      } else if (arch === "arm64") {
-        platformString = "aarch64-unknown-linux-gnu";
+    case 'linux':
+      if (arch === 'x64') {
+        platformString = 'x86_64-unknown-linux-gnu';
+      } else if (arch === 'arm64') {
+        platformString = 'aarch64-unknown-linux-gnu';
       } else {
         throw new Error(`Unsupported Linux architecture: ${arch}`);
       }
       break;
 
-    case "darwin":
-      if (arch === "x64") {
-        platformString = "x86_64-apple-darwin";
-      } else if (arch === "arm64") {
-        platformString = "aarch64-apple-darwin";
+    case 'darwin':
+      if (arch === 'x64') {
+        platformString = 'x86_64-apple-darwin';
+      } else if (arch === 'arm64') {
+        platformString = 'aarch64-apple-darwin';
       } else {
         throw new Error(`Unsupported macOS architecture: ${arch}`);
       }
       break;
 
-    case "win32":
-      extension = "zip";
-      if (arch === "x64") {
-        platformString = "x86_64-pc-windows-msvc";
+    case 'win32':
+      extension = 'zip';
+      if (arch === 'x64') {
+        platformString = 'x86_64-pc-windows-msvc';
       } else {
         throw new Error(`Unsupported Windows architecture: ${arch}`);
       }
@@ -137344,7 +137344,7 @@ function getToolCachePath() {
   }
 
   // Fall back to temp directory for local testing
-  return external_path_.join(external_os_.tmpdir(), "tool-cache");
+  return external_path_.join(external_os_.tmpdir(), 'tool-cache');
 }
 
 /**
@@ -137359,7 +137359,7 @@ function getStencilaCachePath() {
 
   // Default to .stencila in home directory
   const homeDir = external_os_.homedir();
-  return external_path_.join(homeDir, ".stencila");
+  return external_path_.join(homeDir, '.stencila');
 }
 
 
@@ -137399,36 +137399,36 @@ var external_crypto_ = __nccwpck_require__(76982);
 async function fetchChecksumFromGitHub(version, platformString, extension) {
   const filename = `cli-${version}-${platformString}.${extension}`;
   const apiUrl = `https://api.github.com/repos/stencila/stencila/releases/tags/${version}`;
-  
+
   return new Promise((resolve) => {
     const req = external_https_.get(
       apiUrl,
       {
         headers: {
-          "User-Agent": "stencila-action",
-          "Accept": "application/vnd.github.v3+json"
+          'User-Agent': 'stencila-action',
+          'Accept': 'application/vnd.github.v3+json'
         }
       },
       (res) => {
-        let data = "";
-        
-        res.on("data", (chunk) => {
+        let data = '';
+
+        res.on('data', (chunk) => {
           data += chunk;
         });
-        
-        res.on("end", () => {
+
+        res.on('end', () => {
           try {
             if (res.statusCode !== 200) {
               core.warning(`⚠️ GitHub API returned ${res.statusCode} for ${version}`);
               resolve(null);
               return;
             }
-            
+
             const release = JSON.parse(data);
-            
+
             // Find the asset that matches our filename
             const asset = release.assets?.find(/** @param {any} a */ a => a.name === filename);
-            
+
             if (asset && asset.digest) {
               core.info(`📋 Found checksum for ${filename} from GitHub API`);
               resolve(asset.digest);
@@ -137443,15 +137443,15 @@ async function fetchChecksumFromGitHub(version, platformString, extension) {
         });
       }
     );
-    
-    req.on("error", (error) => {
+
+    req.on('error', (error) => {
       core.debug(`⚠️ Failed to fetch checksum from GitHub API: ${error.message}`);
       resolve(null);
     });
-    
+
     req.setTimeout(10000, () => {
       req.destroy();
-      core.debug("⚠️ Timeout fetching checksum from GitHub API");
+      core.debug('⚠️ Timeout fetching checksum from GitHub API');
       resolve(null);
     });
   });
@@ -137463,15 +137463,15 @@ async function fetchChecksumFromGitHub(version, platformString, extension) {
  * @returns {Promise<string>} Resolved version (e.g., "v2.0.0")
  */
 async function resolveVersion(versionInput) {
-  if (versionInput === "latest") {
-    core.info("Resolving latest version...");
-    
+  if (versionInput === 'latest') {
+    core.info('Resolving latest version...');
+
     return new Promise((resolve, reject) => {
       const req = external_https_.get(
-        "https://github.com/stencila/stencila/releases/latest",
+        'https://github.com/stencila/stencila/releases/latest',
         {
           headers: {
-            "User-Agent": "stencila-action"
+            'User-Agent': 'stencila-action'
           }
         },
         (res) => {
@@ -137490,14 +137490,14 @@ async function resolveVersion(versionInput) {
           }
         }
       );
-      
-      req.on("error", (error) => {
+
+      req.on('error', (error) => {
         reject(new Error(`Failed to resolve latest version: ${error.message}`));
       });
-      
+
       req.setTimeout(10000, () => {
         req.destroy();
-        reject(new Error("Timeout resolving latest version"));
+        reject(new Error('Timeout resolving latest version'));
       });
     });
   } else {
@@ -137506,7 +137506,7 @@ async function resolveVersion(versionInput) {
     if (!versionPattern.test(versionInput)) {
       throw new Error(`Invalid version format: ${versionInput}. Use 'latest' or a version like 'v2.0.0'`);
     }
-    
+
     // Ensure version has 'v' prefix
     const normalizedVersion = versionInput.startsWith('v') ? versionInput : `v${versionInput}`;
     core.info(`Using specific version: ${normalizedVersion}`);
@@ -137535,23 +137535,23 @@ async function verifyChecksum(filePath, expectedChecksum) {
   return new Promise((resolve, reject) => {
     const hash = external_crypto_.createHash('sha256');
     const stream = external_fs_.createReadStream(filePath);
-    
+
     stream.on('data', (data) => hash.update(data));
     stream.on('end', () => {
       const actualChecksum = hash.digest('hex');
       const normalizedExpected = expectedChecksum.replace(/^sha256:/, '');
-      
+
       if (actualChecksum === normalizedExpected) {
         core.info(`✅ Checksum verified: ${actualChecksum}`);
         resolve(true);
       } else {
-        core.error(`❌ Checksum mismatch!`);
+        core.error('❌ Checksum mismatch!');
         core.error(`Expected: ${normalizedExpected}`);
         core.error(`Actual:   ${actualChecksum}`);
         resolve(false);
       }
     });
-    
+
     stream.on('error', reject);
   });
 }
@@ -137564,7 +137564,7 @@ async function verifyChecksum(filePath, expectedChecksum) {
  */
 async function downloadWithRetry(url, maxRetries = 3) {
   let lastError;
-  
+
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       if (attempt > 1) {
@@ -137572,24 +137572,24 @@ async function downloadWithRetry(url, maxRetries = 3) {
         const baseDelay = 1000 * Math.pow(2, attempt - 2); // 1s, 2s, 4s...
         const jitter = Math.random() * 1000; // 0-1s random jitter
         const delay = baseDelay + jitter;
-        
+
         core.info(`Retrying download in ${Math.round(delay / 1000)}s (attempt ${attempt}/${maxRetries})...`);
         await new Promise(resolve => setTimeout(resolve, delay));
       }
-      
+
       core.info(`Downloading from ${url} (attempt ${attempt}/${maxRetries})`);
       return await tool_cache.downloadTool(url);
-      
+
     } catch (error) {
       lastError = error;
       core.warning(`Download attempt ${attempt} failed: ${error.message}`);
-      
+
       if (attempt === maxRetries) {
         throw new Error(`Download failed after ${maxRetries} attempts. Last error: ${lastError.message}`);
       }
     }
   }
-  
+
   throw lastError; // Should never reach here, but TypeScript requires it
 }
 
@@ -137600,14 +137600,14 @@ async function downloadWithRetry(url, maxRetries = 3) {
  * @returns {string} Path to Stencila binary
  */
 function findStencilaBinary(extractPath, platform) {
-  const binaryName = platform === "win32" ? "stencila.exe" : "stencila";
-  
+  const binaryName = platform === 'win32' ? 'stencila.exe' : 'stencila';
+
   // First check if binary is directly in extract path
   let candidatePath = external_path_.join(extractPath, binaryName);
   if (external_fs_.existsSync(candidatePath)) {
     return candidatePath;
   }
-  
+
   // Look for binary in subdirectories
   const extractedItems = external_fs_.readdirSync(extractPath);
   for (const item of extractedItems) {
@@ -137619,7 +137619,7 @@ function findStencilaBinary(extractPath, platform) {
       }
     }
   }
-  
+
   throw new Error(`Could not find ${binaryName} in extracted archive at ${extractPath}`);
 }
 
@@ -137630,105 +137630,105 @@ function findStencilaBinary(extractPath, platform) {
  */
 async function ensureStencila(context) {
   const startTime = Date.now();
-  
+
   if (!context.inputs) {
-    throw new Error("Context must have inputs populated before calling ensureStencila");
+    throw new Error('Context must have inputs populated before calling ensureStencila');
   }
-  
+
   if (!context.env) {
-    throw new Error("Context must have env populated before calling ensureStencila");
+    throw new Error('Context must have env populated before calling ensureStencila');
   }
-  
+
   const { version: versionInput } = context.inputs;
   const { platform, platformString, extension } = context.env;
-  
+
   try {
     // Step 1: Resolve version
     const resolvedVersion = await resolveVersion(versionInput);
     const downloadUrl = getDownloadUrl(resolvedVersion, platformString, extension);
-    
+
     // Initialize stencila info
     /** @type {StencilaInfo} */
     const stencilaInfo = {
       version: versionInput,
       resolvedVersion,
-      binaryPath: "",
+      binaryPath: '',
       wasAlreadyInstalled: false,
       downloadUrl,
       checksumVerified: false,
       installDuration: 0
     };
-    
+
     // Step 2: Check if already cached
-    let cachedPath = tool_cache.find("stencila", resolvedVersion);
-    
+    let cachedPath = tool_cache.find('stencila', resolvedVersion);
+
     if (cachedPath) {
       core.info(`✅ Using cached Stencila CLI ${resolvedVersion} from ${cachedPath}`);
       stencilaInfo.wasAlreadyInstalled = true;
-      
+
       // Construct path to binary
-      const binaryName = platform === "win32" ? "stencila.exe" : "stencila";
+      const binaryName = platform === 'win32' ? 'stencila.exe' : 'stencila';
       stencilaInfo.binaryPath = external_path_.join(cachedPath, binaryName);
-      
+
       if (!external_fs_.existsSync(stencilaInfo.binaryPath)) {
         throw new Error(`Cached Stencila binary not found at ${stencilaInfo.binaryPath}`);
       }
     } else {
       // Step 3: Download and install
       core.info(`📦 Installing Stencila CLI ${resolvedVersion}...`);
-      
+
       // Download with retry
       const downloadPath = await downloadWithRetry(downloadUrl, 3);
-      
+
       // Step 4: Verify checksum if available from GitHub API
-      core.info("🏅 Fetching checksum from GitHub API...");
+      core.info('🏅 Fetching checksum from GitHub API...');
       const expectedChecksum = await fetchChecksumFromGitHub(resolvedVersion, platformString, extension);
       if (expectedChecksum) {
-        core.info("🔍 Verifying checksum...");
+        core.info('🔍 Verifying checksum...');
         const checksumValid = await verifyChecksum(downloadPath, expectedChecksum);
         if (!checksumValid) {
-          throw new Error("Checksum verification failed. Download may be corrupted or tampered with.");
+          throw new Error('Checksum verification failed. Download may be corrupted or tampered with.');
         }
         stencilaInfo.checksumVerified = true;
       } else {
         core.warning(`⚠️ No checksum available for ${resolvedVersion} on ${platformString}, skipping verification`);
         stencilaInfo.checksumVerified = false;
       }
-      
+
       // Step 5: Extract archive
-      core.info("📂 Extracting archive...");
+      core.info('📂 Extracting archive...');
       let extractPath;
-      if (extension === "zip") {
+      if (extension === 'zip') {
         extractPath = await tool_cache.extractZip(downloadPath);
       } else {
         extractPath = await tool_cache.extractTar(downloadPath);
       }
-      
+
       // Step 6: Find binary
       const binaryPath = findStencilaBinary(extractPath, platform);
-      
+
       // Step 7: Make executable on Unix-like systems
-      if (platform !== "win32") {
-        await exec.exec("chmod", ["+x", binaryPath]);
+      if (platform !== 'win32') {
+        await exec.exec('chmod', ['+x', binaryPath]);
       }
-      
+
       // Step 8: Cache for future use
       const binaryDir = external_path_.dirname(binaryPath);
-      cachedPath = await tool_cache.cacheDir(binaryDir, "stencila", resolvedVersion);
+      cachedPath = await tool_cache.cacheDir(binaryDir, 'stencila', resolvedVersion);
       core.info(`💾 Cached Stencila CLI to ${cachedPath}`);
-      
+
       // Update binary path to cached location
-      const binaryName = platform === "win32" ? "stencila.exe" : "stencila";
+      const binaryName = platform === 'win32' ? 'stencila.exe' : 'stencila';
       stencilaInfo.binaryPath = external_path_.join(cachedPath, binaryName);
     }
-    
+
     // Step 9: Add to PATH
     core.addPath(external_path_.dirname(stencilaInfo.binaryPath));
-    
+
     // Step 10: Verify installation by checking version
-    let installedVersionOutput = "";
+    let installedVersionOutput = '';
     try {
-      await exec.exec("stencila", ["--version"], {
+      await exec.exec('stencila', ['--version'], {
         listeners: {
           stdout: (data) => {
             installedVersionOutput += data.toString();
@@ -137738,28 +137738,28 @@ async function ensureStencila(context) {
     } catch (error) {
       throw new Error(`Failed to verify Stencila installation: ${error.message}`);
     }
-    
+
     const installedVersion = installedVersionOutput.trim();
-    
+
     // Calculate installation duration
     stencilaInfo.installDuration = Date.now() - startTime;
-    
+
     // Set outputs
-    core.setOutput("version", installedVersion);
-    core.setOutput("binary-path", stencilaInfo.binaryPath);
-    
+    core.setOutput('version', installedVersion);
+    core.setOutput('binary-path', stencilaInfo.binaryPath);
+
     // Log success
     if (stencilaInfo.wasAlreadyInstalled) {
       core.info(`✅ Stencila CLI ${installedVersion} was already installed (${stencilaInfo.installDuration}ms)`);
     } else {
       core.info(`✅ Stencila CLI ${installedVersion} installed successfully (${stencilaInfo.installDuration}ms)`);
     }
-    
+
     // Add to context
     context.stencila = stencilaInfo;
-    
+
     return context;
-    
+
   } catch (error) {
     const duration = Date.now() - startTime;
     core.error(`❌ Failed to install Stencila CLI after ${duration}ms: ${error.message}`);
@@ -137789,22 +137789,22 @@ var cache = __nccwpck_require__(5116);
  */
 async function restoreCache(context) {
   if (!context.inputs) {
-    throw new Error("Context must have inputs populated before restoring cache");
+    throw new Error('Context must have inputs populated before restoring cache');
   }
 
   if (!context.env) {
-    throw new Error("Context must have environment populated before restoring cache");
+    throw new Error('Context must have environment populated before restoring cache');
   }
 
   if (!context.stencila) {
-    throw new Error("Context must have Stencila info populated before restoring cache");
+    throw new Error('Context must have Stencila info populated before restoring cache');
   }
 
   const { inputs, env, stencila } = context;
   const { workingDirectory, cache: useCache } = inputs;
-  
+
   if (!useCache) {
-    core.debug("📦 Cache disabled, skipping cache operations");
+    core.debug('📦 Cache disabled, skipping cache operations');
     return context;
   }
 
@@ -137813,14 +137813,14 @@ async function restoreCache(context) {
     const { platform, arch } = env;
     const { resolvedVersion } = stencila;
     const cacheKey = `stencila-cache-${platform}-${arch}-${resolvedVersion}-${
-      process.env.GITHUB_SHA || "default"
+      process.env.GITHUB_SHA || 'default'
     }`;
     const restoreKeys = [
       `stencila-cache-${platform}-${arch}-${resolvedVersion}-`,
       `stencila-cache-${platform}-${arch}-`,
     ];
 
-    const stencilaCachePath = external_path_.join(workingDirectory, ".stencila");
+    const stencilaCachePath = external_path_.join(workingDirectory, '.stencila');
 
     core.info(`🔄 Restoring .stencila cache with key: ${cacheKey}`);
     const cacheHit = await cache.restoreCache(
@@ -137832,7 +137832,7 @@ async function restoreCache(context) {
     if (cacheHit) {
       core.info(`✅ Cache restored from key: ${cacheHit}`);
     } else {
-      core.info("ℹ️ No cache found, starting fresh");
+      core.info('ℹ️ No cache found, starting fresh');
     }
 
     // Store cache info in context for later save operation
@@ -137857,24 +137857,24 @@ async function restoreCache(context) {
  */
 async function saveCache(context) {
   if (!context.inputs) {
-    throw new Error("Context must have inputs populated before saving cache");
+    throw new Error('Context must have inputs populated before saving cache');
   }
 
   const { inputs } = context;
   const { cache: useCache } = inputs;
-  
+
   if (!useCache) {
-    core.debug("📦 Cache disabled, skipping save");
+    core.debug('📦 Cache disabled, skipping save');
     return context;
   }
 
   if (!context.cache) {
-    core.debug("📦 No cache info available, skipping save");
+    core.debug('📦 No cache info available, skipping save');
     return context;
   }
 
   if (!context.results || context.results.length === 0) {
-    core.debug("📦 No commands executed, skipping cache save");
+    core.debug('📦 No commands executed, skipping cache save');
     return context;
   }
 
@@ -137888,13 +137888,13 @@ async function saveCache(context) {
   try {
     core.info(`💾 Saving .stencila cache with key: ${cacheKey}`);
     await cache.saveCache([stencilaCachePath], cacheKey);
-    core.info("✅ Cache saved successfully");
+    core.info('✅ Cache saved successfully');
   } catch (error) {
     if (
-      error.name === "ValidationError" &&
-      error.message.includes("already exists")
+      error.name === 'ValidationError' &&
+      error.message.includes('already exists')
     ) {
-      core.info("ℹ️ Cache already exists, skipping save");
+      core.info('ℹ️ Cache already exists, skipping save');
     } else {
       core.warning(`⚠️ Failed to save cache: ${error.message}`);
     }
@@ -137921,23 +137921,23 @@ async function saveCache(context) {
  */
 async function installTools(context) {
   if (!context.inputs) {
-    throw new Error("Context must have inputs populated before installing tools");
+    throw new Error('Context must have inputs populated before installing tools');
   }
 
   const { inputs } = context;
   const { workingDirectory, installTools: shouldInstallTools, assumeAnswer } = inputs;
 
   if (!shouldInstallTools) {
-    core.debug("🔧 Tool installation disabled, skipping");
+    core.debug('🔧 Tool installation disabled, skipping');
     return context;
   }
 
   try {
-    core.info("🔧 Installing Stencila tools...");
-    
+    core.info('🔧 Installing Stencila tools...');
+
     const installExitCode = await exec.exec(
-      "stencila",
-      ["tools", "install", `--${assumeAnswer}`],
+      'stencila',
+      ['tools', 'install', `--${assumeAnswer}`],
       {
         cwd: workingDirectory,
         ignoreReturnCode: true,
@@ -137948,15 +137948,15 @@ async function installTools(context) {
       core.warning(
         `⚠️ Failed to install tools with exit code ${installExitCode}`
       );
-      
+
       // Store tool installation result in context
       context.toolsInstalled = {
         success: false,
         exitCode: installExitCode
       };
     } else {
-      core.info("✅ Tools installed successfully");
-      
+      core.info('✅ Tools installed successfully');
+
       // Store tool installation result in context
       context.toolsInstalled = {
         success: true,
@@ -137968,13 +137968,13 @@ async function installTools(context) {
 
   } catch (error) {
     core.warning(`⚠️ Error installing tools: ${error.message}`);
-    
+
     // Store tool installation error in context
     context.toolsInstalled = {
       success: false,
       error: error.message
     };
-    
+
     return context;
   }
 }
@@ -138012,11 +138012,11 @@ const SECRET_PATTERNS = (/* unused pure expression or super */ null && ([
  */
 async function runCommands(context) {
   if (!context.inputs) {
-    throw new Error("Context must have inputs populated before running commands");
+    throw new Error('Context must have inputs populated before running commands');
   }
 
   if (!context.stencila) {
-    throw new Error("Context must have stencila info populated before running commands");
+    throw new Error('Context must have stencila info populated before running commands');
   }
 
   const { inputs } = context;
@@ -138026,7 +138026,7 @@ async function runCommands(context) {
   const commandsToRun = collectCommands(inputs);
 
   if (commandsToRun.length === 0) {
-    core.info("ℹ️ No commands to run");
+    core.info('ℹ️ No commands to run');
     context.results = [];
     return context;
   }
@@ -138039,15 +138039,15 @@ async function runCommands(context) {
   for (let i = 0; i < commandsToRun.length; i++) {
     const command = commandsToRun[i];
     const startTime = Date.now();
-    
-    core.info(`⚡ Running command ${i + 1}/${commandsToRun.length}: stencila ${command.command} ${command.args || ""}`);
+
+    core.info(`⚡ Running command ${i + 1}/${commandsToRun.length}: stencila ${command.command} ${command.args || ''}`);
 
     try {
       const result = await executeCommand(command, workingDirectory, assumeAnswer);
       const duration = Date.now() - startTime;
-      
+
       const commandResult = {
-        command: `stencila ${command.command} ${command.args || ""}`.trim(),
+        command: `stencila ${command.command} ${command.args || ''}`.trim(),
         exitCode: result.exitCode,
         duration
       };
@@ -138068,15 +138068,15 @@ async function runCommands(context) {
     } catch (error) {
       const duration = Date.now() - startTime;
       overallSuccess = false;
-      
+
       const commandResult = {
-        command: `stencila ${command.command} ${command.args || ""}`.trim(),
+        command: `stencila ${command.command} ${command.args || ''}`.trim(),
         exitCode: -1,
         duration
       };
 
       results.push(commandResult);
-      
+
       core.error(`❌ Command ${i + 1} failed with error: ${error.message} (${duration}ms)`);
 
       if (!continueOnError) {
@@ -138088,12 +138088,12 @@ async function runCommands(context) {
   // Set final exit code to the last command's exit code
   const lastResult = results[results.length - 1];
   if (lastResult) {
-    core.setOutput("exit-code", lastResult.exitCode.toString());
+    core.setOutput('exit-code', lastResult.exitCode.toString());
   }
 
   // If continue-on-error is true and any command failed, still fail the action at the end
   if (!overallSuccess && continueOnError) {
-    core.setFailed("One or more Stencila commands failed");
+    core.setFailed('One or more Stencila commands failed');
   }
 
   context.results = results;
@@ -138113,19 +138113,19 @@ function collectCommands(inputs) {
     const cmdParts = inputs.run.trim().split(/\s+/);
     commandsToRun.push({
       command: cmdParts[0],
-      args: cmdParts.slice(1).join(" ")
+      args: cmdParts.slice(1).join(' ')
     });
   }
 
   // Check for simplified command syntax
-  const commands = ["convert", "lint", "execute", "render"];
+  const commands = ['convert', 'lint', 'execute', 'render'];
   for (const cmdName of commands) {
     const cmdArgs = inputs[cmdName];
     if (cmdArgs) {
       // Special handling for render command to support multi-line inputs
-      if (cmdName === "render") {
+      if (cmdName === 'render') {
         const renderCommands = cmdArgs
-          .split("\\n")
+          .split('\\n')
           .filter(/** @param {string} line */ (line) => line.trim())
           .map(/** @param {string} args */ (args) => ({
             command: cmdName,
@@ -138154,11 +138154,11 @@ function collectCommands(inputs) {
  */
 async function executeCommand(commandSpec, workingDirectory, assumeAnswer) {
   const { command, args } = commandSpec;
-  const cmdArgs = args ? args.split(" ") : [];
+  const cmdArgs = args ? args.split(' ') : [];
   const fullArgs = [command, ...cmdArgs, `--${assumeAnswer}`];
 
   // Execute command with environment variables to encourage human-readable output
-  const exitCode = await exec.exec("stencila", fullArgs, {
+  const exitCode = await exec.exec('stencila', fullArgs, {
     cwd: workingDirectory,
     ignoreReturnCode: true,
     env: {
@@ -138179,10 +138179,10 @@ async function executeCommand(commandSpec, workingDirectory, assumeAnswer) {
  */
 function maskSecrets(text) {
   let maskedText = text;
-  
+
   // Mask known secret patterns
   for (const pattern of SECRET_PATTERNS) {
-    maskedText = maskedText.replace(pattern, "***");
+    maskedText = maskedText.replace(pattern, '***');
   }
 
   return maskedText;
@@ -138225,11 +138225,11 @@ const MAX_PATH_LENGTH = 260;
  */
 async function uploadArtifacts(context) {
   if (!context.inputs) {
-    throw new Error("Context must have inputs populated before uploading artifacts");
+    throw new Error('Context must have inputs populated before uploading artifacts');
   }
 
   if (!context.results) {
-    throw new Error("Context must have command results before uploading artifacts");
+    throw new Error('Context must have command results before uploading artifacts');
   }
 
   const { inputs } = context;
@@ -138237,14 +138237,14 @@ async function uploadArtifacts(context) {
 
   // Only upload artifacts if assetsPath is specified and commands succeeded
   if (!assetsPath) {
-    core.info("ℹ️ No assets path specified, skipping artifact upload");
+    core.info('ℹ️ No assets path specified, skipping artifact upload');
     context.artifacts = [];
     return context;
   }
 
   const overallSuccess = context.results.every(r => r.exitCode === 0);
   if (!overallSuccess) {
-    core.warning("⚠️ Skipping artifact upload due to command failures");
+    core.warning('⚠️ Skipping artifact upload due to command failures');
     context.artifacts = [];
     return context;
   }
@@ -138261,7 +138261,7 @@ async function uploadArtifacts(context) {
         omitBrokenSymbolicLinks: true
       }
     );
-    
+
     const files = await globber.glob();
     const validatedFiles = await validateFiles(files, workingDirectory);
 
@@ -138329,7 +138329,7 @@ async function validateFiles(files, workingDirectory) {
 
       // Check if file exists and get stats
       const stats = external_fs_.statSync(filePath);
-      
+
       // Skip directories
       if (stats.isDirectory()) {
         core.debug(`Skipping directory: ${relativePath}`);
@@ -138351,7 +138351,7 @@ async function validateFiles(files, workingDirectory) {
       // Check for reasonable total size (1GB limit for all files combined)
       totalSize += stats.size;
       if (totalSize > 1024 * 1024 * 1024) {
-        core.warning(`⚠️ Skipping remaining files - total size limit reached (1GB)`);
+        core.warning('⚠️ Skipping remaining files - total size limit reached (1GB)');
         break;
       }
 
@@ -138412,7 +138412,7 @@ const MAX_FILENAME_LENGTH = 100;
  */
 async function createRelease(context) {
   if (!context.inputs) {
-    throw new Error("Context must have inputs populated before creating release");
+    throw new Error('Context must have inputs populated before creating release');
   }
 
   const { inputs } = context;
@@ -138420,16 +138420,16 @@ async function createRelease(context) {
 
   // Check if releases are enabled and we're on a tag
   if (!releasesInput) {
-    core.info("ℹ️ Release creation disabled");
+    core.info('ℹ️ Release creation disabled');
     return context;
   }
 
-  if (!process.env.GITHUB_REF || !process.env.GITHUB_REF.startsWith("refs/tags/")) {
-    core.info("ℹ️ Release creation enabled but not on a tag. Skipping release.");
+  if (!process.env.GITHUB_REF || !process.env.GITHUB_REF.startsWith('refs/tags/')) {
+    core.info('ℹ️ Release creation enabled but not on a tag. Skipping release.');
     return context;
   }
 
-  const tagName = process.env.GITHUB_REF.replace("refs/tags/", "");
+  const tagName = process.env.GITHUB_REF.replace('refs/tags/', '');
   const token = process.env.GITHUB_TOKEN;
 
   if (!token) {
@@ -138445,19 +138445,19 @@ async function createRelease(context) {
     const githubContext = github.context;
 
     // Determine release assets path
-    let releasesPath = "";
+    let releasesPath = '';
     if (releasesInput === true) {
       // Use assets pattern if release is true
-      releasesPath = assetsPath || "";
-    } else if (typeof releasesInput === "string") {
+      releasesPath = assetsPath || '';
+    } else if (typeof releasesInput === 'string') {
       // Use the provided pattern
       releasesPath = releasesInput;
     }
 
     // Auto-detect release files if not specified
-    const detectedReleaseNotes = await autoDetectFile("release-notes", releaseNotes, workingDirectory);
-    const detectedReleaseName = await autoDetectFile("release-name", releaseName, workingDirectory);
-    const detectedReleaseFilenames = await autoDetectFile("release-filenames", releaseFilenames, workingDirectory);
+    const detectedReleaseNotes = await autoDetectFile('release-notes', releaseNotes, workingDirectory);
+    const detectedReleaseName = await autoDetectFile('release-name', releaseName, workingDirectory);
+    const detectedReleaseFilenames = await autoDetectFile('release-filenames', releaseFilenames, workingDirectory);
 
     // Prepare template variables for Stencila
     const templateVars = await prepareTemplateVariables(tagName, githubContext);
@@ -138470,10 +138470,10 @@ async function createRelease(context) {
       workingDirectory,
       assumeAnswer
     );
-    
+
     const finalReleaseNotes = await renderTemplate(
       detectedReleaseNotes,
-      "",
+      '',
       templateVars,
       workingDirectory,
       assumeAnswer
@@ -138540,8 +138540,8 @@ async function autoDetectFile(baseName, userSpecified, workingDirectory) {
   const patterns = [
     baseName.toLowerCase(),
     baseName.toUpperCase(),
-    baseName.toLowerCase().replace("-", "_"),
-    baseName.toUpperCase().replace("-", "_")
+    baseName.toLowerCase().replace('-', '_'),
+    baseName.toUpperCase().replace('-', '_')
   ];
 
   try {
@@ -138571,14 +138571,14 @@ async function prepareTemplateVariables(tagName, githubContext) {
     `tag=${tagName}`,
     `datetime=${now
       .toISOString()
-      .replace("T", "-")
-      .replace(".", "-")
+      .replace('T', '-')
+      .replace('.', '-')
       .substring(0, 19)}`,
     `date=${now.toISOString().substring(0, 10)}`,
     `year=${now.getFullYear()}`,
-    `month=${(now.getMonth() + 1).toString().padStart(2, "0")}`,
-    `monthname=${now.toLocaleString("en-US", { month: "long" })}`,
-    `day=${now.getDate().toString().padStart(2, "0")}`,
+    `month=${(now.getMonth() + 1).toString().padStart(2, '0')}`,
+    `monthname=${now.toLocaleString('en-US', { month: 'long' })}`,
+    `day=${now.getDate().toString().padStart(2, '0')}`,
     `commit=${githubContext.sha.substring(0, 7)}`,
     `repo=${githubContext.repo.repo}`,
     `owner=${githubContext.repo.owner}`,
@@ -138601,18 +138601,18 @@ async function renderTemplate(template, defaultValue, templateVars, workingDirec
 
   try {
     const isFile = external_fs_.existsSync(external_path_.resolve(workingDirectory, template));
-    let result = "";
+    let result = '';
 
     if (isFile) {
       // Render file
       const exitCode = await exec.exec(
-        "stencila",
+        'stencila',
         [
-          "render",
+          'render',
           external_path_.resolve(workingDirectory, template),
-          "--to=md",
+          '--to=md',
           `--${assumeAnswer}`,
-          "--",
+          '--',
           ...templateVars
         ],
         {
@@ -138633,13 +138633,13 @@ async function renderTemplate(template, defaultValue, templateVars, workingDirec
     } else {
       // Render string via stdin
       const exitCode = await exec.exec(
-        "stencila",
+        'stencila',
         [
-          "render",
-          "-",
-          "--to=md",
+          'render',
+          '-',
+          '--to=md',
           `--${assumeAnswer}`,
-          "--",
+          '--',
           ...templateVars
         ],
         {
@@ -138694,10 +138694,10 @@ function detectPrerelease(tagName) {
 function sanitizeFilename(filename) {
   // Remove or replace problematic characters
   let sanitized = filename
-    .replace(/[<>:"/\\|?*]/g, "_")  // Replace invalid characters
-    .replace(/\s+/g, "_")          // Replace spaces with underscores
-    .replace(/_{2,}/g, "_")        // Replace multiple underscores with single
-    .replace(/^_+|_+$/g, "");      // Trim underscores from start/end
+    .replace(/[<>:"/\\|?*]/g, '_')  // Replace invalid characters
+    .replace(/\s+/g, '_')          // Replace spaces with underscores
+    .replace(/_{2,}/g, '_')        // Replace multiple underscores with single
+    .replace(/^_+|_+$/g, '');      // Trim underscores from start/end
 
   // Ensure filename isn't too long
   if (sanitized.length > MAX_FILENAME_LENGTH) {
@@ -138708,8 +138708,8 @@ function sanitizeFilename(filename) {
   }
 
   // Ensure we have a valid filename
-  if (!sanitized || sanitized === ".") {
-    sanitized = "asset";
+  if (!sanitized || sanitized === '.') {
+    sanitized = 'asset';
   }
 
   return sanitized;
@@ -138738,7 +138738,7 @@ async function uploadReleaseAssets(octokit, githubContext, releaseId, releasesPa
       omitBrokenSymbolicLinks: true
     }
   );
-  
+
   const files = await globber.glob();
 
   if (files.length === 0) {
@@ -138753,7 +138753,7 @@ async function uploadReleaseAssets(octokit, githubContext, releaseId, releasesPa
   for (let i = 0; i < files.length; i++) {
     const filePath = files[i];
     const originalFileName = external_path_.basename(filePath);
-    
+
     try {
       // Render filename using template if provided
       const finalFileName = await renderAssetFilename(
@@ -138763,7 +138763,7 @@ async function uploadReleaseAssets(octokit, githubContext, releaseId, releasesPa
         workingDirectory,
         assumeAnswer
       );
-      
+
       const sanitizedFileName = sanitizeFilename(finalFileName);
       const fileContent = external_fs_.readFileSync(filePath);
 
@@ -138820,7 +138820,7 @@ async function renderAssetFilename(filePath, releaseFilenames, templateVars, wor
       workingDirectory,
       assumeAnswer
     );
-    
+
     return newName || parsedPath.base;
   } catch (error) {
     core.warning(`⚠️ Error rendering filename for ${filePath}: ${error.message}`);
@@ -138846,41 +138846,41 @@ async function renderAssetFilename(filePath, releaseFilenames, templateVars, wor
 async function publishSummary(context) {
   try {
     const summary = core.summary;
-    
+
     // Start with heading and Stencila icon
-    summary.addRaw("# <img src=https://stencila.io/web/v2.5.1/images/favicon.png width=32 height=32> Stencila Action Summary");
+    summary.addRaw('# <img src=https://stencila.io/web/v2.5.1/images/favicon.png width=32 height=32> Stencila Action Summary');
 
     // Add setup section
-    summary.addHeading("⚙️ Setup", 2);
+    summary.addHeading('⚙️ Setup', 2);
     await addSetupInfo(summary, context);
 
     // Add commands section if any were executed
     if (context.results && context.results.length > 0) {
-      summary.addHeading("🚀 Commands Executed", 2);
+      summary.addHeading('🚀 Commands Executed', 2);
       addCommandsTable(summary, context);
     }
 
     // Add artifacts section if any were uploaded
     if (context.artifacts && context.artifacts.length > 0) {
-      summary.addHeading("📦 Artifacts", 2);
+      summary.addHeading('📦 Artifacts', 2);
       addArtifactsInfo(summary, context);
     }
 
     // Add release section if one was created
     if (context.release) {
-      summary.addHeading("🏷️ Release", 2);
+      summary.addHeading('🏷️ Release', 2);
       addReleaseInfo(summary, context);
     }
 
     // Add any warnings or errors
     if (context.errors && context.errors.length > 0) {
-      summary.addHeading("⚠️ Issues", 2);
+      summary.addHeading('⚠️ Issues', 2);
       addErrorsInfo(summary, context);
     }
 
     // Write the summary
     await summary.write();
-    
+
     return context;
 
   } catch (error) {
@@ -138901,20 +138901,20 @@ async function addSetupInfo(summary, context) {
   // Stencila version info
   if (context.stencila) {
     const { resolvedVersion, wasAlreadyInstalled, installDuration } = context.stencila;
-    const installStatus = wasAlreadyInstalled ? "🟢 Cached" : "🔵 Downloaded";
-    const duration = installDuration ? ` (${(installDuration / 1000).toFixed(1)}s)` : "";
+    const installStatus = wasAlreadyInstalled ? '🟢 Cached' : '🔵 Downloaded';
+    const duration = installDuration ? ` (${(installDuration / 1000).toFixed(1)}s)` : '';
     setupLines.push(`**Stencila Version:** ${resolvedVersion} ${installStatus}${duration}`);
   }
 
   // Cache info
   if (context.cache) {
-    const cacheStatus = context.cache.wasRestored ? "🟢 Hit" : "🟡 Miss";
+    const cacheStatus = context.cache.wasRestored ? '🟢 Hit' : '🟡 Miss';
     setupLines.push(`**Cache:** ${cacheStatus}`);
   }
 
   // Tools installation
   if (context.toolsInstalled) {
-    const toolsStatus = context.toolsInstalled.success ? "✅ Success" : "❌ Failed";
+    const toolsStatus = context.toolsInstalled.success ? '✅ Success' : '❌ Failed';
     setupLines.push(`**Tools Installed:** ${toolsStatus}`);
   }
 
@@ -138925,9 +138925,9 @@ async function addSetupInfo(summary, context) {
   }
 
   if (setupLines.length > 0) {
-    summary.addRaw(setupLines.join("\n"));
+    summary.addRaw(setupLines.join('\n'));
   } else {
-    summary.addRaw("No setup information available.");
+    summary.addRaw('No setup information available.');
   }
 }
 
@@ -138938,18 +138938,18 @@ async function addSetupInfo(summary, context) {
  */
 function addCommandsTable(summary, context) {
   const tableHeaders = [
-    { data: "Command", header: true },
-    { data: "Status", header: true },
-    { data: "Duration", header: true },
-    { data: "Exit Code", header: true }
+    { data: 'Command', header: true },
+    { data: 'Status', header: true },
+    { data: 'Duration', header: true },
+    { data: 'Exit Code', header: true }
   ];
 
   const tableRows = [tableHeaders];
 
   for (const result of context.results) {
-    const status = result.exitCode === 0 ? "✅ Success" : "❌ Failed";
-    const duration = result.duration ? `${(result.duration / 1000).toFixed(1)}s` : "N/A";
-    
+    const status = result.exitCode === 0 ? '✅ Success' : '❌ Failed';
+    const duration = result.duration ? `${(result.duration / 1000).toFixed(1)}s` : 'N/A';
+
     tableRows.push([
       { data: result.command, header: false },
       { data: status, header: false },
@@ -138964,7 +138964,7 @@ function addCommandsTable(summary, context) {
   const totalCommands = context.results.length;
   const successCount = context.results.filter(r => r.exitCode === 0).length;
   const failedCount = totalCommands - successCount;
-  
+
   if (failedCount > 0) {
     summary.addRaw(`\n**Summary:** ${successCount}/${totalCommands} commands succeeded, ${failedCount} failed.`);
   } else {
@@ -138986,7 +138986,7 @@ function addArtifactsInfo(summary, context) {
     artifactLines.push(`**\`${artifact.name}\`:** ${fileCount} files, ${sizeFormatted}`);
   }
 
-  summary.addRaw(artifactLines.join("\n"));
+  summary.addRaw(artifactLines.join('\n'));
 }
 
 /**
@@ -139000,18 +139000,18 @@ function addReleaseInfo(summary, context) {
 
   releaseLines.push(`**Tag:** ${release.tag}`);
   releaseLines.push(`**Name:** ${release.name}`);
-  
+
   if (release.prerelease) {
-    releaseLines.push(`**Type:** 🚧 Pre-release`);
+    releaseLines.push('**Type:** 🚧 Pre-release');
   } else {
-    releaseLines.push(`**Type:** 🚀 Release`);
+    releaseLines.push('**Type:** 🚀 Release');
   }
 
   if (release.assets && release.assets.length > 0) {
     releaseLines.push(`**Assets:** ${release.assets.length} files uploaded`);
   }
 
-  summary.addRaw(releaseLines.join("\n"));
+  summary.addRaw(releaseLines.join('\n'));
 }
 
 /**
@@ -139062,15 +139062,15 @@ function summary_formatBytes(bytes) {
 async function run() {
   try {
     const context = {};
-    await core.group("Parse inputs", () => parseInputs(context));
-    await core.group("Setup environment", () => resolveEnvironment(context));
-    await core.group("Install Stencila", () => ensureStencila(context));
-    await core.group("Restore cache", () => restoreCache(context));
-    await core.group("Install tools", () => installTools(context));
-    await core.group("Run commands", () => runCommands(context));
-    await core.group("Save cache", () => saveCache(context));
-    await core.group("Upload artifacts", () => uploadArtifacts(context));
-    await core.group("Create release", () => createRelease(context));
+    await core.group('Parse inputs', () => parseInputs(context));
+    await core.group('Setup environment', () => resolveEnvironment(context));
+    await core.group('Install Stencila', () => ensureStencila(context));
+    await core.group('Restore cache', () => restoreCache(context));
+    await core.group('Install tools', () => installTools(context));
+    await core.group('Run commands', () => runCommands(context));
+    await core.group('Save cache', () => saveCache(context));
+    await core.group('Upload artifacts', () => uploadArtifacts(context));
+    await core.group('Create release', () => createRelease(context));
     await publishSummary(context);
   } catch (error) {
     core.setFailed(error.message);
