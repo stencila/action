@@ -1,5 +1,11 @@
 A small test document with linting warnings and errors.
 
+Speeling,  typos and other mistook in prose.
+
+[Inaccessible](https://doesnotexit1234asdf.com) and [insecure](http://gihub.com) links.
+
+Referring to a non-existent [figure](fig1).
+
 Citing a non existent reference [@foo].
 
 Using a non-existent TeX math command $\baz{}$.
